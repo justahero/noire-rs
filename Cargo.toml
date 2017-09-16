@@ -1,0 +1,6 @@
+[pacakge]
+name = "Rust-Noire"
+version = "0.1.0"
+authors = ["Sebastian Ziebell"]
+
+[dependencies]
