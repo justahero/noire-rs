@@ -3,5 +3,9 @@ name = "rust_noire"
 version = "0.1.0"
 authors = ["Sebastian Ziebell"]
 
+[dependencies]
+regex = "0.2.0"
+[dependencies.gl]
+git = "https://github.com/brendanzab/gl-rs.git"
 [dependencies.glfw]
 git = "https://github.com/bjz/glfw-rs.git"

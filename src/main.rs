@@ -1,3 +1,4 @@
+extern crate gl;
 extern crate glfw;
 
 use glfw::{Action, Context, Key};
@@ -9,8 +10,17 @@ fn main() {
 
     window.set_key_polling(true);
     window.make_current();
+    glfw.set_swap_interval(glfw::SwapInterval::None);
+
+    // load gl functions
+    gl::load_with( |s| window.get_proc_address(s) as *const _);
 
     while !window.should_close() {
+        unsafe {
+            gl::ClearColor(0.3, 0.3, 0.3, 1.0);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
+
         window.swap_buffers();
 
         glfw.poll_events();
