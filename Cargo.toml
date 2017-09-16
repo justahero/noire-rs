@@ -1,6 +1,7 @@
-[pacakge]
-name = "Rust-Noire"
+[package]
+name = "rust_noire"
 version = "0.1.0"
 authors = ["Sebastian Ziebell"]
 
 [dependencies]
+vulkano = "0.6.2"
