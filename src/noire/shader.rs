@@ -16,6 +16,7 @@ pub enum ShaderType {
     PixelShader,
 }
 
+#[derive(Debug)]
 pub struct Shader {
     pub source: String,
     pub id: u32,
@@ -51,31 +52,31 @@ fn log_compile_info(shader: u32) -> String {
     log_text
 }
 
-fn get_source_location(line: i32, source: &String) -> String {
+fn get_source_location(line: i32, source: &str) -> String {
     let shader_lines: Vec<&str> = source.split('\n').collect();
-    let min: usize = cmp::max(0, (line - 3) as usize);
-    let max: usize = cmp::min(shader_lines.len(), (line + 2) as usize);
+    let min = cmp::max(0, line - 3);
+    let max = cmp::min(shader_lines.len() as i32, line + 2);
 
     let mut result: Vec<String> = vec![];
-    for i in min..max {
+    for i in (min as usize)..(max as usize) {
         result.push(format!("{}: {}", i, &shader_lines.get(i).unwrap()));
     }
     result.join("\n").to_string()
 }
 
-fn get_errors(errors: &String, source: &String) -> Vec<String> {
-    let mut result: Vec<String> = vec![];
+fn get_errors(errors: &String, source: &str) -> Vec<String> {
+    let mut result = Vec::new();
     let lines: Vec<&str> = errors.split('\n').collect();
     for line in lines {
-        let regex = Regex::new(r"/ERROR:\s([0-9]*):([0-9]*):\s(.*)/").unwrap();
-        let groups = regex.captures(line).unwrap();
-
-        if groups.len() > 1 {
-            let error_msg: &str = groups.get(2).map_or("", |m| m.as_str());
-            result.push(get_source_location(
-                error_msg.parse::<i32>().unwrap(),
-                source,
-            ));
+        let regex = Regex::new(r"ERROR:\s([0-9]*):([0-9]*):\s(.*)").unwrap();
+        match regex.captures(line) {
+            Some(groups) => {
+                let location = groups.get(2).unwrap().as_str();
+                let error = groups.get(3).unwrap().as_str();
+                let text = get_source_location(location.parse::<i32>().unwrap(), source);
+                result.push(format!("{}: in:\n{}", error, text));
+            }
+            _ => (),
         }
     }
     result
@@ -93,10 +94,9 @@ pub fn compile_shader(source: &str, shader_type: ShaderType) -> Result<u32, Stri
 
         // check if shader compiled correctly
         gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
-
         if status != gl::TRUE as i32 {
             let log_text = log_compile_info(shader);
-            let error_msg = get_errors(&log_text, &source.to_string()).join("\n");
+            let error_msg = get_errors(&log_text, source).join("\n");
             return Err(error_msg);
         }
     }
@@ -104,11 +104,15 @@ pub fn compile_shader(source: &str, shader_type: ShaderType) -> Result<u32, Stri
 }
 
 impl Shader {
-    pub fn create(source: &str, shader_type: ShaderType) -> Shader {
-        let id = compile_shader(source, shader_type).unwrap();
-        Shader {
-            id: id,
-            source: String::from(source),
+    pub fn create(source: &str, shader_type: ShaderType) -> Result<Shader, String> {
+        match compile_shader(source, shader_type) {
+            Ok(id) => {
+                Ok(Shader {
+                    id: id,
+                    source: String::from(source),
+                })
+            }
+            Err(message) => Err(message),
         }
     }
 }

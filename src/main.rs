@@ -28,8 +28,8 @@ fn main() {
     // load gl functions
     gl::load_with(|s| window.get_proc_address(s) as *const _);
 
-    let vertex_shader = Shader::create(VS_SRC, ShaderType::VertexShader);
-    let pixel_shader = Shader::create(FS_SRC, ShaderType::PixelShader);
+    let vertex_shader = Shader::create(VS_SRC, ShaderType::VertexShader).unwrap();
+    let pixel_shader = Shader::create(FS_SRC, ShaderType::PixelShader).unwrap();
 
     let _program = Program::create(vertex_shader, pixel_shader);
 
