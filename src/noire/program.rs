@@ -1,19 +1,24 @@
-extern crate gl;
-extern crate glfw;
+#![allow(dead_code)]
+// extern crate gl;
 
-#[allow(dead_code)]
-use self::glfw::{Action, Context};
+use noire::shader::Shader;
 
 pub struct Variable {
     // TODO
 }
 
 pub struct Program {
-    id: i32,
+    pub vertex_shader: Shader,
+    pub pixel_shader: Shader,
+    pub id: i32,
 }
 
 impl Program {
-    fn new(&self, id: i32) -> Program {
-        Program { id: id }
+    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Program {
+        Program {
+            vertex_shader: vertex_shader,
+            pixel_shader: pixel_shader,
+            id: 0,
+        }
     }
 }

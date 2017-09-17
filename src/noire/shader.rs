@@ -17,7 +17,7 @@ pub struct Shader {
 fn gl_shader_type(shader_type: ShaderType) -> u32 {
     match shader_type {
         ShaderType::VertexShader => gl::VERTEX_SHADER,
-        ShaderType::PixelShader  => gl::FRAGMENT_SHADER,
+        ShaderType::PixelShader => gl::FRAGMENT_SHADER,
     }
 }
 
@@ -27,12 +27,13 @@ fn compile_shader(source: &str, shader_type: ShaderType) -> u32 {
         shader = gl::CreateShader(gl_shader_type(shader_type));
         let c_str = CString::new(source.as_bytes()).unwrap();
         gl::ShaderSource(shader, 1, &c_str.as_ptr(), ptr::null());
+        gl::CompileShader(shader);
     }
     shader
 }
 
-impl Shader  {
-    fn create(&self, source: &str, shader_type: ShaderType) -> Shader {
+impl Shader {
+    pub fn create(source: &str, shader_type: ShaderType) -> Shader {
         // initialize shader
         let id = compile_shader(source, shader_type);
         Shader { id: id }
@@ -46,6 +47,6 @@ impl Shader  {
 impl Drop for Shader {
     fn drop(&mut self) {
         assert!(self.id > 0);
-        
+
     }
 }
