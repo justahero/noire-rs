@@ -23,6 +23,7 @@ pub struct Program {
     pixel_shader: Shader,
     pub id: u32,
     uniforms: HashMap<String, Variable>,
+    attributes: HashMap<String, Variable>,
 }
 
 fn get_link_error(program: u32) -> String {
@@ -49,6 +50,57 @@ fn get_link_error(program: u32) -> String {
     log_text
 }
 
+fn find_attributes(program: u32) -> HashMap<String, Variable> {
+    let mut result = HashMap::new();
+    unsafe {
+        let mut num_attributes = 0;
+        let mut max_attribute_length = 0;
+
+        gl::GetProgramiv(program, gl::ACTIVE_ATTRIBUTES, &mut num_attributes);
+        gl::GetProgramiv(
+            program,
+            gl::ACTIVE_ATTRIBUTE_MAX_LENGTH,
+            &mut max_attribute_length,
+        );
+
+        // initialize char buffer with length
+        let mut buffer = Vec::with_capacity(max_attribute_length as usize);
+        buffer.set_len((max_attribute_length as usize) - 1);
+
+        for i in 0..num_attributes {
+            let mut length = 0;
+            let mut attrib_size: i32 = 0;
+            let mut attrib_type = gl::FLOAT;
+            let location = gl::GetAttribLocation(program, buffer.as_mut_ptr() as *mut GLchar);
+
+            gl::GetActiveAttrib(
+                program,
+                i as u32,
+                max_attribute_length,
+                &mut length,
+                &mut attrib_size,
+                &mut attrib_type,
+                buffer.as_mut_ptr() as *mut GLchar,
+            );
+
+            let uniform_name = str::from_utf8(&buffer)
+                .ok()
+                .expect("GetActiveAttrib not valid utf8")
+                .to_string();
+
+            let uniform: Variable = Variable {
+                name: uniform_name.clone(),
+                location: location,
+                data_type: attrib_type,
+                size: attrib_size,
+            };
+
+            result.insert(uniform_name, uniform);
+        }
+    }
+    result
+}
+
 fn find_uniforms(program: u32) -> HashMap<String, Variable> {
     let mut result = HashMap::new();
     unsafe {
@@ -70,8 +122,7 @@ fn find_uniforms(program: u32) -> HashMap<String, Variable> {
             let mut length = 0;
             let mut uniform_size: i32 = 0;
             let mut uniform_type = gl::FLOAT;
-            let uniform_location =
-                gl::GetAttribLocation(program, buffer.as_mut_ptr() as *mut GLchar);
+            let location = gl::GetUniformLocation(program, buffer.as_mut_ptr() as *mut GLchar);
 
             gl::GetActiveUniform(
                 program,
@@ -90,7 +141,7 @@ fn find_uniforms(program: u32) -> HashMap<String, Variable> {
 
             let uniform: Variable = Variable {
                 name: uniform_name.clone(),
-                location: uniform_location,
+                location: location,
                 data_type: uniform_type,
                 size: uniform_size,
             };
@@ -113,6 +164,15 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         gl::GetProgramiv(id, gl::LINK_STATUS, &mut status);
 
         if status != (gl::TRUE as GLint) {
+            gl::DeleteProgram(id);
+            return Err(get_link_error(id));
+        }
+
+        gl::ValidateProgram(id);
+        gl::GetProgramiv(id, gl::VALIDATE_STATUS, &mut status);
+
+        if status != (gl::TRUE as GLint) {
+            gl::DeleteProgram(id);
             return Err(get_link_error(id));
         }
     }
@@ -122,6 +182,7 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         pixel_shader: pixel_shader,
         id: id,
         uniforms: find_uniforms(id),
+        attributes: find_attributes(id),
     };
     Ok(program)
 }
