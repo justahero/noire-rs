@@ -29,7 +29,7 @@ fn gl_shader_type(shader_type: ShaderType) -> u32 {
     }
 }
 
-fn log_compile_info(shader: u32) -> String {
+fn get_compile_error(shader: u32) -> String {
     let log_text: String;
     unsafe {
         let mut length: i32 = 0;
@@ -95,7 +95,7 @@ pub fn compile_shader(source: &str, shader_type: ShaderType) -> Result<u32, Stri
         // check if shader compiled correctly
         gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
         if status != gl::TRUE as i32 {
-            let log_text = log_compile_info(shader);
+            let log_text = get_compile_error(shader);
             let error_msg = get_errors(&log_text, source).join("\n");
             return Err(error_msg);
         }
