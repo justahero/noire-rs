@@ -45,7 +45,6 @@ fn get_link_error(program: u32) -> String {
             .ok()
             .expect("GetProgramInfoLog not valid utf8")
             .to_string();
-
     }
     log_text
 }
@@ -158,9 +157,9 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         id = gl::CreateProgram();
         gl::AttachShader(id, vertex_shader.id);
         gl::AttachShader(id, pixel_shader.id);
-        gl::LinkProgram(id);
 
         let mut status = gl::FALSE as GLint;
+        gl::LinkProgram(id);
         gl::GetProgramiv(id, gl::LINK_STATUS, &mut status);
 
         if status != (gl::TRUE as GLint) {
@@ -190,6 +189,16 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 impl Program {
     pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Program, String> {
         link_program(vertex_shader, pixel_shader)
+    }
+
+    pub fn uniform(self, name: &String, value: f32) -> Program {
+        unsafe {
+            match self.uniforms.get(name) {
+                Some(uniform) => gl::Uniform1f(uniform.location, value as GLfloat),
+                _ => (),
+            }
+        }
+        self
     }
 }
 
