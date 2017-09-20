@@ -191,14 +191,22 @@ impl Program {
         link_program(vertex_shader, pixel_shader)
     }
 
-    pub fn uniform(self, name: &String, value: f32) -> Program {
+    pub fn uniform1f(&self, name: &str, value: f32) {
         unsafe {
             match self.uniforms.get(name) {
                 Some(uniform) => gl::Uniform1f(uniform.location, value as GLfloat),
                 _ => (),
             }
         }
-        self
+    }
+
+    pub fn uniform2f(&self, name: &str, val1: f32, val2: f32) {
+        unsafe {
+            match self.uniforms.get(name) {
+                Some(uniform) => gl::Uniform2f(uniform.location, val1 as GLfloat, val2 as GLfloat),
+                _ => (),
+            }
+        }
     }
 }
 
