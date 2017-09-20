@@ -7,6 +7,7 @@ use glfw::{Action, Context, Key};
 use self::gl::types::*;
 use noire::shader::*;
 use noire::program::*;
+use noire::vertex::*;
 
 use std::ffi::CString;
 use std::mem;
@@ -25,10 +26,6 @@ void main(void) {
 "##;
 
 static FS_SRC: &'static str = r##"
-#ifdef GL_ES
-precision mediump float;
-#endif
-
 #define PI 3.14159265359
 
 uniform vec2 u_resolution;
@@ -137,6 +134,7 @@ fn main() {
     let pixel_shader = Shader::create(FS_SRC, ShaderType::PixelShader).unwrap();
 
     let program = Program::create(vertex_shader, pixel_shader).unwrap();
+    let vertex_buffer = VertexBuffer::create(&VERTICES);
 
     window.set_key_polling(true);
     window.make_current();
@@ -163,7 +161,6 @@ fn main() {
 
         // Use shader program
         gl::UseProgram(program.id);
-        gl::BindFragDataLocation(program.id, 0, CString::new("out_color").unwrap().as_ptr());
 
         // Specify the layout of the vertex data
         let pos_attr =
