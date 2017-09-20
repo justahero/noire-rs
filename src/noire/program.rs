@@ -191,6 +191,12 @@ impl Program {
         link_program(vertex_shader, pixel_shader)
     }
 
+    pub fn apply(&self) {
+        unsafe {
+            gl::UseProgram(self.id);
+        }
+    }
+
     pub fn uniform1f(&self, name: &str, value: f32) {
         unsafe {
             match self.uniforms.get(name) {

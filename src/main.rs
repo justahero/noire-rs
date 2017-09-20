@@ -4,14 +4,11 @@ extern crate glfw;
 mod noire;
 
 use glfw::{Action, Context, Key};
-use self::gl::types::*;
 use noire::shader::*;
 use noire::program::*;
+use noire::traits::*;
 use noire::vertex::*;
 
-use std::ffi::CString;
-use std::mem;
-use std::ptr;
 use std::time::Instant;
 
 static VS_SRC: &'static str = r##"
@@ -94,32 +91,7 @@ void main() {
 }
 "##;
 
-static VERTICES: [f32; 24] = [
-    -1.0,
-    1.0,
-    0.0,
-    1.0,
-    -1.0,
-    -1.0,
-    0.0,
-    0.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    -1.0,
-    -1.0,
-    0.0,
-    0.0,
-    1.0,
-    -1.0,
-    1.0,
-    0.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-];
+static VERTICES: [f32; 6] = [0.0, 0.5, 0.5, -0.5, -0.5, -0.5];
 
 fn main() {
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
@@ -130,70 +102,37 @@ fn main() {
     // load gl functions
     gl::load_with(|s| window.get_proc_address(s) as *const _);
 
-    let vertex_shader = Shader::create(VS_SRC, ShaderType::VertexShader).unwrap();
-    let pixel_shader = Shader::create(FS_SRC, ShaderType::PixelShader).unwrap();
-
-    let program = Program::create(vertex_shader, pixel_shader).unwrap();
-    let vertex_buffer = VertexBuffer::create(&VERTICES);
-
     window.set_key_polling(true);
     window.make_current();
     glfw.set_swap_interval(glfw::SwapInterval::None);
 
-    // initialize vertex array and vertex buffer objects
-    let mut vao = 0;
-    let mut vbo = 0;
+    // initialize GL shader stuff
+    let vertex_shader = Shader::create(VS_SRC, ShaderType::VertexShader).unwrap();
+    let pixel_shader = Shader::create(FS_SRC, ShaderType::PixelShader).unwrap();
 
-    unsafe {
-        // Create Vertex Array Object
-        gl::GenVertexArrays(1, &mut vao);
-        gl::BindVertexArray(vao);
+    let program = Program::create(vertex_shader, pixel_shader).unwrap();
+    let vertex_buffer = VertexBuffer::create(&VERTICES, 2);
 
-        // Create a Vertex Buffer Object and copy the vertex data to it
-        gl::GenBuffers(1, &mut vbo);
-        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-        gl::BufferData(
-            gl::ARRAY_BUFFER,
-            (VERTICES.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-            mem::transmute(&VERTICES[0]),
-            gl::STATIC_DRAW,
-        );
+    let mut vao = VertexArrayObject::new();
+    vao.add_vb(vertex_buffer);
 
-        // Use shader program
-        gl::UseProgram(program.id);
-
-        // Specify the layout of the vertex data
-        let pos_attr =
-            gl::GetAttribLocation(program.id, CString::new("position").unwrap().as_ptr());
-        gl::EnableVertexAttribArray(pos_attr as GLuint);
-        gl::VertexAttribPointer(
-            pos_attr as GLuint,
-            2,
-            gl::FLOAT,
-            gl::FALSE as GLboolean,
-            0,
-            ptr::null(),
-        );
-    }
-
-    let mut last_time = Instant::now();
+    let start_time = Instant::now();
 
     while !window.should_close() {
+        let now = Instant::now();
+        let elapsed = now.duration_since(start_time);
+        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+
+        program.apply();
+        program.uniform2f("u_resolution", 400.0, 300.0);
+        program.uniform1f("u_time", elapsed);
+
         unsafe {
             gl::ClearColor(0.3, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
-
-            // render scene
-            gl::DrawArrays(gl::TRIANGLES, 0, 2);
         }
 
-        let now = Instant::now();
-        let elapsed = now.duration_since(last_time);
-        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
-        last_time = now;
-
-        program.uniform2f("u_resolution", 400.0, 300.0);
-        program.uniform1f("u_time", elapsed);
+        vao.draw();
 
         window.swap_buffers();
 
@@ -201,12 +140,6 @@ fn main() {
         for (_, event) in glfw::flush_messages(&events) {
             handle_window_event(&mut window, event);
         }
-    }
-
-    // Cleanup
-    unsafe {
-        gl::DeleteBuffers(1, &vbo);
-        gl::DeleteVertexArrays(1, &vao);
     }
 }
 
