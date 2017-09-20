@@ -63,38 +63,40 @@ fn find_attributes(program: u32) -> HashMap<String, Variable> {
         );
 
         // initialize char buffer with length
-        let mut buffer = Vec::with_capacity(max_attribute_length as usize);
-        buffer.set_len((max_attribute_length as usize) - 1);
+        if num_attributes > 0 {
+            let mut buffer = Vec::with_capacity(max_attribute_length as usize);
+            buffer.set_len((max_attribute_length as usize) - 1);
 
-        for i in 0..num_attributes {
-            let mut length = 0;
-            let mut attrib_size: i32 = 0;
-            let mut attrib_type = gl::FLOAT;
-            let location = gl::GetAttribLocation(program, buffer.as_mut_ptr() as *mut GLchar);
+            for i in 0..num_attributes {
+                let mut length = 0;
+                let mut attrib_size: i32 = 0;
+                let mut attrib_type = gl::FLOAT;
+                let location = gl::GetAttribLocation(program, buffer.as_mut_ptr() as *mut GLchar);
 
-            gl::GetActiveAttrib(
-                program,
-                i as u32,
-                max_attribute_length,
-                &mut length,
-                &mut attrib_size,
-                &mut attrib_type,
-                buffer.as_mut_ptr() as *mut GLchar,
-            );
+                gl::GetActiveAttrib(
+                    program,
+                    i as u32,
+                    max_attribute_length,
+                    &mut length,
+                    &mut attrib_size,
+                    &mut attrib_type,
+                    buffer.as_mut_ptr() as *mut GLchar,
+                );
 
-            let uniform_name = str::from_utf8(&buffer)
-                .ok()
-                .expect("GetActiveAttrib not valid utf8")
-                .to_string();
+                let uniform_name = str::from_utf8(&buffer)
+                    .ok()
+                    .expect("GetActiveAttrib not valid utf8")
+                    .to_string();
 
-            let uniform: Variable = Variable {
-                name: uniform_name.clone(),
-                location: location,
-                data_type: attrib_type,
-                size: attrib_size,
-            };
+                let uniform: Variable = Variable {
+                    name: uniform_name.clone(),
+                    location: location,
+                    data_type: attrib_type,
+                    size: attrib_size,
+                };
 
-            result.insert(uniform_name, uniform);
+                result.insert(uniform_name, uniform);
+            }
         }
     }
     result
@@ -114,38 +116,40 @@ fn find_uniforms(program: u32) -> HashMap<String, Variable> {
         );
 
         // initialize char buffer with length
-        let mut buffer = Vec::with_capacity(max_uniform_length as usize);
-        buffer.set_len((max_uniform_length as usize) - 1);
+        if num_uniforms > 0 {
+            let mut buffer = Vec::with_capacity(max_uniform_length as usize);
+            buffer.set_len((max_uniform_length as usize) - 1);
 
-        for i in 0..num_uniforms {
-            let mut length = 0;
-            let mut uniform_size: i32 = 0;
-            let mut uniform_type = gl::FLOAT;
-            let location = gl::GetUniformLocation(program, buffer.as_mut_ptr() as *mut GLchar);
+            for i in 0..num_uniforms {
+                let mut length = 0;
+                let mut uniform_size: i32 = 0;
+                let mut uniform_type = gl::FLOAT;
+                let location = gl::GetUniformLocation(program, buffer.as_mut_ptr() as *mut GLchar);
 
-            gl::GetActiveUniform(
-                program,
-                i as u32,
-                max_uniform_length,
-                &mut length,
-                &mut uniform_size,
-                &mut uniform_type,
-                buffer.as_mut_ptr() as *mut GLchar,
-            );
+                gl::GetActiveUniform(
+                    program,
+                    i as u32,
+                    max_uniform_length,
+                    &mut length,
+                    &mut uniform_size,
+                    &mut uniform_type,
+                    buffer.as_mut_ptr() as *mut GLchar,
+                );
 
-            let uniform_name = str::from_utf8(&buffer)
-                .ok()
-                .expect("GetActiveUniform not valid utf8")
-                .to_string();
+                let uniform_name = str::from_utf8(&buffer)
+                    .ok()
+                    .expect("GetActiveUniform not valid utf8")
+                    .to_string();
 
-            let uniform: Variable = Variable {
-                name: uniform_name.clone(),
-                location: location,
-                data_type: uniform_type,
-                size: uniform_size,
-            };
+                let uniform: Variable = Variable {
+                    name: uniform_name.clone(),
+                    location: location,
+                    data_type: uniform_type,
+                    size: uniform_size,
+                };
 
-            result.insert(uniform_name, uniform);
+                result.insert(uniform_name, uniform);
+            }
         }
     }
     result
@@ -198,20 +202,27 @@ impl Program {
     }
 
     pub fn uniform1f(&self, name: &str, value: f32) {
-        unsafe {
-            match self.uniforms.get(name) {
-                Some(uniform) => gl::Uniform1f(uniform.location, value as GLfloat),
-                _ => (),
-            }
+        match self.uniform_location(name) {
+            Some(location) => unsafe {
+                gl::Uniform1f(location, value as GLfloat);
+            },
+            _ => (),
         }
     }
 
     pub fn uniform2f(&self, name: &str, val1: f32, val2: f32) {
-        unsafe {
-            match self.uniforms.get(name) {
-                Some(uniform) => gl::Uniform2f(uniform.location, val1 as GLfloat, val2 as GLfloat),
-                _ => (),
-            }
+        match self.uniform_location(name) {
+            Some(location) => unsafe {
+                gl::Uniform2f(location, val1 as GLfloat, val2 as GLfloat);
+            },
+            _ => (),
+        }
+    }
+
+    pub fn uniform_location(&self, name: &str) -> Option<i32> {
+        match self.uniforms.get(name) {
+            Some(uniform) => Some(uniform.location),
+            _ => None,
         }
     }
 }
