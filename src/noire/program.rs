@@ -195,7 +195,7 @@ impl Program {
         link_program(vertex_shader, pixel_shader)
     }
 
-    pub fn apply(&self) {
+    pub fn use_program(&self) {
         unsafe {
             gl::UseProgram(self.id);
         }

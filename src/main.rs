@@ -9,9 +9,11 @@ use noire::program::*;
 use noire::traits::*;
 use noire::vertex::*;
 
+use std::cell::Cell;
 use std::time::Instant;
 
 static VS_SRC: &'static str = r##"
+#version 120
 varying vec2 vUV;
 
 attribute vec2 position;
@@ -23,6 +25,8 @@ void main(void) {
 "##;
 
 static FS_SRC: &'static str = r##"
+#version 120
+
 #define PI 3.14159265359
 
 uniform vec2 u_resolution;
@@ -91,23 +95,14 @@ void main() {
 }
 "##;
 
-static VERTICES: [f32; 12] = [
-    -1.0,
-    -1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    1.0,
-    -1.0,
-    1.0,
-    1.0,
-    -1.0,
-    -1.0,
-];
+static VERTICES: [f32; 6] = [-1.0, -1.0, -1.0, 1.0, 1.0, -1.0];
 
 fn main() {
-    let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+    let mut glfw = glfw::init(Some(glfw::Callback {
+        f: glfw_error_callback as fn(glfw::Error, String, &Cell<usize>),
+        data: Cell::new(0),
+    })).unwrap();
+
     let (mut window, events) =
         glfw.create_window(400, 300, "Hello This is window", glfw::WindowMode::Windowed)
             .expect("Failed to create GLFW window");
@@ -128,6 +123,7 @@ fn main() {
 
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vertex_buffer);
+    vao.bind();
 
     let start_time = Instant::now();
 
@@ -136,7 +132,7 @@ fn main() {
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
-        program.apply();
+        program.use_program();
         program.uniform2f("u_resolution", 400.0, 300.0);
         program.uniform1f("u_time", elapsed);
 
@@ -145,7 +141,10 @@ fn main() {
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
 
-        vao.draw();
+        // vao.draw();
+        unsafe {
+            gl::DrawArrays(gl::TRIANGLES, 0, 6);
+        }
 
         window.swap_buffers();
 
@@ -154,6 +153,11 @@ fn main() {
             handle_window_event(&mut window, event);
         }
     }
+}
+
+fn glfw_error_callback(error: glfw::Error, description: String, _error_count: &Cell<usize>) {
+    println!("GL ERROR: {} - {}", error, description);
+    // TODO
 }
 
 fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent) {
