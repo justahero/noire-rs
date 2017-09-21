@@ -34,26 +34,29 @@ impl Bindable for VertexArrayObject {
         unsafe {
             gl::BindVertexArray(self.id);
 
-            for i in 0..self.vbs.len() {
-                let vb = &self.vbs[i];
+            let mut i = 0;
+            for vb in &self.vbs {
                 gl::EnableVertexAttribArray(i as GLuint);
                 gl::VertexAttribPointer(
                     i as GLuint,
-                    vb.num_components as i32,
+                    vb.num_components,
                     gl::FLOAT,
                     gl::FALSE as GLboolean,
-                    vb.component_size,
+                    vb.component_size() as i32,
                     ptr::null(),
                 );
+                i += 1;
             }
         }
     }
 
     fn unbind(&self) {
         unsafe {
-            for i in 0..self.vbs.len() {
-                self.vbs[i].unbind();
+            let mut i = 0;
+            for vb in &self.vbs {
+                vb.unbind();
                 gl::DisableVertexAttribArray(i as u32);
+                i += 1;
             }
 
             gl::BindVertexArray(0);
@@ -64,9 +67,9 @@ impl Bindable for VertexArrayObject {
 impl Drawable for VertexArrayObject {
     fn draw(&self) {
         // self.bind();
-        let count = self.vbs[0].count;
+        let _count = self.vbs[0].count;
         unsafe {
-            gl::DrawArrays(gl::TRIANGLES, 0, count as i32);
+            gl::DrawArrays(gl::TRIANGLES, 0, 2);
         }
         // self.unbind();
     }
@@ -83,8 +86,7 @@ impl Drop for VertexArrayObject {
 pub struct VertexBuffer {
     id: u32,
     count: u32,
-    num_components: u32,
-    component_size: i32,
+    num_components: i32,
 }
 
 impl VertexBuffer {
@@ -109,9 +111,12 @@ impl VertexBuffer {
         VertexBuffer {
             id: id,
             count: (vertex_data.len() as u32) / num_components,
-            num_components: num_components,
-            component_size: 4,
+            num_components: num_components as i32,
         }
+    }
+
+    pub fn component_size(&self) -> i32 {
+        self.num_components * 4
     }
 }
 

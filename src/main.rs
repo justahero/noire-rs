@@ -91,7 +91,20 @@ void main() {
 }
 "##;
 
-static VERTICES: [f32; 6] = [0.0, 0.5, 0.5, -0.5, -0.5, -0.5];
+static VERTICES: [f32; 12] = [
+    -1.0,
+    -1.0,
+    -1.0,
+    1.0,
+    1.0,
+    -1.0,
+    1.0,
+    -1.0,
+    1.0,
+    1.0,
+    -1.0,
+    -1.0,
+];
 
 fn main() {
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
