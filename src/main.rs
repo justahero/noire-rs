@@ -12,32 +12,28 @@ use noire::traits::*;
 use noire::vertex::*;
 
 use std::cell::Cell;
-use std::ffi::CString;
 use std::mem;
 use std::ptr;
 use std::time::Instant;
 
-static VS_SRC: &'static str = r##"
-varying vec2 position;
-void main() {
-   gl_Position = vec4(position, 0.0, 1.0);
-}
-"##;
+/* Shader sources */
+static VERT_SHADER: &'static str = "#version 330\n\
+    layout(location = 0) in vec2 position;\n\
+    uniform float angle;\n\
+    void main() {\n\
+        gl_Position = vec4(position, 0.0, 1.0);\n\
+    }\n";
 
-static FS_SRC: &'static str = r##"
-void main() {
-   gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-}
-"##;
+static FRAG_SHADER: &'static str = "#version 330\n\
+    out vec4 color;\n\
+    void main() {\n\
+        color = vec4(1, 0.15, 0.15, 0);\n\
+    }\n";
 
-static VERTICES: [GLfloat; 8] = [-0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5, -0.5];
+static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
 fn main() {
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
-
-    let (mut window, events) =
-        glfw.create_window(600, 400, "Hello This is window", glfw::WindowMode::Windowed)
-            .expect("Failed to create GLFW window");
 
     glfw.window_hint(glfw::WindowHint::ContextVersionMajor(3));
     glfw.window_hint(glfw::WindowHint::ContextVersionMinor(3));
@@ -46,6 +42,10 @@ fn main() {
     glfw.window_hint(glfw::WindowHint::OpenGlProfile(
         glfw::OpenGlProfileHint::Core,
     ));
+
+    let (mut window, events) =
+        glfw.create_window(600, 400, "Hello This is window", glfw::WindowMode::Windowed)
+            .expect("Failed to create GLFW window");
 
     window.set_key_polling(true);
     window.make_current();
@@ -56,8 +56,8 @@ fn main() {
     // load gl functions
     gl::load_with(|s| window.get_proc_address(s) as *const _);
 
-    let vertex_shader = Shader::create(VS_SRC, gl::VERTEX_SHADER).unwrap();
-    let pixel_shader = Shader::create(FS_SRC, gl::FRAGMENT_SHADER).unwrap();
+    let vertex_shader = Shader::create(VERT_SHADER, gl::VERTEX_SHADER).unwrap();
+    let pixel_shader = Shader::create(FRAG_SHADER, gl::FRAGMENT_SHADER).unwrap();
     let program = Program::create(vertex_shader, pixel_shader).unwrap();
 
     // initialize GL shader stuff
@@ -102,7 +102,7 @@ fn main() {
             // render square
             gl::UseProgram(program.id);
             gl::BindVertexArray(vao);
-            gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 3);
+            gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
             gl::BindVertexArray(0);
             gl::UseProgram(0);
         }
