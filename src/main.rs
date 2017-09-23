@@ -61,8 +61,8 @@ fn main() {
     let program = Program::create(vertex_shader, pixel_shader).unwrap();
 
     // initialize GL shader stuff
-    let mut vao = 0;
-    let mut vbo = 0;
+    let mut vao = 0 as GLuint;
+    let mut vbo = 0 as GLuint;
 
     let start_time = Instant::now();
 
