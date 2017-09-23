@@ -12,7 +12,6 @@ use noire::traits::*;
 use noire::vertex::*;
 
 use std::cell::Cell;
-use std::mem;
 use std::ptr;
 use std::time::Instant;
 
@@ -62,28 +61,15 @@ fn main() {
 
     // initialize GL shader stuff
     let mut vao = 0 as GLuint;
-    let mut vbo = 0 as GLuint;
+    let vb = VertexBuffer::create(&VERTICES, 2);
 
     let start_time = Instant::now();
-
-    // Create a Vertex Buffer Object and copy the vertex data to it
-    unsafe {
-        gl::GenBuffers(1, &mut vbo);
-        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-        gl::BufferData(
-            gl::ARRAY_BUFFER,
-            mem::size_of_val(&VERTICES) as GLsizeiptr,
-            mem::transmute(&VERTICES[0]),
-            gl::STATIC_DRAW,
-        );
-        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-    }
 
     // create VertexArray Object
     unsafe {
         gl::GenVertexArrays(1, &mut vao);
         gl::BindVertexArray(vao);
-        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+        gl::BindBuffer(gl::ARRAY_BUFFER, vb.id);
         gl::VertexAttribPointer(0, 2, gl::FLOAT, gl::FALSE, 0, ptr::null());
         gl::EnableVertexAttribArray(0);
         gl::BindBuffer(gl::ARRAY_BUFFER, 0);
@@ -120,7 +106,6 @@ fn main() {
     // clean up
     unsafe {
         gl::DeleteVertexArrays(1, &vao);
-        gl::DeleteBuffers(1, &vbo);
     }
 }
 

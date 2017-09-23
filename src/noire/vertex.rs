@@ -36,6 +36,7 @@ impl Bindable for VertexArrayObject {
 
             let mut i = 0;
             for vb in &self.vbs {
+                vb.bind();
                 gl::VertexAttribPointer(
                     i as GLuint,
                     vb.num_components,
@@ -84,7 +85,7 @@ impl Drop for VertexArrayObject {
 }
 
 pub struct VertexBuffer {
-    id: u32,
+    pub id: u32,
     count: u32,
     num_components: i32,
 }
