@@ -5,7 +5,5 @@ authors = ["Sebastian Ziebell"]
 
 [dependencies]
 regex = "0.2.0"
-[dependencies.gl]
-git = "https://github.com/brendanzab/gl-rs.git"
-[dependencies.glfw]
-git = "https://github.com/bjz/glfw-rs.git"
+glfw  = "0.17.0"
+gl    = "0.6.3"
