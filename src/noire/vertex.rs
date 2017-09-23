@@ -38,10 +38,10 @@ impl Bindable for VertexArrayObject {
             for vb in &self.vbs {
                 gl::VertexAttribPointer(
                     i as GLuint,
-                    2,
+                    vb.num_components,
                     gl::FLOAT,
                     gl::FALSE as GLboolean,
-                    8,
+                    vb.component_size(),
                     ptr::null(),
                 );
                 i += 1;
@@ -69,7 +69,7 @@ impl Drawable for VertexArrayObject {
         // self.bind();
         let count = self.vbs[0].count;
         unsafe {
-            gl::DrawArrays(gl::TRIANGLES, 0, count as i32);
+            gl::DrawArrays(gl::TRIANGLES, 0, 3);
         }
         // self.unbind();
     }

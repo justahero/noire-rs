@@ -82,19 +82,20 @@ fn get_errors(errors: &String, source: &str) -> Vec<String> {
     result
 }
 
-pub fn compile_shader(source: &str, shader_type: ShaderType) -> Result<u32, String> {
+pub fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> {
+    let c_str = CString::new(source.as_bytes()).unwrap();
+
     let shader;
     unsafe {
-        shader = gl::CreateShader(gl_shader_type(shader_type));
-        let c_str = CString::new(source.as_bytes()).unwrap();
+        shader = gl::CreateShader(shader_type);
         gl::ShaderSource(shader, 1, &c_str.as_ptr(), ptr::null());
         gl::CompileShader(shader);
 
-        let mut status = gl::FALSE as i32;
-
         // check if shader compiled correctly
+        let mut status = gl::FALSE as GLint;
         gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
-        if status != gl::TRUE as i32 {
+
+        if status != gl::TRUE as GLint {
             let log_text = get_compile_error(shader);
             let error_msg = get_errors(&log_text, source).join("\n");
             return Err(error_msg);
@@ -104,7 +105,7 @@ pub fn compile_shader(source: &str, shader_type: ShaderType) -> Result<u32, Stri
 }
 
 impl Shader {
-    pub fn create(source: &str, shader_type: ShaderType) -> Result<Shader, String> {
+    pub fn create(source: &str, shader_type: GLenum) -> Result<Shader, String> {
         match compile_shader(source, shader_type) {
             Ok(id) => {
                 Ok(Shader {

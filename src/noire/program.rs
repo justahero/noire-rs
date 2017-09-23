@@ -162,22 +162,22 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         gl::AttachShader(id, vertex_shader.id);
         gl::AttachShader(id, pixel_shader.id);
 
-        let mut status = gl::FALSE as GLint;
         gl::LinkProgram(id);
+
+        let mut status = gl::FALSE as GLint;
         gl::GetProgramiv(id, gl::LINK_STATUS, &mut status);
-
         if status != (gl::TRUE as GLint) {
             gl::DeleteProgram(id);
             return Err(get_link_error(id));
         }
 
-        gl::ValidateProgram(id);
-        gl::GetProgramiv(id, gl::VALIDATE_STATUS, &mut status);
+        // gl::ValidateProgram(id);
+        // gl::GetProgramiv(id, gl::VALIDATE_STATUS, &mut status);
 
-        if status != (gl::TRUE as GLint) {
-            gl::DeleteProgram(id);
-            return Err(get_link_error(id));
-        }
+        // if status != (gl::TRUE as GLint) {
+        //     gl::DeleteProgram(id);
+        //     return Err(get_link_error(id));
+        // }
     }
 
     let program = Program {
