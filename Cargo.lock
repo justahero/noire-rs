@@ -2,8 +2,8 @@
 name = "rust_noire"
 version = "0.1.0"
 dependencies = [
- "gl 0.6.3 (git+https://github.com/brendanzab/gl-rs.git)",
- "glfw 0.17.0 (git+https://github.com/bjz/glfw-rs.git)",
+ "gl 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "glfw 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -62,17 +62,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "gl"
 version = "0.6.3"
-source = "git+https://github.com/brendanzab/gl-rs.git#fd6ec77469290c6f803e9951e4e5f7e149c75ac1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "gl_generator 0.5.5 (git+https://github.com/brendanzab/gl-rs.git)",
+ "gl_generator 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "gl_generator"
 version = "0.5.5"
-source = "git+https://github.com/brendanzab/gl-rs.git#fd6ec77469290c6f803e9951e4e5f7e149c75ac1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "khronos_api 1.0.1 (git+https://github.com/brendanzab/gl-rs.git)",
+ "khronos_api 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "xml-rs 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -80,7 +80,7 @@ dependencies = [
 [[package]]
 name = "glfw"
 version = "0.17.0"
-source = "git+https://github.com/bjz/glfw-rs.git#e7d3ec5a99afd9f3021fb0809e2aad0748b55ac0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bitflags 0.9.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "enum_primitive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -102,7 +102,7 @@ dependencies = [
 [[package]]
 name = "khronos_api"
 version = "1.0.1"
-source = "git+https://github.com/brendanzab/gl-rs.git#fd6ec77469290c6f803e9951e4e5f7e149c75ac1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "lazy_static"
@@ -298,11 +298,11 @@ dependencies = [
 "checksum custom_derive 0.1.7 (registry+https://github.com/rust-lang/crates.io-index)" = "ef8ae57c4978a2acd8b869ce6b9ca1dfe817bff704c220209fdef2c0b75a01b9"
 "checksum enum_primitive 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "be4551092f4d519593039259a9ed8daedf0da12e5109c5280338073eaeb81180"
 "checksum gcc 0.3.54 (registry+https://github.com/rust-lang/crates.io-index)" = "5e33ec290da0d127825013597dbdfc28bee4964690c7ce1166cbc2a7bd08b1bb"
-"checksum gl 0.6.3 (git+https://github.com/brendanzab/gl-rs.git)" = "<none>"
-"checksum gl_generator 0.5.5 (git+https://github.com/brendanzab/gl-rs.git)" = "<none>"
-"checksum glfw 0.17.0 (git+https://github.com/bjz/glfw-rs.git)" = "<none>"
+"checksum gl 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)" = "97543cffb3e39377ecb7156651d906f8284f459a460aef973936412364a4202b"
+"checksum gl_generator 0.5.5 (registry+https://github.com/rust-lang/crates.io-index)" = "e7acbf2ba3d52e9e1ad96a84362129e9c1aa0af55ebfc86a91004e1b83eca61c"
+"checksum glfw 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a341b1a61e66cb47c1a37892cd7732724e0f98cf26708d6124a559116b8235e6"
 "checksum glfw-sys 3.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f72bb86276679c5370276224546eef2dce99b23da2f364fd8b097c79db310b39"
-"checksum khronos_api 1.0.1 (git+https://github.com/brendanzab/gl-rs.git)" = "<none>"
+"checksum khronos_api 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "d5a08e2a31d665af8f1ca437eab6d00a93c9d62a549f73f9ed8fc2e55b5a91a7"
 "checksum lazy_static 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)" = "3b37545ab726dd833ec6420aaba8231c5b320814b9029ad585555d2a03e94fbf"
 "checksum libc 0.2.30 (registry+https://github.com/rust-lang/crates.io-index)" = "2370ca07ec338939e356443dac2296f581453c35fe1e3a3ed06023c49435f915"
 "checksum log 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)" = "880f77541efa6e5cc74e76910c9884d9859683118839d6a1dc3b11e63512565b"
