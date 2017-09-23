@@ -76,19 +76,18 @@ fn main() {
         unsafe {
             gl::ClearColor(0.3, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
-
-            // render square
-            program.bind();
-            vao.bind();
-            vao.draw();
-            vao.unbind();
-            program.unbind();
         }
+
+        // render square
+        program.bind();
+        vao.bind();
+        vao.draw();
+        vao.unbind();
+        program.unbind();
 
         window.swap_buffers();
 
         glfw.poll_events();
-
         for (_, event) in glfw::flush_messages(&events) {
             handle_window_event(&mut window, event);
         }
