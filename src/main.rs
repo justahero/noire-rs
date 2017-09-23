@@ -32,7 +32,10 @@ static FRAG_SHADER: &'static str = "#version 330\n\
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
 fn main() {
-    let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
+    let mut glfw = glfw::init(Some(glfw::Callback {
+        f: glfw_error_callback as fn(glfw::Error, String, &Cell<usize>),
+        data: Cell::new(0),
+    })).unwrap();
 
     glfw.window_hint(glfw::WindowHint::ContextVersionMajor(3));
     glfw.window_hint(glfw::WindowHint::ContextVersionMinor(3));
@@ -60,21 +63,11 @@ fn main() {
     let program = Program::create(vertex_shader, pixel_shader).unwrap();
 
     // initialize GL shader stuff
-    let mut vao = 0 as GLuint;
-    let vb = VertexBuffer::create(&VERTICES, 2);
+    let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
+    let mut vao = VertexArrayObject::new();
+    vao.add_vb(vb);
 
     let start_time = Instant::now();
-
-    // create VertexArray Object
-    unsafe {
-        gl::GenVertexArrays(1, &mut vao);
-        gl::BindVertexArray(vao);
-        gl::BindBuffer(gl::ARRAY_BUFFER, vb.id);
-        gl::VertexAttribPointer(0, 2, gl::FLOAT, gl::FALSE, 0, ptr::null());
-        gl::EnableVertexAttribArray(0);
-        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-        gl::BindVertexArray(0);
-    }
 
     while !window.should_close() {
         let now = Instant::now();
@@ -86,11 +79,10 @@ fn main() {
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
             // render square
-            // gl::UseProgram(program.id);
             program.bind();
-            gl::BindVertexArray(vao);
-            gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
-            gl::BindVertexArray(0);
+            vao.bind();
+            vao.draw();
+            vao.unbind();
             program.unbind();
         }
 
@@ -102,16 +94,10 @@ fn main() {
             handle_window_event(&mut window, event);
         }
     }
-
-    // clean up
-    unsafe {
-        gl::DeleteVertexArrays(1, &vao);
-    }
 }
 
 fn glfw_error_callback(error: glfw::Error, description: String, _error_count: &Cell<usize>) {
-    println!("GL ERROR: {} - {}", error, description);
-    // TODO
+    panic!("GL ERROR: {} - {}", error, description);
 }
 
 fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent) {
