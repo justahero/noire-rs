@@ -8,6 +8,7 @@ use std::ptr;
 use std::str;
 
 use noire::shader::Shader;
+use noire::traits::Bindable;
 
 #[derive(Debug)]
 struct Variable {
@@ -170,14 +171,6 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
             gl::DeleteProgram(id);
             return Err(get_link_error(id));
         }
-
-        // gl::ValidateProgram(id);
-        // gl::GetProgramiv(id, gl::VALIDATE_STATUS, &mut status);
-
-        // if status != (gl::TRUE as GLint) {
-        //     gl::DeleteProgram(id);
-        //     return Err(get_link_error(id));
-        // }
     }
 
     let program = Program {
@@ -223,6 +216,20 @@ impl Program {
         match self.uniforms.get(name) {
             Some(uniform) => Some(uniform.location),
             _ => None,
+        }
+    }
+}
+
+impl Bindable for Program {
+    fn bind(&self) {
+        unsafe {
+            gl::UseProgram(self.id);
+        }
+    }
+
+    fn unbind(&self) {
+        unsafe {
+            gl::UseProgram(0);
         }
     }
 }

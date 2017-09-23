@@ -100,11 +100,12 @@ fn main() {
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
             // render square
-            gl::UseProgram(program.id);
+            // gl::UseProgram(program.id);
+            program.bind();
             gl::BindVertexArray(vao);
             gl::DrawArrays(gl::TRIANGLE_STRIP, 0, 4);
             gl::BindVertexArray(0);
-            gl::UseProgram(0);
+            program.unbind();
         }
 
         window.swap_buffers();
