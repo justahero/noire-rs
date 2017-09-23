@@ -8,6 +8,7 @@ use std::ptr;
 use std::str;
 
 use noire::shader::Shader;
+use noire::traits::Bindable;
 
 #[derive(Debug)]
 struct Variable {
@@ -162,18 +163,10 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         gl::AttachShader(id, vertex_shader.id);
         gl::AttachShader(id, pixel_shader.id);
 
-        let mut status = gl::FALSE as GLint;
         gl::LinkProgram(id);
+
+        let mut status = gl::FALSE as GLint;
         gl::GetProgramiv(id, gl::LINK_STATUS, &mut status);
-
-        if status != (gl::TRUE as GLint) {
-            gl::DeleteProgram(id);
-            return Err(get_link_error(id));
-        }
-
-        gl::ValidateProgram(id);
-        gl::GetProgramiv(id, gl::VALIDATE_STATUS, &mut status);
-
         if status != (gl::TRUE as GLint) {
             gl::DeleteProgram(id);
             return Err(get_link_error(id));
@@ -193,12 +186,6 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 impl Program {
     pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Program, String> {
         link_program(vertex_shader, pixel_shader)
-    }
-
-    pub fn use_program(&self) {
-        unsafe {
-            gl::UseProgram(self.id);
-        }
     }
 
     pub fn uniform1f(&self, name: &str, value: f32) {
@@ -223,6 +210,20 @@ impl Program {
         match self.uniforms.get(name) {
             Some(uniform) => Some(uniform.location),
             _ => None,
+        }
+    }
+}
+
+impl Bindable for Program {
+    fn bind(&self) {
+        unsafe {
+            gl::UseProgram(self.id);
+        }
+    }
+
+    fn unbind(&self) {
+        unsafe {
+            gl::UseProgram(0);
         }
     }
 }

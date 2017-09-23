@@ -35,30 +35,26 @@ impl Bindable for VertexArrayObject {
             gl::BindVertexArray(self.id);
 
             let mut i = 0;
-            for vb in &self.vbs {
-                gl::VertexAttribPointer(
-                    i as GLuint,
-                    2,
-                    gl::FLOAT,
-                    gl::FALSE as GLboolean,
-                    8,
-                    ptr::null(),
-                );
+            let mut stride = 0;
+            for ref vb in &self.vbs {
+                vb.bind();
+                gl::VertexAttribPointer(i, 2, gl::FLOAT, gl::FALSE, stride, ptr::null());
+                gl::EnableVertexAttribArray(i);
+                stride += vb.component_size();
                 i += 1;
-                gl::EnableVertexAttribArray(i as GLuint);
             }
+            self.vbs[0].unbind();
         }
     }
 
     fn unbind(&self) {
         unsafe {
             let mut i = 0;
-            for vb in &self.vbs {
+            for ref vb in &self.vbs {
                 vb.unbind();
-                gl::DisableVertexAttribArray(i as u32);
+                gl::DisableVertexAttribArray(i);
                 i += 1;
             }
-
             gl::BindVertexArray(0);
         }
     }
@@ -66,12 +62,11 @@ impl Bindable for VertexArrayObject {
 
 impl Drawable for VertexArrayObject {
     fn draw(&self) {
-        // self.bind();
-        let count = self.vbs[0].count;
+        let count: i32 = self.vbs[0].count as i32;
+        let render_type = self.vbs[0].render_type;
         unsafe {
-            gl::DrawArrays(gl::TRIANGLES, 0, count as i32);
+            gl::DrawArrays(render_type, 0, count);
         }
-        // self.unbind();
     }
 }
 
@@ -84,13 +79,14 @@ impl Drop for VertexArrayObject {
 }
 
 pub struct VertexBuffer {
-    id: u32,
+    pub id: u32,
     count: u32,
     num_components: i32,
+    render_type: GLenum,
 }
 
 impl VertexBuffer {
-    pub fn create(vertex_data: &[f32], num_components: u32) -> VertexBuffer {
+    pub fn create(vertex_data: &[f32], num_components: u32, render_type: GLenum) -> VertexBuffer {
         let total_size = vertex_data.len() * mem::size_of::<GLfloat>();
 
         let mut id = 0;
@@ -112,6 +108,7 @@ impl VertexBuffer {
             id: id,
             count: (vertex_data.len() as u32) / num_components,
             num_components: num_components as i32,
+            render_type: render_type,
         }
     }
 
