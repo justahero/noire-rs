@@ -12,7 +12,6 @@ use noire::traits::*;
 use noire::vertex::*;
 
 use std::cell::Cell;
-use std::ptr;
 use std::time::Instant;
 
 /* Shader sources */

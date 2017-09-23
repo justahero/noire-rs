@@ -188,12 +188,6 @@ impl Program {
         link_program(vertex_shader, pixel_shader)
     }
 
-    pub fn use_program(&self) {
-        unsafe {
-            gl::UseProgram(self.id);
-        }
-    }
-
     pub fn uniform1f(&self, name: &str, value: f32) {
         match self.uniform_location(name) {
             Some(location) => unsafe {

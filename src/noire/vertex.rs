@@ -35,10 +35,12 @@ impl Bindable for VertexArrayObject {
             gl::BindVertexArray(self.id);
 
             let mut i = 0;
+            let mut stride = 0;
             for ref vb in &self.vbs {
                 vb.bind();
-                gl::VertexAttribPointer(i, 2, gl::FLOAT, gl::FALSE, 0, ptr::null());
+                gl::VertexAttribPointer(i, 2, gl::FLOAT, gl::FALSE, stride, ptr::null());
                 gl::EnableVertexAttribArray(i);
+                stride += vb.component_size();
                 i += 1;
             }
             self.vbs[0].unbind();
