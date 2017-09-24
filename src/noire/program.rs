@@ -1,6 +1,5 @@
-extern crate gl;
-
-use self::gl::types::*;
+use gl;
+use gl::types::*;
 
 use std::collections::HashMap;
 use std::ptr;

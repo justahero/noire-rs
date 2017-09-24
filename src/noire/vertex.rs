@@ -1,10 +1,8 @@
-#[allow(unused_extern_crates)]
-extern crate gl;
-
 use std::mem;
 use std::ptr;
 
-use self::gl::types::*;
+use gl;
+use gl::types::*;
 use noire::traits::{Bindable, Drawable};
 
 pub struct VertexArrayObject {

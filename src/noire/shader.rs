@@ -1,10 +1,6 @@
-#![allow(dead_code)]
-
-extern crate gl;
-extern crate regex;
-
-use self::gl::types::*;
-use self::regex::Regex;
+use gl;
+use gl::types::*;
+use regex::Regex;
 
 use std::ffi::CString;
 use std::cmp;
@@ -22,7 +18,7 @@ pub struct Shader {
     pub id: u32,
 }
 
-fn gl_shader_type(shader_type: ShaderType) -> u32 {
+pub fn gl_shader_type(shader_type: ShaderType) -> u32 {
     match shader_type {
         ShaderType::VertexShader => gl::VERTEX_SHADER,
         ShaderType::PixelShader => gl::FRAGMENT_SHADER,
