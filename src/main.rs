@@ -1,17 +1,17 @@
 extern crate gl;
 extern crate glfw;
+extern crate regex;
 
-mod noire;
+pub mod noire;
 
-use glfw::{Action, Context, Key};
 use gl::types::*;
 
 use noire::shader::*;
 use noire::program::*;
 use noire::traits::*;
 use noire::vertex::*;
+use noire::window::RenderWindow;
 
-use std::cell::Cell;
 use std::time::Instant;
 
 /* Shader sources */
@@ -31,31 +31,8 @@ static FRAG_SHADER: &'static str = "#version 330\n\
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
 fn main() {
-    let mut glfw = glfw::init(Some(glfw::Callback {
-        f: glfw_error_callback as fn(glfw::Error, String, &Cell<usize>),
-        data: Cell::new(0),
-    })).unwrap();
-
-    glfw.window_hint(glfw::WindowHint::ContextVersionMajor(3));
-    glfw.window_hint(glfw::WindowHint::ContextVersionMinor(3));
-    glfw.window_hint(glfw::WindowHint::Resizable(false));
-    glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
-    glfw.window_hint(glfw::WindowHint::OpenGlProfile(
-        glfw::OpenGlProfileHint::Core,
-    ));
-
-    let (mut window, events) =
-        glfw.create_window(600, 400, "Hello This is window", glfw::WindowMode::Windowed)
-            .expect("Failed to create GLFW window");
-
-    window.set_key_polling(true);
-    window.make_current();
-
-    // glfw.set_swap_interval(glfw::SwapInterval::None);
-    glfw.set_swap_interval(glfw::SwapInterval::None);
-
-    // load gl functions
-    gl::load_with(|s| window.get_proc_address(s) as *const _);
+    let mut window = RenderWindow::create(600, 400, "Hello This is window")
+        .expect("Failed to create Render Window");
 
     let vertex_shader = Shader::create(VERT_SHADER, gl::VERTEX_SHADER).unwrap();
     let pixel_shader = Shader::create(FRAG_SHADER, gl::FRAGMENT_SHADER).unwrap();
@@ -87,20 +64,6 @@ fn main() {
 
         window.swap_buffers();
 
-        glfw.poll_events();
-        for (_, event) in glfw::flush_messages(&events) {
-            handle_window_event(&mut window, event);
-        }
-    }
-}
-
-fn glfw_error_callback(error: glfw::Error, description: String, _error_count: &Cell<usize>) {
-    panic!("GL ERROR: {} - {}", error, description);
-}
-
-fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent) {
-    match event {
-        glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => window.set_should_close(true),
-        _ => {}
+        window.poll_events();
     }
 }
