@@ -2,8 +2,11 @@ use gl;
 use gl::types::*;
 use regex::Regex;
 
-use std::ffi::CString;
+use std::fs::File;
+use std::path::Path;
 use std::cmp;
+use std::ffi::CString;
+use std::io::prelude::*;
 use std::ptr;
 use std::str;
 
@@ -18,8 +21,22 @@ pub struct Shader {
     pub id: u32,
 }
 
-pub fn load_shdaer_from_file(_file_path: &str) -> Result<Shader, String> {
-    Err("Failed to load shader from file".to_string())
+pub fn create_shdaer_from_file(file_path: &str, shader_type: GLenum) -> Result<Shader, String> {
+    let path = Path::new(file_path);
+    let display = path.display();
+
+    let mut file = match File::open(&path) {
+        Ok(file) => file,
+        Err(_) => return Err(format!("Failed to open file {}", display)),
+    };
+
+    let mut source = String::new();
+    let source = match file.read_to_string(&mut source) {
+        Ok(_) => source,
+        Err(_) => return Err(format!("Could not read content from file {}", display)),
+    };
+
+    Shader::create(&source, shader_type)
 }
 
 pub fn gl_shader_type(shader_type: ShaderType) -> u32 {

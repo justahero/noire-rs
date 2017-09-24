@@ -11,29 +11,17 @@ use noire::render::window::RenderWindow;
 
 use std::time::Instant;
 
-/* Shader sources */
-static VERT_SHADER: &'static str = "#version 330\n\
-    layout(location = 0) in vec2 position;\n\
-    uniform float angle;\n\
-    void main() {\n\
-        gl_Position = vec4(position, 0.0, 1.0);\n\
-    }\n";
-
-static FRAG_SHADER: &'static str = "#version 330\n\
-    out vec4 color;\n\
-    void main() {\n\
-        color = vec4(1, 0.15, 0.15, 0);\n\
-    }\n";
-
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
 fn main() {
     let mut window = RenderWindow::create(600, 400, "Hello This is window")
         .expect("Failed to create Render Window");
 
-    let vertex_shader = Shader::create(VERT_SHADER, gl::VERTEX_SHADER).unwrap();
-    let pixel_shader = Shader::create(FRAG_SHADER, gl::FRAGMENT_SHADER).unwrap();
-    let program = Program::create(vertex_shader, pixel_shader).unwrap();
+    let vertex_shader =
+        create_shdaer_from_file("./examples/shaders/vertex.glsl", gl::VERTEX_SHADER).unwrap();
+    let fragment_shader =
+        create_shdaer_from_file("./examples/shaders/fragment.glsl", gl::FRAGMENT_SHADER).unwrap();
+    let program = Program::create(vertex_shader, fragment_shader).unwrap();
 
     // initialize GL shader stuff
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
