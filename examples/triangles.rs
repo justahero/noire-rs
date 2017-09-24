@@ -23,7 +23,6 @@ fn main() {
         create_shdaer_from_file("./examples/shaders/fragment.glsl", gl::FRAGMENT_SHADER).unwrap();
     let program = Program::create(vertex_shader, fragment_shader).unwrap();
 
-    // initialize GL shader stuff
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
@@ -35,10 +34,7 @@ fn main() {
         let elapsed = now.duration_since(start_time);
         let _elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
-        unsafe {
-            gl::ClearColor(0.3, 0.3, 0.3, 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
-        }
+        window.clear(0.3, 0.3, 0.3, 1.0);
 
         // render square
         program.bind();

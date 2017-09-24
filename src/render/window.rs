@@ -55,6 +55,13 @@ impl RenderWindow {
         })
     }
 
+    pub fn clear(&self, r: f32, g: f32, b: f32, a: f32) {
+        unsafe {
+            gl::ClearColor(r, g, b, a);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
+    }
+
     pub fn poll_events(&mut self) {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
