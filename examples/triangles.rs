@@ -1,16 +1,13 @@
 extern crate gl;
-extern crate glfw;
-extern crate regex;
-
-pub mod noire;
+extern crate noire;
 
 use gl::types::*;
 
-use noire::shader::*;
-use noire::program::*;
-use noire::traits::*;
-use noire::vertex::*;
-use noire::window::RenderWindow;
+use noire::render::shader::*;
+use noire::render::program::*;
+use noire::render::traits::*;
+use noire::render::vertex::*;
+use noire::render::window::RenderWindow;
 
 use std::time::Instant;
 

@@ -18,6 +18,10 @@ pub struct Shader {
     pub id: u32,
 }
 
+pub fn load_shdaer_from_file(_file_path: &str) -> Result<Shader, String> {
+    Err("Failed to load shader from file".to_string())
+}
+
 pub fn gl_shader_type(shader_type: ShaderType) -> u32 {
     match shader_type {
         ShaderType::VertexShader => gl::VERTEX_SHADER,

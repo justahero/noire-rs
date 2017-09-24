@@ -5,4 +5,4 @@ extern crate gl;
 extern crate glfw;
 extern crate regex;
 
-pub mod noire;
+pub mod render;

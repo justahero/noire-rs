@@ -5,8 +5,8 @@ use std::collections::HashMap;
 use std::ptr;
 use std::str;
 
-use noire::shader::Shader;
-use noire::traits::Bindable;
+use render::shader::Shader;
+use render::traits::Bindable;
 
 #[derive(Debug)]
 struct Variable {

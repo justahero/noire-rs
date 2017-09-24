@@ -3,7 +3,7 @@ use std::ptr;
 
 use gl;
 use gl::types::*;
-use noire::traits::{Bindable, Drawable};
+use render::traits::{Bindable, Drawable};
 
 pub struct VertexArrayObject {
     id: u32,

@@ -1,7 +1,10 @@
 [package]
-name = "rust_noire"
+name = "noire"
 version = "0.1.0"
 authors = ["Sebastian Ziebell"]
+
+[[example]]
+name = "triangles"
 
 [dependencies]
 regex = "0.2.0"
