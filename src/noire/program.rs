@@ -1,4 +1,3 @@
-#[allow(dead_code)]
 extern crate gl;
 
 use self::gl::types::*;
