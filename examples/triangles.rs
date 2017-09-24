@@ -23,6 +23,9 @@ fn main() {
         create_shdaer_from_file("./examples/shaders/fragment.glsl", gl::FRAGMENT_SHADER).unwrap();
     let program = Program::create(vertex_shader, fragment_shader).unwrap();
 
+    println!("UNIFORMS: {:?}", program.uniforms);
+    println!("ATTRIBUTES: {:?}", program.attributes);
+
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
@@ -32,12 +35,16 @@ fn main() {
     while !window.should_close() {
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
-        let _elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
         window.clear(0.3, 0.3, 0.3, 1.0);
 
         // render square
         program.bind();
+        program.uniform2f("u_resolution", 600.0, 400.0);
+        program.uniform1f("u_time", elapsed as f32);
+        program.bind_frag_location("out_color", 0);
+
         vao.bind();
         vao.draw();
         vao.unbind();

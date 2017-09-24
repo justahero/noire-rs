@@ -2,6 +2,7 @@ use gl;
 use gl::types::*;
 
 use std::collections::HashMap;
+use std::ffi::CString;
 use std::ptr;
 use std::str;
 
@@ -82,9 +83,7 @@ fn find_attributes(program: u32) -> HashMap<String, Variable> {
                 );
             }
 
-            let location = unsafe {
-                gl::GetAttribLocation(program, name.as_ptr() as *const _)
-            };
+            let location = unsafe { gl::GetAttribLocation(program, name.as_ptr() as *const _) };
 
             name.truncate(length as usize);
             let name = str::from_utf8(&name)
@@ -114,11 +113,7 @@ fn find_uniforms(program: u32) -> HashMap<String, Variable> {
 
     unsafe {
         gl::GetProgramiv(program, gl::ACTIVE_UNIFORMS, &mut num_uniforms);
-        gl::GetProgramiv(
-            program,
-            gl::ACTIVE_UNIFORM_MAX_LENGTH,
-            &mut max_name_length,
-        );
+        gl::GetProgramiv(program, gl::ACTIVE_UNIFORM_MAX_LENGTH, &mut max_name_length);
     }
 
     if num_uniforms > 0 {
@@ -141,17 +136,13 @@ fn find_uniforms(program: u32) -> HashMap<String, Variable> {
                 );
             }
 
-            let location = unsafe {
-                gl::GetUniformLocation(program, name.as_ptr() as *const _)
-            };
+            let location = unsafe { gl::GetUniformLocation(program, name.as_ptr() as *const _) };
 
             name.truncate(length as usize);
             let name = str::from_utf8(&name)
                 .ok()
                 .expect("GetActiveUniform not valid utf8")
                 .to_string();
-
-            println!("  UNIFORM: {}", name);
 
             let uniform: Variable = Variable {
                 name: name.clone(),
@@ -171,6 +162,7 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
     let id;
     unsafe {
         id = gl::CreateProgram();
+
         gl::AttachShader(id, vertex_shader.id);
         gl::AttachShader(id, pixel_shader.id);
 
@@ -200,20 +192,20 @@ impl Program {
     }
 
     pub fn uniform1f(&self, name: &str, value: f32) {
-        match self.uniform_location(name) {
-            Some(location) => unsafe {
-                gl::Uniform1f(location, value as GLfloat);
-            },
-            _ => (),
+        let location = self.uniform_location(name).expect(
+            "Failed to find location",
+        );
+        unsafe {
+            gl::Uniform1f(location, value as GLfloat);
         }
     }
 
     pub fn uniform2f(&self, name: &str, val1: f32, val2: f32) {
-        match self.uniform_location(name) {
-            Some(location) => unsafe {
-                gl::Uniform2f(location, val1 as GLfloat, val2 as GLfloat);
-            },
-            _ => (),
+        let location = self.uniform_location(name).expect(
+            "Failed to find location",
+        );
+        unsafe {
+            gl::Uniform2f(location, val1 as GLfloat, val2 as GLfloat);
         }
     }
 
@@ -221,6 +213,12 @@ impl Program {
         match self.uniforms.get(name) {
             Some(uniform) => Some(uniform.location),
             _ => None,
+        }
+    }
+
+    pub fn bind_frag_location(&self, name: &str, color_number: u32) {
+        unsafe {
+            gl::BindFragDataLocation(self.id, color_number, CString::new(name).unwrap().as_ptr());
         }
     }
 }
@@ -241,7 +239,6 @@ impl Bindable for Program {
 
 impl Drop for Program {
     fn drop(&mut self) {
-        assert!(self.id > 0);
         unsafe {
             gl::DeleteProgram(self.id);
         }
