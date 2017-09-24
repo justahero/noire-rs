@@ -1,5 +1,5 @@
 [root]
-name = "rust_noire"
+name = "noire"
 version = "0.1.0"
 dependencies = [
  "gl 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
