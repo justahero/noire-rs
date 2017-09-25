@@ -9,17 +9,24 @@ uniform float u_time;
 
 out vec4 out_color;
 
-void main() {
-  vec2 st = 0.5 * gl_FragCoord.xy / u_resolution;
+mat2 rotate(float angle) {
+  return mat2(cos(angle), -sin(angle),
+              sin(angle),  cos(angle));
+}
 
-  vec2 pos = vec2(0.5) - st;
-  float d = 0.0;
+void main() {
+  vec2 st = 0.5 * (gl_FragCoord.xy / u_resolution);
+
+  st -= vec2(0.5);
+  st *= rotate(u_time * PI * 0.125);
+
+  vec2 pos = st;
 
   float r = length(pos) * 2.2;
   float a = atan(pos.y, pos.x);
 
   // determine value
-  d = abs(cos(a * 4.0));
+  float d = abs(cos(a * 4.0));
 
   vec3 color = vec3(1.0 - smoothstep(d, d + 0.1, r));
 

@@ -44,8 +44,7 @@ fn main() {
         // render square
         program.bind();
         program.uniform2f("u_resolution", width as f32, height as f32);
-        // program.uniform1f("u_time", elapsed as f32);
-        program.bind_frag_location("out_color", 0);
+        program.uniform1f("u_time", elapsed as f32);
 
         vao.bind();
         vao.draw();
