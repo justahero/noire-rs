@@ -14,7 +14,7 @@ use std::time::Instant;
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
 fn main() {
-    let mut window = RenderWindow::create(600, 400, "Hello This is window")
+    let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
 
     let vertex_shader =
@@ -39,10 +39,12 @@ fn main() {
 
         window.clear(0.3, 0.3, 0.3, 1.0);
 
+        let (width, height) = window.get_size();
+
         // render square
         program.bind();
-        program.uniform2f("u_resolution", 600.0, 400.0);
-        program.uniform1f("u_time", elapsed as f32);
+        program.uniform2f("u_resolution", width as f32, height as f32);
+        // program.uniform1f("u_time", elapsed as f32);
         program.bind_frag_location("out_color", 0);
 
         vao.bind();
