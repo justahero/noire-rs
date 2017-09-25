@@ -14,7 +14,7 @@ use std::time::Instant;
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
 fn main() {
-    let mut window = RenderWindow::create(600, 400, "Hello This is window")
+    let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
 
     let vertex_shader =
@@ -22,6 +22,9 @@ fn main() {
     let fragment_shader =
         create_shdaer_from_file("./examples/shaders/fragment.glsl", gl::FRAGMENT_SHADER).unwrap();
     let program = Program::create(vertex_shader, fragment_shader).unwrap();
+
+    println!("UNIFORMS: {:?}", program.uniforms);
+    println!("ATTRIBUTES: {:?}", program.attributes);
 
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();
@@ -32,12 +35,17 @@ fn main() {
     while !window.should_close() {
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
-        let _elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
         window.clear(0.3, 0.3, 0.3, 1.0);
 
+        let (width, height) = window.get_size();
+
         // render square
         program.bind();
+        program.uniform2f("u_resolution", width as f32, height as f32);
+        program.uniform1f("u_time", elapsed as f32);
+
         vao.bind();
         vao.draw();
         vao.unbind();
