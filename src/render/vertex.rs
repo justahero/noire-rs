@@ -31,28 +31,31 @@ impl Bindable for VertexArrayObject {
     fn bind(&self) {
         unsafe {
             gl::BindVertexArray(self.id);
+        }
 
-            let mut i = 0;
-            let mut stride = 0;
-            for ref vb in &self.vbs {
-                vb.bind();
+        let mut i = 0;
+        let mut stride = 0;
+        for ref vb in &self.vbs {
+            vb.bind();
+            unsafe {
                 gl::VertexAttribPointer(i, 2, gl::FLOAT, gl::FALSE, stride, ptr::null());
                 gl::EnableVertexAttribArray(i);
-                stride += vb.component_size();
-                i += 1;
             }
-            self.vbs[0].unbind();
+            stride += vb.component_size();
+            i += 1;
         }
     }
 
     fn unbind(&self) {
-        unsafe {
-            let mut i = 0;
-            for ref vb in &self.vbs {
-                vb.unbind();
+        let mut i = 0;
+        for ref vb in &self.vbs {
+            vb.unbind();
+            unsafe {
                 gl::DisableVertexAttribArray(i);
-                i += 1;
             }
+            i += 1;
+        }
+        unsafe {
             gl::BindVertexArray(0);
         }
     }
