@@ -9,7 +9,7 @@ use render::shader::Shader;
 use render::traits::Bindable;
 
 #[derive(Debug)]
-struct Variable {
+pub struct Variable {
     name: String,
     data_type: u32,
     size: i32,
@@ -21,8 +21,8 @@ pub struct Program {
     vertex_shader: Shader,
     pixel_shader: Shader,
     pub id: u32,
-    uniforms: HashMap<String, Variable>,
-    attributes: HashMap<String, Variable>,
+    pub uniforms: HashMap<String, Variable>,
+    pub attributes: HashMap<String, Variable>,
 }
 
 fn get_link_error(program: u32) -> String {
@@ -50,107 +50,120 @@ fn get_link_error(program: u32) -> String {
 
 fn find_attributes(program: u32) -> HashMap<String, Variable> {
     let mut result = HashMap::new();
-    unsafe {
-        let mut num_attributes = 0;
-        let mut max_attribute_length = 0;
+    let mut num_attributes = 0;
+    let mut max_name_length = 0;
 
+    unsafe {
         gl::GetProgramiv(program, gl::ACTIVE_ATTRIBUTES, &mut num_attributes);
         gl::GetProgramiv(
             program,
             gl::ACTIVE_ATTRIBUTE_MAX_LENGTH,
-            &mut max_attribute_length,
+            &mut max_name_length,
         );
+    }
 
-        // initialize char buffer with length
-        if num_attributes > 0 {
-            let mut buffer = Vec::with_capacity(max_attribute_length as usize);
-            buffer.set_len((max_attribute_length as usize) - 1);
+    if num_attributes > 0 {
+        for i in 0..num_attributes {
+            let mut name = vec![0; max_name_length as usize];
 
-            for i in 0..num_attributes {
-                let mut length = 0;
-                let mut attrib_size: i32 = 0;
-                let mut attrib_type = gl::FLOAT;
-                let location = gl::GetAttribLocation(program, buffer.as_mut_ptr() as *mut GLchar);
+            let mut length = 0;
+            let mut attrib_size: i32 = 0;
+            let mut attrib_type = gl::FLOAT;
 
+            unsafe {
                 gl::GetActiveAttrib(
                     program,
                     i as u32,
-                    max_attribute_length,
+                    max_name_length,
                     &mut length,
                     &mut attrib_size,
                     &mut attrib_type,
-                    buffer.as_mut_ptr() as *mut GLchar,
+                    name.as_mut_ptr() as *mut _,
                 );
-
-                let uniform_name = str::from_utf8(&buffer)
-                    .ok()
-                    .expect("GetActiveAttrib not valid utf8")
-                    .to_string();
-
-                let uniform: Variable = Variable {
-                    name: uniform_name.clone(),
-                    location: location,
-                    data_type: attrib_type,
-                    size: attrib_size,
-                };
-
-                result.insert(uniform_name, uniform);
             }
+
+            let location = unsafe {
+                gl::GetAttribLocation(program, name.as_ptr() as *const _)
+            };
+
+            name.truncate(length as usize);
+            let name = str::from_utf8(&name)
+                .ok()
+                .expect("GetActiveAttrib not valid utf8")
+                .to_string();
+
+            let uniform: Variable = Variable {
+                name: name.clone(),
+                location: location,
+                data_type: attrib_type,
+                size: attrib_size,
+            };
+
+            result.insert(name, uniform);
         }
     }
+
     result
 }
 
 fn find_uniforms(program: u32) -> HashMap<String, Variable> {
     let mut result = HashMap::new();
-    unsafe {
-        let mut num_uniforms = 0;
-        let mut max_uniform_length = 0;
 
+    let mut num_uniforms = 0;
+    let mut max_name_length = 0;
+
+    unsafe {
         gl::GetProgramiv(program, gl::ACTIVE_UNIFORMS, &mut num_uniforms);
         gl::GetProgramiv(
             program,
             gl::ACTIVE_UNIFORM_MAX_LENGTH,
-            &mut max_uniform_length,
+            &mut max_name_length,
         );
+    }
 
-        // initialize char buffer with length
-        if num_uniforms > 0 {
-            let mut buffer = Vec::with_capacity(max_uniform_length as usize);
-            buffer.set_len((max_uniform_length as usize) - 1);
+    if num_uniforms > 0 {
+        for i in 0..num_uniforms {
+            let mut name = vec![0; max_name_length as usize];
 
-            for i in 0..num_uniforms {
-                let mut length = 0;
-                let mut uniform_size: i32 = 0;
-                let mut uniform_type = gl::FLOAT;
-                let location = gl::GetUniformLocation(program, buffer.as_mut_ptr() as *mut GLchar);
+            let mut length = 0;
+            let mut uniform_size: i32 = 0;
+            let mut uniform_type = gl::FLOAT;
 
+            unsafe {
                 gl::GetActiveUniform(
                     program,
                     i as u32,
-                    max_uniform_length,
+                    max_name_length,
                     &mut length,
                     &mut uniform_size,
                     &mut uniform_type,
-                    buffer.as_mut_ptr() as *mut GLchar,
+                    name.as_mut_ptr() as *mut _,
                 );
-
-                let uniform_name = str::from_utf8(&buffer)
-                    .ok()
-                    .expect("GetActiveUniform not valid utf8")
-                    .to_string();
-
-                let uniform: Variable = Variable {
-                    name: uniform_name.clone(),
-                    location: location,
-                    data_type: uniform_type,
-                    size: uniform_size,
-                };
-
-                result.insert(uniform_name, uniform);
             }
+
+            let location = unsafe {
+                gl::GetUniformLocation(program, name.as_ptr() as *const _)
+            };
+
+            name.truncate(length as usize);
+            let name = str::from_utf8(&name)
+                .ok()
+                .expect("GetActiveUniform not valid utf8")
+                .to_string();
+
+            println!("  UNIFORM: {}", name);
+
+            let uniform: Variable = Variable {
+                name: name.clone(),
+                location: location,
+                data_type: uniform_type,
+                size: uniform_size,
+            };
+
+            result.insert(name, uniform);
         }
     }
+
     result
 }
 
