@@ -183,6 +183,10 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         uniforms: find_uniforms(id),
         attributes: find_attributes(id),
     };
+
+    println!("UNIFORMS: {:?}", program.uniforms);
+    println!("ATTRIBUTES: {:?}", program.attributes);
+
     Ok(program)
 }
 

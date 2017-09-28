@@ -23,9 +23,6 @@ fn main() {
         create_shdaer_from_file("./examples/shaders/fragment.glsl", gl::FRAGMENT_SHADER).unwrap();
     let program = Program::create(vertex_shader, fragment_shader).unwrap();
 
-    println!("UNIFORMS: {:?}", program.uniforms);
-    println!("ATTRIBUTES: {:?}", program.attributes);
-
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
