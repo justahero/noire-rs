@@ -29,7 +29,8 @@ fn main() {
 
     let start_time = Instant::now();
 
-    while !window.should_close() {
+    loop {
+        // while !window.should_close() {
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
@@ -51,5 +52,8 @@ fn main() {
         window.swap_buffers();
 
         window.poll_events();
+        if window.should_close() {
+            return;
+        }
     }
 }
