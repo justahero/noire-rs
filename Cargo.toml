@@ -6,6 +6,9 @@ authors = ["Sebastian Ziebell"]
 [[example]]
 name = "triangles"
 
+[[example]]
+name = "filewatch"
+
 [dependencies]
 regex  = "0.2.0"
 glfw   = "0.17.0"
