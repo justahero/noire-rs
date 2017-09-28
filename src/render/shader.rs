@@ -10,15 +10,11 @@ use std::io::prelude::*;
 use std::ptr;
 use std::str;
 
-pub enum ShaderType {
-    VertexShader,
-    PixelShader,
-}
-
 #[derive(Debug)]
 pub struct Shader {
     pub source: String,
     pub id: u32,
+    pub shader_type: GLenum,
 }
 
 pub fn create_shdaer_from_file(file_path: &str, shader_type: GLenum) -> Result<Shader, String> {
@@ -37,13 +33,6 @@ pub fn create_shdaer_from_file(file_path: &str, shader_type: GLenum) -> Result<S
     };
 
     Shader::create(&source, shader_type)
-}
-
-pub fn gl_shader_type(shader_type: ShaderType) -> u32 {
-    match shader_type {
-        ShaderType::VertexShader => gl::VERTEX_SHADER,
-        ShaderType::PixelShader => gl::FRAGMENT_SHADER,
-    }
 }
 
 fn get_compile_error(shader: u32) -> String {
@@ -120,12 +109,13 @@ pub fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> 
 }
 
 impl Shader {
-    pub fn create(source: &str, shader_type: GLenum) -> Result<Shader, String> {
+    pub fn create(source: &str, shader_type: GLenum) -> Result<Self, String> {
         match compile_shader(source, shader_type) {
             Ok(id) => {
                 Ok(Shader {
                     id: id,
                     source: String::from(source),
+                    shader_type: shader_type,
                 })
             }
             Err(message) => Err(message),

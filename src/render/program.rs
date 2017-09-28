@@ -191,7 +191,7 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 }
 
 impl Program {
-    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Program, String> {
+    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Self, String> {
         link_program(vertex_shader, pixel_shader)
     }
 
