@@ -7,12 +7,14 @@ use notify::*;
 use std::sync::mpsc::channel;
 use std::time::Duration;
 
-fn watch_file(file_path: &str) -> notify::Result<()> {
+fn watch_files(files: &Vec<String>) -> notify::Result<()> {
     let (tx, rx) = channel();
 
-    let mut watcher: RecommendedWatcher = try!(Watcher::new(tx, Duration::from_secs(2)));
+    let mut watcher: RecommendedWatcher = try!(Watcher::new(tx, Duration::from_millis(125)));
 
-    try!(watcher.watch(file_path, RecursiveMode::NonRecursive));
+    for file in files {
+        try!(watcher.watch(&file, RecursiveMode::NonRecursive));
+    }
 
     loop {
         match rx.recv() {
@@ -23,7 +25,11 @@ fn watch_file(file_path: &str) -> notify::Result<()> {
 }
 
 fn main() {
-    if let Err(e) = watch_file("./examples/shaders/vertex.glsl") {
+    let files: Vec<String> = vec![
+        "./examples/shaders/vertex.glsl".to_string(),
+        "./examples/shaders/fragment.glsl".to_string(),
+    ];
+    if let Err(e) = watch_files(&files) {
         println!("ERROR: {:?}", e);
     }
 }
