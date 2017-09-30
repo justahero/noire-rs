@@ -2,8 +2,6 @@
 
 #define PI 3.14159265359
 
-in vec2 vUV;
-
 uniform vec2 u_resolution;
 uniform float u_time;
 
@@ -15,12 +13,12 @@ mat2 rotate(float angle) {
 }
 
 void main() {
-  vec2 st = 0.5 * (gl_FragCoord.xy / u_resolution);
+  vec2 st = 1.0 * (gl_FragCoord.xy / u_resolution);
 
   st -= vec2(0.5);
   st *= rotate(u_time * PI * 0.25);
 
-  vec2 pos = st * rotate(8.0 * cos(2.0 - length(st)) * PI);
+  vec2 pos = st * rotate(6.0 * cos(2.0 - length(st)) * PI);
 
   float r = length(pos) * 2.2;
   float a = atan(pos.y, pos.x);
