@@ -196,18 +196,20 @@ impl Program {
     }
 
     pub fn uniform1f(&self, name: &str, value: f32) {
-        let location = self.uniform_location(name).expect(
-            "Failed to find location",
-        );
+        let location = self.uniform_location(name).expect(&format!(
+            "Failed to find location: {}",
+            name
+        ));
         unsafe {
             gl::Uniform1f(location, value as GLfloat);
         }
     }
 
     pub fn uniform2f(&self, name: &str, val1: f32, val2: f32) {
-        let location = self.uniform_location(name).expect(
-            "Failed to find location",
-        );
+        let location = self.uniform_location(name).expect(&format!(
+            "Failed to find location: {}",
+            name
+        ));
         unsafe {
             gl::Uniform2f(location, val1 as GLfloat, val2 as GLfloat);
         }
