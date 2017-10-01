@@ -55,8 +55,8 @@ impl RenderWindow {
         })
     }
 
-    pub fn get_size(&self) -> (i32, i32) {
-        self.window.get_size()
+    pub fn get_framebuffer_size(&self) -> (i32, i32) {
+        self.window.get_framebuffer_size()
     }
 
     pub fn clear(&self, r: f32, g: f32, b: f32, a: f32) {
