@@ -11,6 +11,7 @@ path = "examples/triangles/main.rs"
 name = "filewatch"
 
 [dependencies]
+cgmath = "0.15.0"
 regex  = "0.2.0"
 glfw   = "0.17.0"
 gl     = "0.6.3"
