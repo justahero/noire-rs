@@ -17,7 +17,7 @@ pub struct Shader {
     pub shader_type: GLenum,
 }
 
-pub fn create_shdaer_from_file(file_path: &str, shader_type: GLenum) -> Result<Shader, String> {
+pub fn create_shdaer_from_file(file_path: &String, shader_type: GLenum) -> Result<Shader, String> {
     let path = Path::new(file_path);
     let display = path.display();
 

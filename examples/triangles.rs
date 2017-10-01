@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+
 extern crate gl;
 extern crate noire;
 extern crate notify;
@@ -12,11 +16,30 @@ use noire::render::window::RenderWindow;
 
 use notify::*;
 use std::sync::mpsc::channel;
-use std::time::Instant;
+use std::time::{Duration, Instant};
+use std::thread;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
-fn compile_program(vertex_file: &str, fragment_file: &str) -> Program {
+fn watch_files(files: Vec<String>) {
+    let (tx, rx) = channel();
+
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(125)).unwrap();
+
+    for file in files {
+        watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
+    }
+
+    loop {
+        // println!("Waiting for file change");
+        match rx.recv() {
+            Ok(event) => println!("Event: {:?}", event),
+            Err(e) => println!("Error: {:?}", e),
+        }
+    }
+}
+
+fn compile_program(vertex_file: &String, fragment_file: &String) -> Program {
     let vertex_shader = create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER).unwrap();
     let fragment_shader = create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER).unwrap();
     Program::create(vertex_shader, fragment_shader).unwrap()
@@ -26,9 +49,12 @@ fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
 
-    let vertex_file = "./examples/shaders/vertex.glsl";
-    let fragment_file = "./examples/shaders/fragment.glsl";
-    let program = compile_program(vertex_file, fragment_file);
+    let vertex_file = String::from("./examples/shaders/vertex.glsl");
+    let fragment_file = String::from("./examples/shaders/fragment.glsl");
+    let program = compile_program(&vertex_file, &fragment_file);
+
+    let files = vec![vertex_file, fragment_file];
+    watch_files(files);
 
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();
