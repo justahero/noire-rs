@@ -18,44 +18,37 @@ use notify::*;
 use std::sync::mpsc::channel;
 use std::time::{Duration, Instant};
 use std::thread;
+use std::thread::JoinHandle;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
-fn watch_files(files: Vec<String>) {
-    let (tx, rx) = channel();
-
-    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(125)).unwrap();
-
-    for file in files {
-        watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
-    }
-
-    loop {
-        // println!("Waiting for file change");
-        match rx.recv() {
-            Ok(event) => println!("Event: {:?}", event),
-            Err(e) => println!("Error: {:?}", e),
-        }
-    }
-}
-
-fn compile_program(vertex_file: &String, fragment_file: &String) -> Program {
+fn compile_program(
+    vertex_file: &String,
+    fragment_file: &String,
+) -> std::result::Result<Program, String> {
     let vertex_shader = create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER).unwrap();
     let fragment_shader = create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER).unwrap();
-    Program::create(vertex_shader, fragment_shader).unwrap()
+    Program::create(vertex_shader, fragment_shader)
 }
 
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
 
+    // create shader program
     let vertex_file = String::from("./examples/shaders/vertex.glsl");
     let fragment_file = String::from("./examples/shaders/fragment.glsl");
-    let program = compile_program(&vertex_file, &fragment_file);
+    let mut program: Program = compile_program(&vertex_file, &fragment_file).unwrap();
 
-    let files = vec![vertex_file, fragment_file];
-    watch_files(files);
+    // enable file watching
+    let files = vec![&vertex_file, &fragment_file];
+    let (tx, rx) = channel();
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(125)).unwrap();
+    for file in &files {
+        watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
+    }
 
+    // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
@@ -63,6 +56,20 @@ fn main() {
     let start_time = Instant::now();
 
     loop {
+        // check if there is a file system event
+        match rx.try_recv() {
+            Ok(event) => {
+                println!("Event: {:?}", event);
+                match compile_program(&vertex_file, &fragment_file) {
+                    Ok(new_program) => {
+                        program = new_program;
+                    }
+                    Err(e) => println!("Failed to set new program: {:?}", e),
+                }
+            }
+            _ => (),
+        }
+
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
