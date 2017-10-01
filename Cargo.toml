@@ -5,6 +5,7 @@ authors = ["Sebastian Ziebell"]
 
 [[example]]
 name = "triangles"
+path = "examples/triangles/main.rs"
 
 [[example]]
 name = "filewatch"
