@@ -22,24 +22,6 @@ use std::thread::JoinHandle;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
-fn compile_program(
-    vertex_file: &String,
-    fragment_file: &String,
-) -> std::result::Result<Program, String> {
-    let vertex_shader;
-    let fragment_shader;
-
-    match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
-        Ok(shader) => vertex_shader = shader,
-        Err(e) => return Err(e),
-    }
-    match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
-        Ok(shader) => fragment_shader = shader,
-        Err(e) => return Err(e),
-    }
-    Program::create(vertex_shader, fragment_shader)
-}
-
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
@@ -47,7 +29,7 @@ fn main() {
     // create shader program
     let vertex_file = String::from("./examples/shaders/vertex.glsl");
     let fragment_file = String::from("./examples/shaders/fragment.glsl");
-    let mut program: Program = compile_program(&vertex_file, &fragment_file).unwrap();
+    let mut program: Program = compile_program_from_files(&vertex_file, &fragment_file).unwrap();
 
     // enable file watching
     let files = vec![&vertex_file, &fragment_file];
@@ -68,7 +50,7 @@ fn main() {
         // check if there is a file system event
         match rx.try_recv() {
             Ok(DebouncedEvent::Write(path)) => {
-                match compile_program(&vertex_file, &fragment_file) {
+                match compile_program_from_files(&vertex_file, &fragment_file) {
                     Ok(new_program) => {
                         program = new_program;
                     }

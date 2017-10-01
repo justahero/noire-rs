@@ -8,6 +8,7 @@ use std::str;
 
 use render::shader::Shader;
 use render::traits::Bindable;
+use render::shader::create_shdaer_from_file;
 
 #[derive(Debug)]
 pub struct Variable {
@@ -24,6 +25,22 @@ pub struct Program {
     pub id: u32,
     pub uniforms: HashMap<String, Variable>,
     pub attributes: HashMap<String, Variable>,
+}
+
+pub fn compile_program_from_files(
+    vertex_file: &String,
+    fragment_file: &String,
+) -> Result<Program, String> {
+    let vertex_shader = match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
+        Ok(shader) => shader,
+        Err(e) => return Err(e),
+    };
+    let fragment_shader = match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
+        Ok(shader) => shader,
+        Err(e) => return Err(e),
+    };
+    Program::create(vertex_shader, fragment_shader)
+
 }
 
 fn get_link_error(program: u32) -> String {
