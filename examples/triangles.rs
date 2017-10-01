@@ -66,7 +66,7 @@ fn main() {
 
         window.clear(0.3, 0.3, 0.3, 1.0);
 
-        let (width, height) = window.get_size();
+        let (width, height) = window.get_framebuffer_size();
 
         program.bind();
         program.uniform2f("u_resolution", width as f32, height as f32);
