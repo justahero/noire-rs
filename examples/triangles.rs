@@ -26,8 +26,17 @@ fn compile_program(
     vertex_file: &String,
     fragment_file: &String,
 ) -> std::result::Result<Program, String> {
-    let vertex_shader = create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER).unwrap();
-    let fragment_shader = create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER).unwrap();
+    let vertex_shader;
+    let fragment_shader;
+
+    match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
+        Ok(shader) => vertex_shader = shader,
+        Err(e) => return Err(e),
+    }
+    match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
+        Ok(shader) => fragment_shader = shader,
+        Err(e) => return Err(e),
+    }
     Program::create(vertex_shader, fragment_shader)
 }
 
@@ -58,8 +67,7 @@ fn main() {
     loop {
         // check if there is a file system event
         match rx.try_recv() {
-            Ok(event) => {
-                println!("Event: {:?}", event);
+            Ok(DebouncedEvent::Write(path)) => {
                 match compile_program(&vertex_file, &fragment_file) {
                     Ok(new_program) => {
                         program = new_program;
