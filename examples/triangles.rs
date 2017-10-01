@@ -1,5 +1,10 @@
+#![allow(dead_code)]
+#![allow(unused_imports)]
+#![allow(unused_variables)]
+
 extern crate gl;
 extern crate noire;
+extern crate notify;
 
 use gl::types::*;
 
@@ -9,7 +14,11 @@ use noire::render::traits::*;
 use noire::render::vertex::*;
 use noire::render::window::RenderWindow;
 
-use std::time::Instant;
+use notify::*;
+use std::sync::mpsc::channel;
+use std::time::{Duration, Instant};
+use std::thread;
+use std::thread::JoinHandle;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
@@ -17,22 +26,40 @@ fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
 
-    let vertex_shader =
-        create_shdaer_from_file("./examples/shaders/vertex.glsl", gl::VERTEX_SHADER).unwrap();
-    let fragment_shader =
-        create_shdaer_from_file("./examples/shaders/fragment.glsl", gl::FRAGMENT_SHADER).unwrap();
-    let program = Program::create(vertex_shader, fragment_shader).unwrap();
+    // create shader program
+    let vertex_file = String::from("./examples/shaders/vertex.glsl");
+    let fragment_file = String::from("./examples/shaders/fragment.glsl");
+    let mut program: Program = compile_program_from_files(&vertex_file, &fragment_file).unwrap();
 
-    println!("UNIFORMS: {:?}", program.uniforms);
-    println!("ATTRIBUTES: {:?}", program.attributes);
+    // enable file watching
+    let files = vec![&vertex_file, &fragment_file];
+    let (tx, rx) = channel();
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(125)).unwrap();
+    for file in &files {
+        watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
+    }
 
+    // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
 
     let start_time = Instant::now();
 
-    while !window.should_close() {
+    loop {
+        // check if there is a file system event
+        match rx.try_recv() {
+            Ok(DebouncedEvent::Write(path)) => {
+                match compile_program_from_files(&vertex_file, &fragment_file) {
+                    Ok(new_program) => {
+                        program = new_program;
+                    }
+                    Err(e) => println!("Failed to set new program: {:?}", e),
+                }
+            }
+            _ => (),
+        }
+
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
@@ -41,7 +68,6 @@ fn main() {
 
         let (width, height) = window.get_size();
 
-        // render square
         program.bind();
         program.uniform2f("u_resolution", width as f32, height as f32);
         program.uniform1f("u_time", elapsed as f32);
@@ -49,10 +75,14 @@ fn main() {
         vao.bind();
         vao.draw();
         vao.unbind();
+
         program.unbind();
 
         window.swap_buffers();
 
         window.poll_events();
+        if window.should_close() {
+            return;
+        }
     }
 }

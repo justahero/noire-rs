@@ -8,6 +8,7 @@ use std::str;
 
 use render::shader::Shader;
 use render::traits::Bindable;
+use render::shader::create_shdaer_from_file;
 
 #[derive(Debug)]
 pub struct Variable {
@@ -24,6 +25,22 @@ pub struct Program {
     pub id: u32,
     pub uniforms: HashMap<String, Variable>,
     pub attributes: HashMap<String, Variable>,
+}
+
+pub fn compile_program_from_files(
+    vertex_file: &String,
+    fragment_file: &String,
+) -> Result<Program, String> {
+    let vertex_shader = match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
+        Ok(shader) => shader,
+        Err(e) => return Err(e),
+    };
+    let fragment_shader = match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
+        Ok(shader) => shader,
+        Err(e) => return Err(e),
+    };
+    Program::create(vertex_shader, fragment_shader)
+
 }
 
 fn get_link_error(program: u32) -> String {
@@ -183,27 +200,33 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         uniforms: find_uniforms(id),
         attributes: find_attributes(id),
     };
+
+    println!("UNIFORMS: {:?}", program.uniforms);
+    println!("ATTRIBUTES: {:?}", program.attributes);
+
     Ok(program)
 }
 
 impl Program {
-    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Program, String> {
+    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Self, String> {
         link_program(vertex_shader, pixel_shader)
     }
 
     pub fn uniform1f(&self, name: &str, value: f32) {
-        let location = self.uniform_location(name).expect(
-            "Failed to find location",
-        );
+        let location = self.uniform_location(name).expect(&format!(
+            "Failed to find location: {}",
+            name
+        ));
         unsafe {
             gl::Uniform1f(location, value as GLfloat);
         }
     }
 
     pub fn uniform2f(&self, name: &str, val1: f32, val2: f32) {
-        let location = self.uniform_location(name).expect(
-            "Failed to find location",
-        );
+        let location = self.uniform_location(name).expect(&format!(
+            "Failed to find location: {}",
+            name
+        ));
         unsafe {
             gl::Uniform2f(location, val1 as GLfloat, val2 as GLfloat);
         }
