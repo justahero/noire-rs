@@ -1,4 +1,4 @@
-use cgmath::Matrix4;
+use cgmath::{Matrix4, Point3, Vector3};
 use cgmath::One;
 
 #[derive(Debug)]
@@ -7,7 +7,10 @@ pub struct Camera {
     pub zfar: f32,
     pub aspect: f32,
     pub fov: f32,
+
     projection: Matrix4<f32>,
+    view: Matrix4<f32>,
+    position: Point3<f32>,
 }
 
 impl Camera {
@@ -18,6 +21,8 @@ impl Camera {
             fov: 60.0,
             aspect: 1.0,
             projection: Matrix4::one(),
+            view: Matrix4::one(),
+            position: Point3::new(0.0, 0.0, 0.0),
         }
     }
 
@@ -26,6 +31,17 @@ impl Camera {
         self.aspect = aspect;
         self.znear = znear;
         self.zfar = zfar;
+        self
+    }
+
+    pub fn lookat(
+        &mut self,
+        eye: Point3<f32>,
+        center: Point3<f32>,
+        up: Vector3<f32>,
+    ) -> &mut Camera {
+        self.position = eye.clone();
+        self.view = Matrix4::look_at(eye, center, up);
         self
     }
 }
