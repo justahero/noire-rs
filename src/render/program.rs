@@ -2,7 +2,6 @@ use gl;
 use gl::types::*;
 
 use std::collections::HashMap;
-use std::ffi::CString;
 use std::ptr;
 use std::str;
 
