@@ -40,7 +40,6 @@ pub fn compile_program_from_files(
         Err(e) => return Err(e),
     };
     Program::create(vertex_shader, fragment_shader)
-
 }
 
 fn get_link_error(program: u32) -> String {
@@ -236,12 +235,6 @@ impl Program {
         match self.uniforms.get(name) {
             Some(uniform) => Some(uniform.location),
             _ => None,
-        }
-    }
-
-    pub fn bind_frag_location(&self, name: &str, color_number: u32) {
-        unsafe {
-            gl::BindFragDataLocation(self.id, color_number, CString::new(name).unwrap().as_ptr());
         }
     }
 }
