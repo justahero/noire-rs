@@ -1,5 +1,8 @@
-use cgmath::{Matrix4, Point3, Vector3, Quaternion};
+use cgmath::{EuclideanSpace, Euler, InnerSpace, Matrix4, Point3, Rad, Rotation, Vector3,
+             Quaternion};
+use cgmath::vec3;
 use cgmath::One;
+use cgmath::perspective;
 
 use math::convert_to_quaternion;
 
@@ -35,6 +38,7 @@ impl Camera {
         self.aspect = aspect;
         self.znear = znear;
         self.zfar = zfar;
+        self.projection = perspective(Rad(fov), aspect, znear, zfar);
         self
     }
 
@@ -47,6 +51,49 @@ impl Camera {
         self.position = eye.clone();
         self.view = Matrix4::look_at(eye, center, up);
         self.orientation = convert_to_quaternion(&self.view);
+        self.update_view();
+        self
+    }
+
+    pub fn yaw(&self) -> f32 {
+        let euler = Euler::from(self.orientation);
+        euler.y.0
+    }
+
+    pub fn pitch(&self) -> f32 {
+        let euler = Euler::from(self.orientation);
+        euler.x.0
+    }
+
+    pub fn roll(&self) -> f32 {
+        let euler = Euler::from(self.orientation);
+        euler.z.0
+    }
+
+    pub fn forward(&self) -> Vector3<f32> {
+        let conjugate = self.orientation.conjugate().normalize();
+        conjugate.rotate_vector(vec3(0.0, 0.0, -1.0))
+    }
+
+    pub fn right(&self) -> Vector3<f32> {
+        let conjugate = self.orientation.conjugate().normalize();
+        conjugate.rotate_vector(vec3(1.0, 0.0, 0.0))
+    }
+
+    pub fn set_position(&mut self, pos: Point3<f32>) {
+        self.position = pos;
+        self.update_view();
+    }
+
+    pub fn set_orientation(&mut self, orientation: Quaternion<f32>) {
+        self.orientation = orientation;
+        self.update_view();
+    }
+
+    fn update_view(&mut self) -> &mut Camera {
+        let rotation = Matrix4::from(self.orientation);
+        let translation = Matrix4::from_translation(self.position.to_vec());
+        self.view = rotation * translation;
         self
     }
 }
