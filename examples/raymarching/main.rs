@@ -16,11 +16,29 @@ use noire::render::window::RenderWindow;
 
 use notify::*;
 use std::sync::mpsc::channel;
+use std::sync::mpsc::Receiver;
 use std::time::{Duration, Instant};
 use std::thread;
 use std::thread::JoinHandle;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
+
+fn watch_program(
+    rx: &Receiver<notify::DebouncedEvent>,
+    vertex_file: &String,
+    fragment_file: &String,
+) -> std::option::Option<Program> {
+    match rx.try_recv() {
+        Ok(DebouncedEvent::Write(path)) => {
+            match compile_program_from_files(&vertex_file, &fragment_file) {
+                Ok(program) => return Some(program),
+                Err(e) => (),
+            }
+        }
+        _ => (),
+    }
+    None
+}
 
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
@@ -47,17 +65,9 @@ fn main() {
     let start_time = Instant::now();
 
     loop {
-        // check if there is a file system event
-        match rx.try_recv() {
-            Ok(DebouncedEvent::Write(path)) => {
-                match compile_program_from_files(&vertex_file, &fragment_file) {
-                    Ok(new_program) => {
-                        program = new_program;
-                    }
-                    Err(e) => println!("Failed to set new program: {:?}", e),
-                }
-            }
-            _ => (),
+        match watch_program(&rx, &vertex_file, &fragment_file) {
+            Some(new_program) => program = new_program,
+            None => (),
         }
 
         let now = Instant::now();
