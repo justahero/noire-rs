@@ -8,12 +8,13 @@ use glfw::{Context, Glfw, Error, Key, Window, WindowEvent};
 
 pub struct RenderWindow {
     glfw: Glfw,
-    window: Window,
+    pub window: Window,
     events: Receiver<(f64, WindowEvent)>,
-    keypress_callback: Box<FnMut()>,
+    keypress_callback: Box<FnMut(Key)>,
+    keyrelease_callback: Box<FnMut(Key)>,
 }
 
-fn default_callback() {}
+fn default_callback(key: Key) {}
 
 fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<usize>) {
     panic!("GL ERROR: {} - {}", error, description);
@@ -57,10 +58,15 @@ impl RenderWindow {
             window: window,
             events: events,
             keypress_callback: Box::new(default_callback),
+            keyrelease_callback: Box::new(default_callback),
         })
     }
 
-    pub fn set_keypress_callback<CB: 'static + FnMut()>(&mut self, callback: CB) {
+    pub fn close(&mut self) {
+        self.window.set_should_close(true);
+    }
+
+    pub fn set_keypress_callback<CB: 'static + FnMut(Key)>(&mut self, callback: CB) {
         self.keypress_callback = Box::new(callback);
     }
 
@@ -78,7 +84,15 @@ impl RenderWindow {
     pub fn poll_events(&mut self) {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
-            handle_window_event(event);
+            match event {
+                WindowEvent::Key(key, _, glfw::Action::Press, mods) => {
+                    (self.keypress_callback)(key);
+                }
+                WindowEvent::Key(key, _, glfw::Action::Release, mods) => {
+                    (self.keyrelease_callback)(key);
+                }
+                _ => {}
+            }
         }
     }
 
@@ -88,18 +102,5 @@ impl RenderWindow {
 
     pub fn swap_buffers(&mut self) {
         self.window.swap_buffers()
-    }
-}
-
-fn handle_window_event(event: glfw::WindowEvent) {
-    match event {
-        WindowEvent::Key(key, _, glfw::Action::Press, mods) => {
-            // TODO call key press function
-            // (self.keypress_callback)();
-        }
-        WindowEvent::Key(key, _, glfw::Action::Release, mods) => {
-            // TODO call key release function
-        }
-        _ => {}
     }
 }

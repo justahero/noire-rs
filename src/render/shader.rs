@@ -115,7 +115,7 @@ impl Shader {
                 Ok(Shader {
                     id: id,
                     source: String::from(source),
-                    shader_type: shader_type,
+                    shader_type,
                 })
             }
             Err(message) => Err(message),

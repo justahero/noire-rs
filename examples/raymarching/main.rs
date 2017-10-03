@@ -3,16 +3,19 @@
 #![allow(unused_variables)]
 
 extern crate gl;
+extern crate glfw;
 extern crate noire;
 extern crate notify;
 
 use gl::types::*;
+use glfw::Key;
 
 use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
 use noire::render::window::RenderWindow;
+use noire::math::camera::*;
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -40,13 +43,13 @@ fn watch_program(
     None
 }
 
-fn keypress_callback() {}
+fn keypress_callback(key: Key) {
+    // TODO
+}
 
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
-
-    window.set_keypress_callback(keypress_callback);
 
     // create shader program
     let vertex_file = String::from("./examples/raymarching/shaders/vertex.glsl");
@@ -60,6 +63,9 @@ fn main() {
     for file in &files {
         watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
     }
+
+    // set input callbacks
+    window.set_keypress_callback(keypress_callback);
 
     // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
