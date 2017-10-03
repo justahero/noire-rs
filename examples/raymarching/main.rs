@@ -40,9 +40,13 @@ fn watch_program(
     None
 }
 
+fn keypress_callback() {}
+
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
+
+    window.set_keypress_callback(keypress_callback);
 
     // create shader program
     let vertex_file = String::from("./examples/raymarching/shaders/vertex.glsl");
