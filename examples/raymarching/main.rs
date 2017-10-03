@@ -33,7 +33,7 @@ fn watch_program(
 ) -> std::option::Option<Program> {
     match rx.try_recv() {
         Ok(DebouncedEvent::Write(path)) => {
-            match compile_program_from_files(&vertex_file, &fragment_file) {
+            match Program::compile_from_files(&vertex_file, &fragment_file) {
                 Ok(program) => return Some(program),
                 Err(e) => (),
             }
@@ -54,7 +54,7 @@ fn main() {
     // create shader program
     let vertex_file = String::from("./examples/raymarching/shaders/vertex.glsl");
     let fragment_file = String::from("./examples/raymarching/shaders/fragment.glsl");
-    let mut program: Program = compile_program_from_files(&vertex_file, &fragment_file).unwrap();
+    let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // enable file watching
     let files = vec![&vertex_file, &fragment_file];

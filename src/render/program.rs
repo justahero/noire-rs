@@ -26,21 +26,6 @@ pub struct Program {
     pub attributes: HashMap<String, Variable>,
 }
 
-pub fn compile_program_from_files(
-    vertex_file: &String,
-    fragment_file: &String,
-) -> Result<Program, String> {
-    let vertex_shader = match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
-        Ok(shader) => shader,
-        Err(e) => return Err(e),
-    };
-    let fragment_shader = match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
-        Ok(shader) => shader,
-        Err(e) => return Err(e),
-    };
-    Program::create(vertex_shader, fragment_shader)
-}
-
 fn get_link_error(program: u32) -> String {
     let log_text: String;
     unsafe {
@@ -206,6 +191,21 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 }
 
 impl Program {
+    pub fn compile_from_files(
+        vertex_file: &String,
+        fragment_file: &String,
+    ) -> Result<Program, String> {
+        let vertex_shader = match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
+            Ok(shader) => shader,
+            Err(e) => return Err(e),
+        };
+        let fragment_shader = match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
+            Ok(shader) => shader,
+            Err(e) => return Err(e),
+        };
+        Program::create(vertex_shader, fragment_shader)
+    }
+
     pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Self, String> {
         link_program(vertex_shader, pixel_shader)
     }
