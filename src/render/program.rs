@@ -1,3 +1,5 @@
+use cgmath::{Vector2, Vector3};
+
 use gl;
 use gl::types::*;
 
@@ -24,6 +26,13 @@ pub struct Program {
     pub id: u32,
     pub uniforms: HashMap<String, Variable>,
     pub attributes: HashMap<String, Variable>,
+}
+
+pub enum Uniform {
+    Float(f32),
+    Float2(Vector2<f32>),
+    Float3(Vector3<f32>),
+    Size(f32, f32),
 }
 
 fn get_link_error(program: u32) -> String {
@@ -210,23 +219,35 @@ impl Program {
         link_program(vertex_shader, pixel_shader)
     }
 
-    pub fn uniform1f(&self, name: &str, value: f32) {
-        let location = self.uniform_location(name).expect(&format!(
-            "Failed to find location: {}",
-            name
-        ));
+    pub fn uniform(&self, name: &str, uniform: Uniform) {
+        match self.uniform_location(name) {
+            Some(location) => {
+                match uniform {
+                    Uniform::Float(v) => Program::uniform1f(location, v),
+                    Uniform::Float2(v) => Program::uniform2f(location, v.x, v.y),
+                    Uniform::Float3(v) => Program::uniform3f(location, v.x, v.y, v.z),
+                    Uniform::Size(x, y) => Program::uniform2f(location, x, y),
+                }
+            }
+            _ => (),
+        }
+    }
+
+    pub fn uniform1f(location: i32, value: f32) {
         unsafe {
             gl::Uniform1f(location, value as GLfloat);
         }
     }
 
-    pub fn uniform2f(&self, name: &str, val1: f32, val2: f32) {
-        let location = self.uniform_location(name).expect(&format!(
-            "Failed to find location: {}",
-            name
-        ));
+    pub fn uniform2f(location: i32, x: f32, y: f32) {
         unsafe {
-            gl::Uniform2f(location, val1 as GLfloat, val2 as GLfloat);
+            gl::Uniform2f(location, x as GLfloat, y as GLfloat);
+        }
+    }
+
+    pub fn uniform3f(location: i32, x: f32, y: f32, z: f32) {
+        unsafe {
+            gl::Uniform3f(location, x as GLfloat, y as GLfloat, z as GLfloat);
         }
     }
 

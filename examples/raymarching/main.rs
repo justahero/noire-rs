@@ -89,8 +89,8 @@ fn main() {
         let (width, height) = window.get_framebuffer_size();
 
         program.bind();
-        program.uniform2f("u_resolution", width as f32, height as f32);
-        program.uniform1f("u_time", elapsed as f32);
+        program.uniform("u_resolution", Uniform::Size(width as f32, height as f32));
+        program.uniform("u_time", Uniform::Float(elapsed));
 
         vao.bind();
         vao.draw();
