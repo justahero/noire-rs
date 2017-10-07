@@ -2,8 +2,16 @@
 
 #define PI 3.14159265359
 
-uniform vec2 u_resolution;
+uniform vec2  u_resolution;
+uniform float u_aspect;
 uniform float u_time;
+uniform float u_znear;
+uniform float u_zfar;
+
+uniform vec4  u_ambientColor;
+uniform vec3  u_light;
+uniform vec4  u_lightColor;
+uniform float u_blendFactor;
 
 out vec4 out_color;
 

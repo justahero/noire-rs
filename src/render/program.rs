@@ -1,4 +1,4 @@
-use cgmath::{Vector2, Vector3};
+use cgmath::{Matrix, Matrix4, Vector2, Vector3};
 
 use math::color::Color;
 
@@ -35,6 +35,7 @@ pub enum Uniform {
     Float(f32),
     Float2(f32, f32),
     Float3(f32, f32, f32),
+    Mat4(Matrix4<f32>),
     Vec2(Vector2<f32>),
     Vec3(Vector3<f32>),
     Size(f32, f32),
@@ -232,12 +233,25 @@ impl Program {
                     Uniform::Float(v) => Program::uniform1f(location, v),
                     Uniform::Float2(x, y) => Program::uniform2f(location, x, y),
                     Uniform::Float3(x, y, z) => Program::uniform3f(location, x, y, z),
+                    Uniform::Mat4(m) => Program::matrix4(location, &m),
                     Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
                     Uniform::Vec3(v) => Program::uniform3f(location, v.x, v.y, v.z),
                     Uniform::Size(x, y) => Program::uniform2f(location, x, y),
                 }
             }
             _ => (),
+        }
+    }
+
+    pub fn color(location: i32, color: Color) {
+        unsafe {
+            gl::Uniform4fv(location, 4, color.values().as_ptr());
+        }
+    }
+
+    pub fn matrix4(location: i32, matrix: &Matrix4<f32>) {
+        unsafe {
+            gl::UniformMatrix4fv(location, 1, gl::FALSE, matrix.as_ptr());
         }
     }
 
@@ -256,12 +270,6 @@ impl Program {
     pub fn uniform3f(location: i32, x: f32, y: f32, z: f32) {
         unsafe {
             gl::Uniform3f(location, x as GLfloat, y as GLfloat, z as GLfloat);
-        }
-    }
-
-    pub fn color(location: i32, color: Color) {
-        unsafe {
-            gl::Uniform4fv(location, 4, color.values().as_ptr());
         }
     }
 

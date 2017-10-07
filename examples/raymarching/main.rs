@@ -99,6 +99,7 @@ fn main() {
             "u_ambientColor",
             Uniform::Color(Color::new(0.0, 0.0, 0.0, 1.0)),
         );
+        program.uniform("u_aspect", Uniform::Float(camera.aspect));
         program.uniform("u_znear", Uniform::Float(camera.znear));
         program.uniform("u_zfar", Uniform::Float(camera.zfar));
 
