@@ -1,4 +1,4 @@
-use cgmath::{EuclideanSpace, Euler, InnerSpace, Matrix4, Point3, Rad, Rotation, Vector3,
+use cgmath::{Deg, EuclideanSpace, Euler, InnerSpace, Matrix4, Point3, Rad, Rotation, Vector3,
              Quaternion};
 use cgmath::vec3;
 use cgmath::One;
@@ -38,7 +38,7 @@ impl Camera {
         self.aspect = aspect;
         self.znear = znear;
         self.zfar = zfar;
-        self.projection = perspective(Rad(fov), aspect, znear, zfar);
+        self.projection = perspective(Rad::from(Deg(fov)), aspect, znear, zfar);
         self
     }
 

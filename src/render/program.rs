@@ -1,5 +1,7 @@
 use cgmath::{Vector2, Vector3};
 
+use math::color::Color;
+
 use gl;
 use gl::types::*;
 
@@ -29,6 +31,7 @@ pub struct Program {
 }
 
 pub enum Uniform {
+    Color(Color),
     Float(f32),
     Float2(f32, f32),
     Float3(f32, f32, f32),
@@ -225,6 +228,7 @@ impl Program {
         match self.uniform_location(name) {
             Some(location) => {
                 match uniform {
+                    Uniform::Color(c) => Program::color(location, c),
                     Uniform::Float(v) => Program::uniform1f(location, v),
                     Uniform::Float2(x, y) => Program::uniform2f(location, x, y),
                     Uniform::Float3(x, y, z) => Program::uniform3f(location, x, y, z),
@@ -252,6 +256,12 @@ impl Program {
     pub fn uniform3f(location: i32, x: f32, y: f32, z: f32) {
         unsafe {
             gl::Uniform3f(location, x as GLfloat, y as GLfloat, z as GLfloat);
+        }
+    }
+
+    pub fn color(location: i32, color: Color) {
+        unsafe {
+            gl::Uniform4fv(location, 4, color.values().as_ptr());
         }
     }
 

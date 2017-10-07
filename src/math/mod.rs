@@ -1,5 +1,6 @@
 #![allow(unused_variables)]
 pub mod camera;
+pub mod color;
 
 use cgmath::{Matrix4, Quaternion};
 

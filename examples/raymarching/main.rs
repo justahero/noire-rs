@@ -16,6 +16,7 @@ use noire::render::traits::*;
 use noire::render::vertex::*;
 use noire::render::window::RenderWindow;
 use noire::math::camera::*;
+use noire::math::color::*;
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -64,6 +65,9 @@ fn main() {
         watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
     }
 
+    let mut camera = Camera::new();
+    camera.perspective(60.0, 1.0, 0.1, 100.0);
+
     // set input callbacks
     window.set_keypress_callback(keypress_callback);
 
@@ -91,6 +95,12 @@ fn main() {
         program.bind();
         program.uniform("u_resolution", Uniform::Size(width as f32, height as f32));
         program.uniform("u_time", Uniform::Float(elapsed));
+        program.uniform(
+            "u_ambientColor",
+            Uniform::Color(Color::new(0.0, 0.0, 0.0, 1.0)),
+        );
+        program.uniform("u_znear", Uniform::Float(camera.znear));
+        program.uniform("u_zfar", Uniform::Float(camera.zfar));
 
         vao.bind();
         vao.draw();
