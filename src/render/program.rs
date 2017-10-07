@@ -30,8 +30,10 @@ pub struct Program {
 
 pub enum Uniform {
     Float(f32),
-    Float2(Vector2<f32>),
-    Float3(Vector3<f32>),
+    Float2(f32, f32),
+    Float3(f32, f32, f32),
+    Vec2(Vector2<f32>),
+    Vec3(Vector3<f32>),
     Size(f32, f32),
 }
 
@@ -224,8 +226,10 @@ impl Program {
             Some(location) => {
                 match uniform {
                     Uniform::Float(v) => Program::uniform1f(location, v),
-                    Uniform::Float2(v) => Program::uniform2f(location, v.x, v.y),
-                    Uniform::Float3(v) => Program::uniform3f(location, v.x, v.y, v.z),
+                    Uniform::Float2(x, y) => Program::uniform2f(location, x, y),
+                    Uniform::Float3(x, y, z) => Program::uniform3f(location, x, y, z),
+                    Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
+                    Uniform::Vec3(v) => Program::uniform3f(location, v.x, v.y, v.z),
                     Uniform::Size(x, y) => Program::uniform2f(location, x, y),
                 }
             }
