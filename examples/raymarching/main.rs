@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
+extern crate cgmath;
 extern crate gl;
 extern crate glfw;
 extern crate noire;
@@ -10,6 +11,9 @@ extern crate notify;
 use gl::types::*;
 use glfw::Key;
 
+use cgmath::{Point3, Vector3};
+use cgmath::vec3;
+
 use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
@@ -17,6 +21,7 @@ use noire::render::vertex::*;
 use noire::render::window::RenderWindow;
 use noire::math::camera::*;
 use noire::math::color::*;
+use noire::math::macros;
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -67,6 +72,19 @@ fn main() {
 
     let mut camera = Camera::new();
     camera.perspective(60.0, 1.0, 0.1, 100.0);
+    camera.lookat(
+        Point3 {
+            x: 0.0,
+            y: 2.0,
+            z: -4.5,
+        },
+        Point3 {
+            x: 0.0,
+            y: 2.0,
+            z: 0.0,
+        },
+        vec3(0.0, 1.0, 0.0),
+    );
 
     // set input callbacks
     window.set_keypress_callback(keypress_callback);
@@ -95,15 +113,9 @@ fn main() {
         program.bind();
         program.uniform("u_resolution", Uniform::Size(width as f32, height as f32));
         program.uniform("u_time", Uniform::Float(elapsed));
-        program.uniform(
-            "u_ambientColor",
-            Uniform::Color(Color::new(0.0, 0.0, 0.0, 1.0)),
-        );
+        program.uniform("u_ambientColor", color!(0.0, 0.0, 0.0));
         program.uniform("u_light", Uniform::Float3(0.0, 20.0, 0.0));
-        program.uniform(
-            "u_lightColor",
-            Uniform::Color(Color::new(0.4, 1.0, 1.0, 1.0)),
-        );
+        program.uniform("u_lightColor", color!(0.4, 1.0, 1.0));
         program.uniform("u_aspect", Uniform::Float(camera.aspect));
         program.uniform("u_znear", Uniform::Float(camera.znear));
         program.uniform("u_zfar", Uniform::Float(camera.zfar));

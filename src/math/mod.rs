@@ -2,6 +2,9 @@
 pub mod camera;
 pub mod color;
 
+#[macro_use]
+pub mod macros;
+
 use cgmath::{Matrix4, Quaternion};
 
 pub fn convert_to_quaternion(mat: &Matrix4<f32>) -> Quaternion<f32> {
