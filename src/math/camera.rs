@@ -1,5 +1,5 @@
-use cgmath::{Deg, EuclideanSpace, Euler, InnerSpace, Matrix4, Point3, Rad, Rotation, Vector3,
-             Quaternion};
+use cgmath::{Deg, EuclideanSpace, Euler, InnerSpace, Matrix4, Point3, Rad, Rotation, SquareMatrix,
+             Vector3, Quaternion};
 use cgmath::vec3;
 use cgmath::One;
 use cgmath::perspective;
@@ -13,10 +13,10 @@ pub struct Camera {
     pub aspect: f32,
     pub fov: f32,
 
-    projection: Matrix4<f32>,
-    view: Matrix4<f32>,
-    position: Point3<f32>,
-    orientation: Quaternion<f32>,
+    pub projection: Matrix4<f32>,
+    pub view: Matrix4<f32>,
+    pub position: Point3<f32>,
+    pub orientation: Quaternion<f32>,
 }
 
 impl Camera {
@@ -53,6 +53,10 @@ impl Camera {
         self.orientation = convert_to_quaternion(&self.view);
         self.update_view();
         self
+    }
+
+    pub fn invert_view(&self) -> Option<Matrix4<f32>> {
+        self.view.invert()
     }
 
     pub fn yaw(&self) -> f32 {

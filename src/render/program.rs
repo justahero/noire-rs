@@ -1,4 +1,4 @@
-use cgmath::{Matrix, Matrix4, Vector2, Vector3};
+use cgmath::{Matrix, Matrix4, Point3, Vector2, Vector3};
 
 use math::color::Color;
 
@@ -38,6 +38,7 @@ pub enum Uniform {
     Mat4(Matrix4<f32>),
     Vec2(Vector2<f32>),
     Vec3(Vector3<f32>),
+    Point3(Point3<f32>),
     Size(f32, f32),
 }
 
@@ -236,6 +237,7 @@ impl Program {
                     Uniform::Mat4(m) => Program::matrix4(location, &m),
                     Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
                     Uniform::Vec3(v) => Program::uniform3f(location, v.x, v.y, v.z),
+                    Uniform::Point3(p) => Program::uniform3f(location, p.x, p.y, p.z),
                     Uniform::Size(x, y) => Program::uniform2f(location, x, y),
                 }
             }
