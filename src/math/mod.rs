@@ -2,8 +2,15 @@
 pub mod camera;
 pub mod color;
 
-#[macro_use]
-pub mod macros;
+#[macro_export]
+macro_rules! color {
+    ($r:expr) => {
+        Color::new($r, $r, $r, 1.0)
+    };
+    ($r:expr, $g:expr, $b:expr) => {
+        Color::new($r, $g, $b, 1.0)
+    };
+}
 
 use cgmath::{Matrix4, Quaternion};
 

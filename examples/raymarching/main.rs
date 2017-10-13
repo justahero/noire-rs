@@ -5,8 +5,10 @@
 extern crate cgmath;
 extern crate gl;
 extern crate glfw;
-extern crate noire;
 extern crate notify;
+
+#[macro_use]
+extern crate noire;
 
 use gl::types::*;
 use glfw::Key;
@@ -21,7 +23,6 @@ use noire::render::vertex::*;
 use noire::render::window::RenderWindow;
 use noire::math::camera::*;
 use noire::math::color::*;
-use noire::math::macros;
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -113,9 +114,9 @@ fn main() {
         program.bind();
         program.uniform("u_resolution", Uniform::Size(width as f32, height as f32));
         program.uniform("u_time", Uniform::Float(elapsed));
-        program.uniform("u_ambientColor", color!(0.0, 0.0, 0.0));
+        program.uniform("u_ambientColor", Uniform::Color(color!(0.0)));
         program.uniform("u_light", Uniform::Float3(0.0, 20.0, 0.0));
-        program.uniform("u_lightColor", color!(0.4, 1.0, 1.0));
+        program.uniform("u_lightColor", Uniform::Color(color!(0.4, 1.0, 1.0)));
         program.uniform("u_aspect", Uniform::Float(camera.aspect));
         program.uniform("u_znear", Uniform::Float(camera.znear));
         program.uniform("u_zfar", Uniform::Float(camera.zfar));
