@@ -10,6 +10,9 @@ macro_rules! color {
     ($r:expr, $g:expr, $b:expr) => {
         Color::new($r, $g, $b, 1.0)
     };
+    ($r:expr, $g:expr, $b:expr, $a:expr) => {
+        Color::new($r, $g, $b, $a)
+    };
 }
 
 use cgmath::{Matrix4, Quaternion};

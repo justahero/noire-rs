@@ -17,7 +17,7 @@ uniform vec4  u_lightColor;
 
 out vec4 out_color;
 
-const int   MAX_AO    = 16;
+const int   MAX_AO    = 20;
 const int   MAX_STEPS = 256;
 const float EPSILON   = 0.00001;
 const float SHADOWS   = 64.0;
@@ -269,10 +269,11 @@ vec4 computeColor(vec3 ro, vec3 rd) {
   return color;
 }
 
-
 void main(void) {
+  vec2 st = 1.0 * (gl_FragCoord.xy / u_resolution) - 0.5;
+
   vec3 ro = u_cameraPos;
-  vec3 rd = normalize(u_camView * vec4(gl_FragCoord.x * u_aspect, gl_FragCoord.y, u_aspect, 0.0)).xyz;
+  vec3 rd = normalize(u_camView * vec4(st.x * u_aspect, st.y, u_aspect, 0.0)).xyz;
 
   vec4 color = computeColor(ro, rd);
 

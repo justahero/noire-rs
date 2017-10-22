@@ -72,20 +72,18 @@ fn main() {
     }
 
     let mut camera = Camera::new();
-    camera.perspective(60.0, 1.0, 0.1, 100.0);
-    camera.lookat(
-        Point3 {
+    camera
+        .perspective(60.0, 1.0, 0.1, 100.0)
+        .lookat(
+            Point3::new(0.0, 2.0, -4.5),
+            Point3::new(0.0, 2.0, 0.0),
+            vec3(0.0, 1.0, 0.0),
+        )
+        .set_position(Point3 {
             x: 0.0,
             y: 2.0,
-            z: -4.5,
-        },
-        Point3 {
-            x: 0.0,
-            y: 2.0,
-            z: 0.0,
-        },
-        vec3(0.0, 1.0, 0.0),
-    );
+            z: 10.0,
+        });
 
     // set input callbacks
     window.set_keypress_callback(keypress_callback);
@@ -107,21 +105,22 @@ fn main() {
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
-        window.clear(0.3, 0.3, 0.3, 1.0);
+        window.clear(0.0, 0.0, 0.0, 1.0);
+        window.clear_depth(1.0);
 
         let (width, height) = window.get_framebuffer_size();
 
         program.bind();
         program.uniform("u_resolution", Uniform::Size(width as f32, height as f32));
-        program.uniform("u_time", Uniform::Float(elapsed));
-        program.uniform("u_ambientColor", Uniform::Color(color!(0.0)));
-        program.uniform("u_light", Uniform::Float3(0.0, 20.0, 0.0));
-        program.uniform("u_lightColor", Uniform::Color(color!(0.4, 1.0, 1.0)));
         program.uniform("u_aspect", Uniform::Float(camera.aspect));
+        program.uniform("u_time", Uniform::Float(elapsed));
         program.uniform("u_znear", Uniform::Float(camera.znear));
         program.uniform("u_zfar", Uniform::Float(camera.zfar));
         program.uniform("u_cameraPos", Uniform::Point3(camera.position));
         program.uniform("u_camView", Uniform::Mat4(camera.invert_view().unwrap()));
+        program.uniform("u_ambientColor", Uniform::Color(color!(0.0, 0.0, 0.0)));
+        program.uniform("u_light", Uniform::Float3(0.0, 20.0, 0.0));
+        program.uniform("u_lightColor", Uniform::Color(color!(0.4, 1.0, 1.0)));
 
         vao.bind();
         vao.draw();

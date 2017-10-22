@@ -1,8 +1,7 @@
-use cgmath::{Deg, EuclideanSpace, Euler, InnerSpace, Matrix4, Point3, Rad, Rotation, SquareMatrix,
-             Vector3, Quaternion};
+use cgmath::{Deg, EuclideanSpace, Euler, InnerSpace, Matrix4, PerspectiveFov, Point3, Rad,
+             Rotation, SquareMatrix, Vector3, Quaternion};
 use cgmath::vec3;
 use cgmath::One;
-use cgmath::perspective;
 
 use math::convert_to_quaternion;
 
@@ -38,21 +37,21 @@ impl Camera {
         self.aspect = aspect;
         self.znear = znear;
         self.zfar = zfar;
-        self.projection = perspective(Rad::from(Deg(fov)), aspect, znear, zfar);
+        // self.projection = perspective(Rad::from(Deg(fov)), aspect, znear, zfar);
+        self.projection = Matrix4::from(PerspectiveFov {
+            fovy: Rad::from(Deg(fov)),
+            aspect: aspect,
+            near: znear,
+            far: zfar,
+        });
         self
     }
 
-    pub fn lookat(
-        &mut self,
-        eye: Point3<f32>,
-        center: Point3<f32>,
-        up: Vector3<f32>,
-    ) -> &mut Camera {
+    pub fn lookat(&mut self, eye: Point3<f32>, center: Point3<f32>, up: Vector3<f32>) -> &mut Self {
         self.position = eye.clone();
         self.view = Matrix4::look_at(eye, center, up);
         self.orientation = convert_to_quaternion(&self.view);
-        self.update_view();
-        self
+        self.update_view()
     }
 
     pub fn invert_view(&self) -> Option<Matrix4<f32>> {
@@ -84,9 +83,9 @@ impl Camera {
         conjugate.rotate_vector(vec3(1.0, 0.0, 0.0))
     }
 
-    pub fn set_position(&mut self, pos: Point3<f32>) {
+    pub fn set_position(&mut self, pos: Point3<f32>) -> &mut Self {
         self.position = pos;
-        self.update_view();
+        self.update_view()
     }
 
     pub fn set_orientation(&mut self, orientation: Quaternion<f32>) {
@@ -94,7 +93,7 @@ impl Camera {
         self.update_view();
     }
 
-    fn update_view(&mut self) -> &mut Camera {
+    fn update_view(&mut self) -> &mut Self {
         let rotation = Matrix4::from(self.orientation);
         let translation = Matrix4::from_translation(self.position.to_vec());
         self.view = rotation * translation;

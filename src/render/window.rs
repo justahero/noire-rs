@@ -81,6 +81,13 @@ impl RenderWindow {
         }
     }
 
+    pub fn clear_depth(&self, value: f32) {
+        unsafe {
+            gl::ClearDepthf(value);
+            gl::Clear(gl::DEPTH_BUFFER_BIT);
+        }
+    }
+
     pub fn poll_events(&mut self) {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {

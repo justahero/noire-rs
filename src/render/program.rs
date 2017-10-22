@@ -247,7 +247,7 @@ impl Program {
 
     pub fn color(location: i32, color: Color) {
         unsafe {
-            gl::Uniform4fv(location, 4, color.values().as_ptr());
+            gl::Uniform4f(location, color.red, color.green, color.blue, color.alpha);
         }
     }
 
@@ -272,6 +272,18 @@ impl Program {
     pub fn uniform3f(location: i32, x: f32, y: f32, z: f32) {
         unsafe {
             gl::Uniform3f(location, x as GLfloat, y as GLfloat, z as GLfloat);
+        }
+    }
+
+    pub fn uniform4f(location: i32, x: f32, y: f32, z: f32, w: f32) {
+        unsafe {
+            gl::Uniform4f(
+                location,
+                x as GLfloat,
+                y as GLfloat,
+                z as GLfloat,
+                w as GLfloat,
+            )
         }
     }
 
