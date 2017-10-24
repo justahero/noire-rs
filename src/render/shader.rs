@@ -75,14 +75,12 @@ fn get_errors(errors: &String, source: &str) -> Vec<String> {
     let lines: Vec<&str> = errors.split('\n').collect();
     for line in lines {
         let regex = Regex::new(r"ERROR:\s([0-9]*):([0-9]*):\s(.*)").unwrap();
-        match regex.captures(line) {
-            Some(groups) => {
-                let location = groups.get(2).unwrap().as_str();
-                let error = groups.get(3).unwrap().as_str();
-                let text = get_source_location(location.parse::<i32>().unwrap(), source);
-                result.push(format!("{}: in:\n{}", error, text));
-            }
-            _ => (),
+
+        if let Some(groups) = regex.captures(line) {
+            let location = groups.get(2).unwrap().as_str();
+            let error = groups.get(3).unwrap().as_str();
+            let text = get_source_location(location.parse::<i32>().unwrap(), source);
+            result.push(format!("{}: in:\n{}", error, text));
         }
     }
     result

@@ -62,6 +62,11 @@ impl RenderWindow {
         })
     }
 
+    pub fn aspect(&self) -> f32 {
+        let (width, height) = self.window.get_size();
+        width as f32 / height as f32
+    }
+
     pub fn close(&mut self) {
         self.window.set_should_close(true);
     }

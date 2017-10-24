@@ -227,21 +227,18 @@ impl Program {
     }
 
     pub fn uniform(&self, name: &str, uniform: Uniform) {
-        match self.uniform_location(name) {
-            Some(location) => {
-                match uniform {
-                    Uniform::Color(c) => Program::color(location, c),
-                    Uniform::Float(v) => Program::uniform1f(location, v),
-                    Uniform::Float2(x, y) => Program::uniform2f(location, x, y),
-                    Uniform::Float3(x, y, z) => Program::uniform3f(location, x, y, z),
-                    Uniform::Mat4(m) => Program::matrix4(location, &m),
-                    Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
-                    Uniform::Vec3(v) => Program::uniform3f(location, v.x, v.y, v.z),
-                    Uniform::Point3(p) => Program::uniform3f(location, p.x, p.y, p.z),
-                    Uniform::Size(x, y) => Program::uniform2f(location, x, y),
-                }
+        if let Some(location) = self.uniform_location(name) {
+            match uniform {
+                Uniform::Color(c) => Program::color(location, c),
+                Uniform::Float(v) => Program::uniform1f(location, v),
+                Uniform::Float2(x, y) => Program::uniform2f(location, x, y),
+                Uniform::Float3(x, y, z) => Program::uniform3f(location, x, y, z),
+                Uniform::Mat4(m) => Program::matrix4(location, &m),
+                Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
+                Uniform::Vec3(v) => Program::uniform3f(location, v.x, v.y, v.z),
+                Uniform::Point3(p) => Program::uniform3f(location, p.x, p.y, p.z),
+                Uniform::Size(x, y) => Program::uniform2f(location, x, y),
             }
-            _ => (),
         }
     }
 

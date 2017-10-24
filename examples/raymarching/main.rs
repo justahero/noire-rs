@@ -73,7 +73,7 @@ fn main() {
 
     let mut camera = Camera::new();
     camera
-        .perspective(60.0, 1.0, 0.1, 100.0)
+        .perspective(60.0, window.aspect(), 0.1, 100.0)
         .lookat(
             Point3::new(0.0, 2.0, -4.5),
             Point3::new(0.0, 2.0, 0.0),
@@ -82,7 +82,7 @@ fn main() {
         .set_position(Point3 {
             x: 0.0,
             y: 2.0,
-            z: 10.0,
+            z: 20.0,
         });
 
     // set input callbacks
@@ -96,9 +96,8 @@ fn main() {
     let start_time = Instant::now();
 
     loop {
-        match watch_program(&rx, &vertex_file, &fragment_file) {
-            Some(new_program) => program = new_program,
-            None => (),
+        if let Some(new_program) = watch_program(&rx, &vertex_file, &fragment_file) {
+            program = new_program;
         }
 
         let now = Instant::now();
