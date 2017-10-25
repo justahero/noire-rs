@@ -23,6 +23,7 @@ use noire::render::vertex::*;
 use noire::render::window::RenderWindow;
 use noire::math::camera::*;
 use noire::math::color::*;
+use noire::render::window::set_fullscreen;
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -57,6 +58,7 @@ fn keypress_callback(key: Key) {
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
+    // set_fullscreen(&mut window.glfw, &mut window.window);
 
     // create shader program
     let vertex_file = String::from("./examples/raymarching/shaders/vertex.glsl");

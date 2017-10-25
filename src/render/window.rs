@@ -7,7 +7,7 @@ use glfw;
 use glfw::{Context, Glfw, Error, Key, Window, WindowEvent};
 
 pub struct RenderWindow {
-    glfw: Glfw,
+    pub glfw: Glfw,
     pub window: Window,
     events: Receiver<(f64, WindowEvent)>,
     keypress_callback: Box<FnMut(Key)>,
@@ -18,6 +18,30 @@ fn default_callback(key: Key) {}
 
 fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<usize>) {
     panic!("GL ERROR: {} - {}", error, description);
+}
+
+// make struct function
+pub fn set_fullscreen(glfw: &mut Glfw, window: &mut Window) {
+    glfw.with_primary_monitor_mut(|_: &mut _, m: Option<&glfw::Monitor>| {
+        let monitor = m.unwrap();
+        let mode: glfw::VidMode = monitor.get_video_mode().unwrap();
+
+        window.set_monitor(
+            glfw::WindowMode::FullScreen(&monitor),
+            0,
+            0,
+            mode.width,
+            mode.height,
+            Some(mode.refresh_rate),
+        );
+        println!(
+            "{}x{} fullscreen enabled at {}Hz on monitor {}",
+            mode.width,
+            mode.height,
+            mode.refresh_rate,
+            monitor.get_name()
+        );
+    });
 }
 
 impl RenderWindow {
@@ -47,8 +71,7 @@ impl RenderWindow {
         window.set_key_polling(true);
         window.make_current();
 
-        // glfw.set_swap_interval(glfw::SwapInterval::None);
-        glfw.set_swap_interval(glfw::SwapInterval::None);
+        glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
 
         // load gl functions
         gl::load_with(|s| window.get_proc_address(s) as *const _);
