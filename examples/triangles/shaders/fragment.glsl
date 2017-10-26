@@ -13,9 +13,9 @@ mat2 rotate(float angle) {
 }
 
 void main() {
-  vec2 st = 1.0 * (gl_FragCoord.xy / u_resolution);
+  vec2 st = (gl_FragCoord.xy / u_resolution.xy) - vec2(0.5);
+  st.x *= u_resolution.x / u_resolution.y;
 
-  st -= vec2(0.5);
   st *= rotate(u_time * PI * 0.25);
 
   vec2 pos = st * rotate(6.0 * cos(2.0 - length(st)) * PI);
