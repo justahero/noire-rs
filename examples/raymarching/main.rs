@@ -41,9 +41,8 @@ fn watch_program(
 ) -> std::option::Option<Program> {
     match rx.try_recv() {
         Ok(DebouncedEvent::Write(path)) => {
-            match Program::compile_from_files(&vertex_file, &fragment_file) {
-                Ok(program) => return Some(program),
-                Err(e) => (),
+            if let Ok(program) = Program::compile_from_files(&vertex_file, &fragment_file) {
+                return Some(program);
             }
         }
         _ => (),
