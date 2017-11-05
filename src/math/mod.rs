@@ -2,6 +2,8 @@
 pub mod camera;
 pub mod color;
 
+use cgmath::Point3;
+
 #[macro_export]
 macro_rules! color {
     ($r:expr) => {
@@ -13,6 +15,10 @@ macro_rules! color {
     ($r:expr, $g:expr, $b:expr, $a:expr) => {
         Color::new($r, $g, $b, $a)
     };
+}
+
+pub fn point3(x: f32, y: f32, z: f32) -> Point3<f32> {
+    Point3 { x, y, z }
 }
 
 use cgmath::{Matrix4, Quaternion};

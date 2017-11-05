@@ -23,6 +23,7 @@ use noire::render::vertex::*;
 use noire::render::window::RenderWindow;
 use noire::math::camera::*;
 use noire::math::color::*;
+use noire::math::*;
 use noire::render::window::set_fullscreen;
 
 use notify::*;
@@ -55,9 +56,8 @@ fn keypress_callback(key: Key) {
 }
 
 fn main() {
-    let mut window = RenderWindow::create(600, 600, "Hello This is window")
+    let mut window = RenderWindow::create(1024, 768, "Hello This is window")
         .expect("Failed to create Render Window");
-    // set_fullscreen(&mut window.glfw, &mut window.window);
 
     // create shader program
     let vertex_file = String::from("./examples/raymarching/shaders/vertex.glsl");
@@ -76,15 +76,11 @@ fn main() {
     camera
         .perspective(60.0, window.aspect(), 0.1, 100.0)
         .lookat(
-            Point3::new(0.0, 2.0, -4.5),
-            Point3::new(0.0, 2.0, 0.0),
+            point3(0.0, 2.0, -4.5),
+            point3(0.0, 2.0, 0.0),
             vec3(0.0, 1.0, 0.0),
         )
-        .set_position(Point3 {
-            x: 0.0,
-            y: 2.0,
-            z: 20.0,
-        });
+        .set_position(point3(0.0, 2.0, 20.0));
 
     // set input callbacks
     window.set_keypress_callback(keypress_callback);
