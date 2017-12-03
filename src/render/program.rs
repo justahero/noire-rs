@@ -1,8 +1,11 @@
+use cgmath::{Matrix, Matrix4, Point3, Vector2, Vector3};
+
+use math::color::Color;
+
 use gl;
 use gl::types::*;
 
 use std::collections::HashMap;
-use std::ffi::CString;
 use std::ptr;
 use std::str;
 
@@ -27,19 +30,16 @@ pub struct Program {
     pub attributes: HashMap<String, Variable>,
 }
 
-pub fn compile_program_from_files(
-    vertex_file: &String,
-    fragment_file: &String,
-) -> Result<Program, String> {
-    let vertex_shader = match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
-        Ok(shader) => shader,
-        Err(e) => return Err(e),
-    };
-    let fragment_shader = match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
-        Ok(shader) => shader,
-        Err(e) => return Err(e),
-    };
-    Program::create(vertex_shader, fragment_shader)
+pub enum Uniform {
+    Color(Color),
+    Float(f32),
+    Float2(f32, f32),
+    Float3(f32, f32, f32),
+    Mat4(Matrix4<f32>),
+    Vec2(Vector2<f32>),
+    Vec3(Vector3<f32>),
+    Point3(Point3<f32>),
+    Size(f32, f32),
 }
 
 fn get_link_error(program: u32) -> String {
@@ -207,27 +207,80 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 }
 
 impl Program {
+    pub fn compile_from_files(
+        vertex_file: &String,
+        fragment_file: &String,
+    ) -> Result<Program, String> {
+        let vertex_shader = match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
+            Ok(shader) => shader,
+            Err(e) => return Err(e),
+        };
+        let fragment_shader = match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
+            Ok(shader) => shader,
+            Err(e) => return Err(e),
+        };
+        Program::create(vertex_shader, fragment_shader)
+    }
+
     pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Self, String> {
         link_program(vertex_shader, pixel_shader)
     }
 
-    pub fn uniform1f(&self, name: &str, value: f32) {
-        let location = self.uniform_location(name).expect(&format!(
-            "Failed to find location: {}",
-            name
-        ));
+    pub fn uniform(&self, name: &str, uniform: Uniform) {
+        if let Some(location) = self.uniform_location(name) {
+            match uniform {
+                Uniform::Color(c) => Program::color(location, c),
+                Uniform::Float(v) => Program::uniform1f(location, v),
+                Uniform::Float2(x, y) => Program::uniform2f(location, x, y),
+                Uniform::Float3(x, y, z) => Program::uniform3f(location, x, y, z),
+                Uniform::Mat4(m) => Program::matrix4(location, &m),
+                Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
+                Uniform::Vec3(v) => Program::uniform3f(location, v.x, v.y, v.z),
+                Uniform::Point3(p) => Program::uniform3f(location, p.x, p.y, p.z),
+                Uniform::Size(x, y) => Program::uniform2f(location, x, y),
+            }
+        }
+    }
+
+    pub fn color(location: i32, color: Color) {
+        unsafe {
+            gl::Uniform4f(location, color.red, color.green, color.blue, color.alpha);
+        }
+    }
+
+    pub fn matrix4(location: i32, matrix: &Matrix4<f32>) {
+        unsafe {
+            gl::UniformMatrix4fv(location, 1, gl::FALSE, matrix.as_ptr());
+        }
+    }
+
+    pub fn uniform1f(location: i32, value: f32) {
         unsafe {
             gl::Uniform1f(location, value as GLfloat);
         }
     }
 
-    pub fn uniform2f(&self, name: &str, val1: f32, val2: f32) {
-        let location = self.uniform_location(name).expect(&format!(
-            "Failed to find location: {}",
-            name
-        ));
+    pub fn uniform2f(location: i32, x: f32, y: f32) {
         unsafe {
-            gl::Uniform2f(location, val1 as GLfloat, val2 as GLfloat);
+            gl::Uniform2f(location, x as GLfloat, y as GLfloat);
+        }
+    }
+
+    pub fn uniform3f(location: i32, x: f32, y: f32, z: f32) {
+        unsafe {
+            gl::Uniform3f(location, x as GLfloat, y as GLfloat, z as GLfloat);
+        }
+    }
+
+    pub fn uniform4f(location: i32, x: f32, y: f32, z: f32, w: f32) {
+        unsafe {
+            gl::Uniform4f(
+                location,
+                x as GLfloat,
+                y as GLfloat,
+                z as GLfloat,
+                w as GLfloat,
+            )
         }
     }
 

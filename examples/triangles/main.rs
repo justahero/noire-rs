@@ -29,7 +29,7 @@ fn main() {
     // create shader program
     let vertex_file = String::from("./examples/triangles/shaders/vertex.glsl");
     let fragment_file = String::from("./examples/triangles/shaders/fragment.glsl");
-    let mut program: Program = compile_program_from_files(&vertex_file, &fragment_file).unwrap();
+    let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // enable file watching
     let files = vec![&vertex_file, &fragment_file];
@@ -50,7 +50,7 @@ fn main() {
         // check if there is a file system event
         match rx.try_recv() {
             Ok(DebouncedEvent::Write(path)) => {
-                match compile_program_from_files(&vertex_file, &fragment_file) {
+                match Program::compile_from_files(&vertex_file, &fragment_file) {
                     Ok(new_program) => {
                         program = new_program;
                     }
@@ -69,8 +69,8 @@ fn main() {
         let (width, height) = window.get_framebuffer_size();
 
         program.bind();
-        program.uniform2f("u_resolution", width as f32, height as f32);
-        program.uniform1f("u_time", elapsed as f32);
+        program.uniform("u_resolution", Uniform::Float2(width as f32, height as f32));
+        program.uniform("u_time", Uniform::Float(elapsed as f32));
 
         vao.bind();
         vao.draw();

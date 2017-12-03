@@ -109,7 +109,7 @@ impl VertexBuffer {
             id: id,
             count: (vertex_data.len() as u32) / num_components,
             num_components: num_components as i32,
-            render_type: render_type,
+            render_type,
         }
     }
 

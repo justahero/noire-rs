@@ -1,18 +1,47 @@
+#![allow(unused_variables)]
 use gl;
 use std::cell::Cell;
 use std::sync::mpsc::Receiver;
 
 use glfw;
-use glfw::{Context, Glfw, Error, Window, WindowEvent};
+use glfw::{Context, Glfw, Error, Key, Window, WindowEvent};
 
 pub struct RenderWindow {
-    glfw: Glfw,
-    window: Window,
+    pub glfw: Glfw,
+    pub window: Window,
     events: Receiver<(f64, WindowEvent)>,
+    keypress_callback: Box<FnMut(Key)>,
+    keyrelease_callback: Box<FnMut(Key)>,
 }
+
+fn default_callback(key: Key) {}
 
 fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<usize>) {
     panic!("GL ERROR: {} - {}", error, description);
+}
+
+// make struct function
+pub fn set_fullscreen(glfw: &mut Glfw, window: &mut Window) {
+    glfw.with_primary_monitor_mut(|_: &mut _, m: Option<&glfw::Monitor>| {
+        let monitor = m.unwrap();
+        let mode: glfw::VidMode = monitor.get_video_mode().unwrap();
+
+        window.set_monitor(
+            glfw::WindowMode::FullScreen(&monitor),
+            0,
+            0,
+            mode.width,
+            mode.height,
+            Some(mode.refresh_rate),
+        );
+        println!(
+            "{}x{} fullscreen enabled at {}Hz on monitor {}",
+            mode.width,
+            mode.height,
+            mode.refresh_rate,
+            monitor.get_name()
+        );
+    });
 }
 
 impl RenderWindow {
@@ -42,8 +71,7 @@ impl RenderWindow {
         window.set_key_polling(true);
         window.make_current();
 
-        // glfw.set_swap_interval(glfw::SwapInterval::None);
-        glfw.set_swap_interval(glfw::SwapInterval::None);
+        glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
 
         // load gl functions
         gl::load_with(|s| window.get_proc_address(s) as *const _);
@@ -52,7 +80,22 @@ impl RenderWindow {
             glfw: glfw,
             window: window,
             events: events,
+            keypress_callback: Box::new(default_callback),
+            keyrelease_callback: Box::new(default_callback),
         })
+    }
+
+    pub fn aspect(&self) -> f32 {
+        let (width, height) = self.window.get_size();
+        width as f32 / height as f32
+    }
+
+    pub fn close(&mut self) {
+        self.window.set_should_close(true);
+    }
+
+    pub fn set_keypress_callback<CB: 'static + FnMut(Key)>(&mut self, callback: CB) {
+        self.keypress_callback = Box::new(callback);
     }
 
     pub fn get_framebuffer_size(&self) -> (i32, i32) {
@@ -66,10 +109,25 @@ impl RenderWindow {
         }
     }
 
+    pub fn clear_depth(&self, value: f32) {
+        unsafe {
+            gl::ClearDepthf(value);
+            gl::Clear(gl::DEPTH_BUFFER_BIT);
+        }
+    }
+
     pub fn poll_events(&mut self) {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
-            handle_window_event(&mut self.window, event);
+            match event {
+                WindowEvent::Key(key, _, glfw::Action::Press, mods) => {
+                    (self.keypress_callback)(key);
+                }
+                WindowEvent::Key(key, _, glfw::Action::Release, mods) => {
+                    (self.keyrelease_callback)(key);
+                }
+                _ => {}
+            }
         }
     }
 
@@ -79,14 +137,5 @@ impl RenderWindow {
 
     pub fn swap_buffers(&mut self) {
         self.window.swap_buffers()
-    }
-}
-
-fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent) {
-    match event {
-        WindowEvent::Key(glfw::Key::Escape, _, glfw::Action::Press, _) => {
-            window.set_should_close(true)
-        }
-        _ => {}
     }
 }

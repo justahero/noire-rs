@@ -13,20 +13,20 @@ mat2 rotate(float angle) {
 }
 
 void main() {
-  vec2 st = 1.0 * (gl_FragCoord.xy / u_resolution);
+  vec2 st = (gl_FragCoord.xy / u_resolution.xy) - vec2(0.5);
+  st.x *= u_resolution.x / u_resolution.y;
 
-  st -= vec2(0.5);
-  st *= rotate(u_time * PI * 0.25);
+  st *= rotate(u_time * PI * 0.125);
 
-  vec2 pos = st * rotate(6.0 * cos(2.0 - length(st)) * PI);
+  vec2 pos = st * rotate(12.0 * sin(u_time * 0.125) * cos(u_time * PI * 0.125) * length(st));
 
-  float r = length(pos) * 2.2;
+  float r = length(pos) * 2.5;
   float a = atan(pos.y, pos.x);
 
   // determine value
-  float d = abs(cos(a * 4.0));
+  float d = abs(cos(a * 8.0));
 
-  vec3 color = vec3(1.0 - smoothstep(d, d + 0.1, r));
+  vec3 color = vec3(1.0 - smoothstep(d, d + 0.2, r));
 
   out_color = vec4(color, 1.0);
 }
