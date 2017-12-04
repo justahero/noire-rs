@@ -1,23 +1,61 @@
 #![allow(unused_variables)]
+// TODO remove here
+#![allow(unused_imports)]
+
 use gl;
 use std::cell::Cell;
 use std::sync::mpsc::Receiver;
+use std::collections::VecDeque;
 
 use glfw;
-use glfw::{Context, Glfw, Error, Window, WindowEvent};
+use glfw::{Context, Glfw, Error, WindowEvent};
+
+use input::Input;
+
+/// Struct to provide size dimensions
+#[derive(Debug, Copy, Clone)]
+pub struct Size {
+    /// width in pixels
+    pub width: u32,
+    /// height in pixels
+    pub height: u32,
+}
+
+/// Trait that handles a Window
+///
+/// The basic behavior of a Window is defined here
+pub trait Window {
+    /// Returns the size of the window
+    fn size(&self) -> Size;
+    /// Polls an input event from window
+    fn poll_event(&mut self) -> Option<Input>;
+}
+
+/// Trait that defines an OpenGL specific Window
+///
+pub trait OpenGLWindow: Window {
+    /// Returns true if this window is the current one
+    fn is_current(&self) -> bool;
+    /// Make this window the current one
+    fn make_current(&mut self);
+}
 
 pub struct RenderWindow {
     pub glfw: Glfw,
-    pub window: Window,
+    pub window: glfw::Window,
+    /// Listener of new window events from glfw
     events: Receiver<(f64, WindowEvent)>,
+    /// vector of input events
+    input_events: VecDeque<Input>,
 }
 
+/// callback function to report error
 fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<usize>) {
     panic!("GL ERROR: {} - {}", error, description);
 }
 
-// make struct function
-pub fn set_fullscreen(glfw: &mut Glfw, window: &mut Window) {
+/// make struct function
+pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window) {
     glfw.with_primary_monitor_mut(|_: &mut _, m: Option<&glfw::Monitor>| {
         let monitor = m.unwrap();
         let mode: glfw::VidMode = monitor.get_video_mode().unwrap();
@@ -76,6 +114,7 @@ impl RenderWindow {
             glfw: glfw,
             window: window,
             events: events,
+            input_events: VecDeque::new(),
         })
     }
 
@@ -107,11 +146,14 @@ impl RenderWindow {
     }
 
     pub fn poll_events(&mut self) {
+        // get all events from glfw
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
             match event {
                 WindowEvent::Key(key, _, glfw::Action::Press, mods) => {}
                 WindowEvent::Key(key, _, glfw::Action::Release, mods) => {}
+                WindowEvent::CursorPos(x, y) => {}
+                WindowEvent::MouseButton(btn, action, mods) => {}
                 _ => {}
             }
         }
@@ -123,5 +165,29 @@ impl RenderWindow {
 
     pub fn swap_buffers(&mut self) {
         self.window.swap_buffers()
+    }
+}
+
+impl Window for RenderWindow {
+    fn size(&self) -> Size {
+        let (width, height) = self.window.get_size();
+        Size {
+            width: width as u32,
+            height: height as u32,
+        }
+    }
+
+    fn poll_event(&mut self) -> Option<Input> {
+        None
+    }
+}
+
+impl OpenGLWindow for RenderWindow {
+    fn is_current(&self) -> bool {
+        self.window.is_current()
+    }
+
+    fn make_current(&mut self) {
+        self.window.make_current()
     }
 }

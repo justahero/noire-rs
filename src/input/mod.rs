@@ -1,5 +1,7 @@
 pub mod mouse;
 
+use input::mouse::MouseButton;
+
 #[derive(Copy, Clone, Debug)]
 pub enum Motion {
     /// x and y in window coordinates
@@ -9,6 +11,12 @@ pub enum Motion {
 }
 
 #[derive(Copy, Clone, Debug)]
+pub enum Button {
+    Mouse(MouseButton),
+}
+
+#[derive(Copy, Clone, Debug)]
 pub enum Input {
+    Button(Button),
     Move(Motion),
 }

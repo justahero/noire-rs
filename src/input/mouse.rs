@@ -1,6 +1,7 @@
 use glfw;
 
 /// a mouse button
+#[derive(Copy, Clone, Debug)]
 pub enum MouseButton {
     Left,
     Middle,
