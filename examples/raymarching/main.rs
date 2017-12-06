@@ -11,7 +11,6 @@ extern crate notify;
 extern crate noire;
 
 use gl::types::*;
-use glfw::Key;
 
 use cgmath::{Point3, Vector3};
 use cgmath::vec3;
@@ -20,11 +19,13 @@ use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
+use noire::render::window::*;
 use noire::render::window::RenderWindow;
 use noire::math::camera::*;
 use noire::math::color::*;
 use noire::math::*;
-use noire::render::window::set_fullscreen;
+use noire::input::*;
+use noire::input::keyboard::*;
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -51,7 +52,7 @@ fn watch_program(
     None
 }
 
-fn keypress_callback(key: Key) {
+fn keypress_callback(key: keyboard::Key) {
     // TODO
 }
 
@@ -124,6 +125,15 @@ fn main() {
         window.swap_buffers();
 
         window.poll_events();
+        if let Some(input) = window.poll_event() {
+            match input {
+                Input::Press(Button::Keyboard(Key::Escape)) => {
+                    window.close();
+                }
+                _ => (),
+            }
+        }
+
         if window.should_close() {
             return;
         }

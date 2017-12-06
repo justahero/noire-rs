@@ -1,8 +1,24 @@
+extern crate glfw;
+
+pub mod keyboard;
 pub mod mouse;
+pub mod button;
 
-use input::mouse::MouseButton;
+pub use input::button::{ButtonState, ButtonArgs};
+pub use input::keyboard::Key;
+pub use input::mouse::MouseButton;
 
-#[derive(Copy, Clone, Debug)]
+/// Enum to support different button types
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub enum Button {
+    /// mouse button press
+    Mouse(mouse::MouseButton),
+    /// keyboard key
+    Keyboard(keyboard::Key),
+}
+
+/// Enum to capture motion of input devices
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Motion {
     /// x and y in window coordinates
     MousePos(f64, f64),
@@ -10,13 +26,26 @@ pub enum Motion {
     MouseRelative(f64, f64),
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum Button {
-    Mouse(MouseButton),
-}
-
+/// Enum to support different input types
 #[derive(Copy, Clone, Debug)]
 pub enum Input {
-    Button(Button),
+    /// Button press input
+    Press(Button),
+    /// Button release input
+    Release(Button),
+    /// Mouse cursor moved
     Move(Motion),
+}
+
+impl From<keyboard::Key> for Button {
+    fn from(key: keyboard::Key) -> Self {
+        Button::Keyboard(key)
+    }
+}
+
+#[test]
+fn button_press() {
+    let button = keyboard::Key::Escape.into();
+    let input = Input::Press(button);
+    assert_eq!("Press(Keyboard(Escape))", format!("{:?}", input))
 }

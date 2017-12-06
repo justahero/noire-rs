@@ -10,7 +10,8 @@ use std::collections::VecDeque;
 use glfw;
 use glfw::{Context, Glfw, Error, WindowEvent};
 
-use input::Input;
+use input::{Button, Input};
+use input::keyboard::Key;
 
 /// Struct to provide size dimensions
 #[derive(Debug, Copy, Clone)]
@@ -32,7 +33,6 @@ pub trait Window {
 }
 
 /// Trait that defines an OpenGL specific Window
-///
 pub trait OpenGLWindow: Window {
     /// Returns true if this window is the current one
     fn is_current(&self) -> bool;
@@ -145,26 +145,29 @@ impl RenderWindow {
         }
     }
 
-    pub fn poll_events(&mut self) {
-        // get all events from glfw
-        self.glfw.poll_events();
-        for (_, event) in glfw::flush_messages(&self.events) {
-            match event {
-                WindowEvent::Key(key, _, glfw::Action::Press, mods) => {}
-                WindowEvent::Key(key, _, glfw::Action::Release, mods) => {}
-                WindowEvent::CursorPos(x, y) => {}
-                WindowEvent::MouseButton(btn, action, mods) => {}
-                _ => {}
-            }
-        }
-    }
-
     pub fn should_close(&self) -> bool {
         self.window.should_close()
     }
 
     pub fn swap_buffers(&mut self) {
         self.window.swap_buffers()
+    }
+
+    pub fn poll_events(&mut self) {
+        self.glfw.poll_events();
+        for (_, event) in glfw::flush_messages(&self.events) {
+            match event {
+                WindowEvent::Key(key, _, glfw::Action::Press, mods) => {
+                    let button = Button::Keyboard(key.into());
+                    self.input_events.push_back(Input::Press(button))
+                }
+                WindowEvent::Key(key, _, glfw::Action::Release, mods) => {
+                    let button = Button::Keyboard(key.into());
+                    self.input_events.push_back(Input::Release(button))
+                }
+                _ => (),
+            }
+        }
     }
 }
 
@@ -178,7 +181,7 @@ impl Window for RenderWindow {
     }
 
     fn poll_event(&mut self) -> Option<Input> {
-        None
+        self.input_events.pop_front()
     }
 }
 

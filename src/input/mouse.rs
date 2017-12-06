@@ -1,11 +1,15 @@
 use glfw;
 
 /// a mouse button
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum MouseButton {
+    /// left mouse button
     Left,
+    /// center or middle mouse button
     Middle,
+    /// right mouse button
     Right,
+    /// unknown mouse button
     Unknown,
 }
 
