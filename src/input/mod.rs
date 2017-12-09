@@ -50,3 +50,17 @@ fn button_press() {
     let input = Input::Press(button);
     assert_eq!("Press(Keyboard(Escape))", format!("{:?}", input))
 }
+
+#[test]
+fn button_press() {
+    use input::button::ButtonState;
+    let args = ButtonArgs {
+        button: Button::Keyboard(keyboard::Key::Escape.into()),
+        state: ButtonState::Press,
+    };
+    let input = Input::Button(args);
+    assert_eq!(
+        "Button(ButtonArgs { state: Press, button: Keyboard(Escape) })",
+        format!("{:?}", input)
+    )
+}

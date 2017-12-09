@@ -30,6 +30,7 @@ pub struct Program {
     pub attributes: HashMap<String, Variable>,
 }
 
+#[derive(Debug)]
 pub enum Uniform {
     Color(Color),
     Float(f32),

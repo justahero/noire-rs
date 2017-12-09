@@ -1,5 +1,4 @@
 #![allow(unused_variables)]
-// TODO remove here
 #![allow(unused_imports)]
 
 use gl;
@@ -86,7 +85,6 @@ pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window) {
 }
 
 /// Struct to render a window
-///
 impl RenderWindow {
     pub fn create(width: u32, height: u32, title: &str) -> Result<RenderWindow, String> {
         let mut glfw = match glfw::init(Some(glfw::Callback {
@@ -173,6 +171,7 @@ impl RenderWindow {
     }
 }
 
+/// Implement Window functions
 impl Window for RenderWindow {
     fn size(&self) -> Size {
         let (width, height) = self.window.get_size();
@@ -196,13 +195,11 @@ impl Window for RenderWindow {
 }
 
 /// OpenGL version of the render window
-///
 impl OpenGLWindow for RenderWindow {
     /// Returns true if the window is the current one
     fn is_current(&self) -> bool {
         self.window.is_current()
     }
-
     /// Sets the window as current
     fn make_current(&mut self) {
         self.window.make_current()

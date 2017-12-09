@@ -18,7 +18,7 @@ impl From<glfw::Key> for Key {
 }
 
 #[test]
-fn test_worlks() {
+fn test_key_input() {
     let key = glfw::Key::Escape;
     assert_eq!(Key::Escape, key.into());
 }
