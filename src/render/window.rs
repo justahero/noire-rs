@@ -28,6 +28,10 @@ pub struct Size {
 pub trait Window {
     /// Returns the size of the window
     fn size(&self) -> Size;
+    /// Closes the window
+    fn close(&mut self);
+    /// Returns true if the window should be closed
+    fn should_close(&self) -> bool;
     /// Polls an input event from window
     fn poll_event(&mut self) -> Option<Input>;
 }
@@ -40,8 +44,11 @@ pub trait OpenGLWindow: Window {
     fn make_current(&mut self);
 }
 
+/// Struct that defines a window to render graphics
 pub struct RenderWindow {
+    /// GL instance
     pub glfw: Glfw,
+    /// GL Window instance
     pub window: glfw::Window,
     /// Listener of new window events from glfw
     events: Receiver<(f64, WindowEvent)>,
@@ -54,7 +61,7 @@ fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<us
     panic!("GL ERROR: {} - {}", error, description);
 }
 
-/// make struct function
+/// make struct function?
 pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window) {
     glfw.with_primary_monitor_mut(|_: &mut _, m: Option<&glfw::Monitor>| {
         let monitor = m.unwrap();
@@ -78,6 +85,8 @@ pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window) {
     });
 }
 
+/// Struct to render a window
+///
 impl RenderWindow {
     pub fn create(width: u32, height: u32, title: &str) -> Result<RenderWindow, String> {
         let mut glfw = match glfw::init(Some(glfw::Callback {
@@ -123,10 +132,6 @@ impl RenderWindow {
         width as f32 / height as f32
     }
 
-    pub fn close(&mut self) {
-        self.window.set_should_close(true);
-    }
-
     pub fn get_framebuffer_size(&self) -> (i32, i32) {
         self.window.get_framebuffer_size()
     }
@@ -145,14 +150,11 @@ impl RenderWindow {
         }
     }
 
-    pub fn should_close(&self) -> bool {
-        self.window.should_close()
-    }
-
     pub fn swap_buffers(&mut self) {
         self.window.swap_buffers()
     }
 
+    /// Poll all events from glfw instance
     pub fn poll_events(&mut self) {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
@@ -180,16 +182,28 @@ impl Window for RenderWindow {
         }
     }
 
+    fn close(&mut self) {
+        self.window.set_should_close(true);
+    }
+
+    fn should_close(&self) -> bool {
+        self.window.should_close()
+    }
+
     fn poll_event(&mut self) -> Option<Input> {
         self.input_events.pop_front()
     }
 }
 
+/// OpenGL version of the render window
+///
 impl OpenGLWindow for RenderWindow {
+    /// Returns true if the window is the current one
     fn is_current(&self) -> bool {
         self.window.is_current()
     }
 
+    /// Sets the window as current
     fn make_current(&mut self) {
         self.window.make_current()
     }

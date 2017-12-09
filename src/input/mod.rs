@@ -37,6 +37,7 @@ pub enum Input {
     Move(Motion),
 }
 
+/// Convert from Key to Button
 impl From<keyboard::Key> for Button {
     fn from(key: keyboard::Key) -> Self {
         Button::Keyboard(key)
