@@ -21,12 +21,22 @@ pub struct Size {
     pub height: u32,
 }
 
+/// Struct to provide coordinates
+pub struct Pos {
+    /// x coordinate
+    pub x: i32,
+    /// y coordinate
+    pub y: i32,
+}
+
 /// Trait that handles a Window
 ///
 /// The basic behavior of a Window is defined here
 pub trait Window {
     /// Returns the size of the window
     fn size(&self) -> Size;
+    /// Returns the position of the window
+    fn pos(&self) -> Pos;
     /// Closes the window
     fn close(&mut self);
     /// Returns true if the window should be closed
@@ -41,6 +51,8 @@ pub trait OpenGLWindow: Window {
     fn is_current(&self) -> bool;
     /// Make this window the current one
     fn make_current(&mut self);
+    /// Returns true if window is running in fullscreen mode
+    fn is_fullscreen(&self) -> bool;
 }
 
 /// Struct that defines a window to render graphics
@@ -173,6 +185,11 @@ impl RenderWindow {
 
 /// Implement Window functions
 impl Window for RenderWindow {
+    fn pos(&self) -> Pos {
+        let (x, y) = self.window.get_pos();
+        Pos { x, y }
+    }
+
     fn size(&self) -> Size {
         let (width, height) = self.window.get_size();
         Size {
@@ -203,5 +220,8 @@ impl OpenGLWindow for RenderWindow {
     /// Sets the window as current
     fn make_current(&mut self) {
         self.window.make_current()
+    }
+    fn is_fullscreen(&self) -> bool {
+        false
     }
 }

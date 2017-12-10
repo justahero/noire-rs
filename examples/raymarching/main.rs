@@ -51,10 +51,6 @@ fn watch_program(
     None
 }
 
-fn keypress_callback(key: keyboard::Key) {
-    // TODO
-}
-
 fn main() {
     let mut window = RenderWindow::create(1024, 768, "Hello This is window")
         .expect("Failed to create Render Window");
