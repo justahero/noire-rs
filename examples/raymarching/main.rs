@@ -83,6 +83,12 @@ fn main() {
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
 
+    let mut last_pos = Pos { x: 0, y: 0 };
+    let mut last_size = Size {
+        width: 0,
+        height: 0,
+    };
+
     let start_time = Instant::now();
 
     loop {
@@ -120,8 +126,17 @@ fn main() {
         window.swap_buffers();
 
         window.poll_events();
-        if let Some(input) = window.poll_event() {
+        while let Some(input) = window.poll_event() {
             match input {
+                Input::Press(Button::Keyboard(Key::Enter)) => {
+                    if window.is_fullscreen() {
+                        window.set_windowed(&last_pos, &last_size);
+                    } else {
+                        last_pos = window.pos();
+                        last_size = window.size();
+                        window.set_fullscreen();
+                    }
+                }
                 Input::Press(Button::Keyboard(Key::Escape)) => {
                     window.close();
                 }

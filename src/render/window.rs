@@ -1,11 +1,12 @@
 #![allow(unused_variables)]
 #![allow(unused_imports)]
 
-use gl;
 use std::cell::Cell;
+use std::ffi::*;
 use std::sync::mpsc::Receiver;
 use std::collections::VecDeque;
 
+use gl;
 use glfw;
 use glfw::{Context, Glfw, Error, WindowEvent};
 
@@ -53,6 +54,10 @@ pub trait OpenGLWindow: Window {
     fn make_current(&mut self);
     /// Returns true if window is running in fullscreen mode
     fn is_fullscreen(&self) -> bool;
+    /// Set the Window into fullscreen mode
+    fn set_fullscreen(&mut self);
+    /// set windowed mode
+    fn set_windowed(&mut self, pos: &Pos, size: &Size);
 }
 
 /// Struct that defines a window to render graphics
@@ -109,7 +114,7 @@ impl RenderWindow {
 
         glfw.window_hint(glfw::WindowHint::ContextVersionMajor(3));
         glfw.window_hint(glfw::WindowHint::ContextVersionMinor(3));
-        glfw.window_hint(glfw::WindowHint::Resizable(false));
+        glfw.window_hint(glfw::WindowHint::Resizable(true));
         glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
         glfw.window_hint(glfw::WindowHint::OpenGlProfile(
             glfw::OpenGlProfileHint::Core,
@@ -221,7 +226,26 @@ impl OpenGLWindow for RenderWindow {
     fn make_current(&mut self) {
         self.window.make_current()
     }
+    /// Returns true if Window is running in fullscreen
     fn is_fullscreen(&self) -> bool {
-        false
+        self.window.with_window_mode(|mode| match mode {
+            glfw::WindowMode::Windowed => false,
+            glfw::WindowMode::FullScreen(_) => true,
+        })
+    }
+    /// Set the Window into fullscreen mode
+    fn set_fullscreen(&mut self) {
+        set_fullscreen(&mut self.glfw, &mut self.window);
+    }
+    /// Set the Window into Windowed mode
+    fn set_windowed(&mut self, pos: &Pos, size: &Size) {
+        self.window.set_monitor(
+            glfw::WindowMode::Windowed,
+            pos.x,
+            pos.y,
+            size.width,
+            size.height,
+            None,
+        );
     }
 }
