@@ -103,10 +103,14 @@ fn main() {
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
 
-        let (width, height) = window.get_framebuffer_size();
+        camera.perspective(60.0, window.aspect(), 0.1, 100.0);
+        let size = window.get_framebuffer_size();
 
         program.bind();
-        program.uniform("u_resolution", Uniform::Size(width as f32, height as f32));
+        program.uniform(
+            "u_resolution",
+            Uniform::Size(size.width as f32, size.height as f32),
+        );
         program.uniform("u_aspect", Uniform::Float(camera.aspect));
         program.uniform("u_time", Uniform::Float(elapsed));
         program.uniform("u_znear", Uniform::Float(camera.znear));

@@ -147,8 +147,12 @@ impl RenderWindow {
         width as f32 / height as f32
     }
 
-    pub fn get_framebuffer_size(&self) -> (i32, i32) {
-        self.window.get_framebuffer_size()
+    pub fn get_framebuffer_size(&self) -> Size {
+        let (width, height) = self.window.get_framebuffer_size();
+        Size {
+            width: width as u32,
+            height: height as u32,
+        }
     }
 
     pub fn clear(&self, r: f32, g: f32, b: f32, a: f32) {
