@@ -141,19 +141,19 @@ fn main() {
                         window.set_fullscreen(Fullscreen::Current);
                     }
                 }
-                Input::Press(Button::Keyboard(Key::Left)) => {
+                Input::Pressed(Button::Keyboard(Key::Left)) => {
                     let pos = camera.position + camera.right() * -0.5;
                     camera.set_position(pos);
                 }
-                Input::Press(Button::Keyboard(Key::Right)) => {
+                Input::Pressed(Button::Keyboard(Key::Right)) => {
                     let pos = camera.position + camera.right() * 0.5;
                     camera.set_position(pos);
                 }
-                Input::Press(Button::Keyboard(Key::Up)) => {
+                Input::Pressed(Button::Keyboard(Key::Up)) => {
                     let pos = camera.position + camera.forward() * -0.5;
                     camera.set_position(pos);
                 }
-                Input::Press(Button::Keyboard(Key::Down)) => {
+                Input::Pressed(Button::Keyboard(Key::Down)) => {
                     let pos = camera.position + camera.forward() * 0.5;
                     camera.set_position(pos);
                 }

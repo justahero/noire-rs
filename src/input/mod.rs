@@ -31,6 +31,8 @@ pub enum Motion {
 pub enum Input {
     /// Button press input
     Press(Button),
+    /// Button pressed state
+    Pressed(Button),
     /// Button release input
     Release(Button),
     /// Mouse cursor moved

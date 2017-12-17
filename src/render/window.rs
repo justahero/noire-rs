@@ -79,7 +79,7 @@ pub struct RenderWindow {
     /// vector of input events
     input_events: VecDeque<Input>,
     /// vector of pressed keys / buttons
-    pressed_buttons: VecDeque<Button>,
+    pressed_buttons: VecDeque<(Button, u32)>,
 }
 
 /// callback function to report error
@@ -209,11 +209,11 @@ impl RenderWindow {
             match event {
                 WindowEvent::Key(key, _, glfw::Action::Press, mods) => {
                     let button = Button::Keyboard(key.into());
-                    self.pressed_buttons.push_back(button)
+                    self.pressed_buttons.push_back((button, 0))
                 }
                 WindowEvent::Key(key, _, glfw::Action::Release, mods) => {
                     let button = Button::Keyboard(key.into());
-                    if let Some(index) = self.pressed_buttons.iter().position(|&x| x == button) {
+                    if let Some(index) = self.pressed_buttons.iter().position(|&(b, _)| b == button) {
                         self.pressed_buttons.remove(index);
                     }
                 }
@@ -221,8 +221,18 @@ impl RenderWindow {
             }
         }
         // check if keys are presed and queue input events
-        for &button in &self.pressed_buttons {
-            self.input_events.push_back(Input::Press(button));
+        for &(button, count) in &self.pressed_buttons {
+            match count {
+                0 => {
+                    self.input_events.push_back(Input::Press(button));
+                }
+                _ => {
+                    self.input_events.push_back(Input::Pressed(button));
+                }
+            }
+        }
+        for tuple in self.pressed_buttons.iter_mut() {
+            *tuple = (tuple.0, tuple.1 + 1);
         }
     }
 }
