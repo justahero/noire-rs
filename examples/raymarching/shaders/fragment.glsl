@@ -17,7 +17,7 @@ uniform vec4  u_lightColor;
 
 out vec4 out_color;
 
-const int   MAX_AO    = 20;
+const int   MAX_AO    = 16;
 const int   MAX_STEPS = 256;
 const float EPSILON   = 0.00001;
 const float SHADOWS   = 64.0;

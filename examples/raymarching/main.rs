@@ -70,7 +70,7 @@ fn main() {
 
     let mut camera = Camera::new();
     camera
-        .perspective(60.0, window.aspect(), 0.1, 100.0)
+        .perspective(60.0, window.aspect(), 0.1, 80.0)
         .lookat(
             point3(0.0, 2.0, -4.5),
             point3(0.0, 2.0, 0.0),
@@ -111,7 +111,7 @@ fn main() {
             "u_resolution",
             Uniform::Size(size.width as f32, size.height as f32),
         );
-        program.uniform("u_aspect", Uniform::Float(camera.aspect));
+        program.uniform("u_aspect", camera.aspect.into());
         program.uniform("u_time", Uniform::Float(elapsed));
         program.uniform("u_znear", Uniform::Float(camera.znear));
         program.uniform("u_zfar", Uniform::Float(camera.zfar));
@@ -138,7 +138,7 @@ fn main() {
                     } else {
                         last_pos = window.pos();
                         last_size = window.size();
-                        window.set_fullscreen();
+                        window.set_fullscreen(Fullscreen::Current);
                     }
                 }
                 Input::Press(Button::Keyboard(Key::Left)) => {

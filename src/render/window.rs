@@ -30,6 +30,14 @@ pub struct Pos {
     pub y: i32,
 }
 
+/// Struct to define fullscreen mode
+pub enum Fullscreen {
+    /// Use current screen resolution
+    Current,
+    /// Specify dimensions directly
+    Size(Size),
+}
+
 /// Trait that handles a Window
 ///
 /// The basic behavior of a Window is defined here
@@ -55,7 +63,7 @@ pub trait OpenGLWindow: Window {
     /// Returns true if window is running in fullscreen mode
     fn is_fullscreen(&self) -> bool;
     /// Set the Window into fullscreen mode
-    fn set_fullscreen(&mut self);
+    fn set_fullscreen(&mut self, mode: Fullscreen);
     /// set windowed mode
     fn set_windowed(&mut self, pos: &Pos, size: &Size);
 }
@@ -80,24 +88,41 @@ fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<us
 }
 
 /// make struct function?
-pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window) {
+pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window, mode: Fullscreen) {
     glfw.with_primary_monitor_mut(|_: &mut _, m: Option<&glfw::Monitor>| {
         let monitor = m.unwrap();
-        let mode: glfw::VidMode = monitor.get_video_mode().unwrap();
+        let video_mode: glfw::VidMode = monitor.get_video_mode().unwrap();
+
+        let mut new_size = Size {
+            width: 0,
+            height: 0,
+        };
+        let refresh_rate = video_mode.refresh_rate;
+
+        match mode {
+            Fullscreen::Current => {
+                new_size.width = video_mode.width;
+                new_size.height = video_mode.height;
+            }
+            Fullscreen::Size(size) => {
+                new_size.width = size.width;
+                new_size.height = size.height;
+            }
+        }
 
         window.set_monitor(
             glfw::WindowMode::FullScreen(&monitor),
             0,
             0,
-            mode.width,
-            mode.height,
-            Some(mode.refresh_rate),
+            new_size.width,
+            new_size.height,
+            Some(refresh_rate),
         );
         println!(
             "{}x{} fullscreen enabled at {}Hz on monitor {}",
-            mode.width,
-            mode.height,
-            mode.refresh_rate,
+            new_size.width,
+            new_size.height,
+            refresh_rate,
             monitor.get_name()
         );
     });
@@ -131,6 +156,7 @@ impl RenderWindow {
         window.set_key_polling(true);
         window.make_current();
 
+        // enable Vertical Sync
         glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
 
         // load gl functions
@@ -196,7 +222,6 @@ impl RenderWindow {
         }
         // check if keys are presed and queue input events
         for &button in &self.pressed_buttons {
-            println!("BUTTON: {:?} pressed", button);
             self.input_events.push_back(Input::Press(button));
         }
     }
@@ -248,8 +273,8 @@ impl OpenGLWindow for RenderWindow {
         })
     }
     /// Set the Window into fullscreen mode
-    fn set_fullscreen(&mut self) {
-        set_fullscreen(&mut self.glfw, &mut self.window);
+    fn set_fullscreen(&mut self, mode: Fullscreen) {
+        set_fullscreen(&mut self.glfw, &mut self.window, mode);
     }
     /// Set the Window into Windowed mode
     fn set_windowed(&mut self, pos: &Pos, size: &Size) {

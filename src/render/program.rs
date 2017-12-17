@@ -43,6 +43,12 @@ pub enum Uniform {
     Size(f32, f32),
 }
 
+impl From<f32> for Uniform {
+    fn from(v: f32) -> Self {
+        Uniform::Float(v)
+    }
+}
+
 fn get_link_error(program: u32) -> String {
     let log_text: String;
     unsafe {
