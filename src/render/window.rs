@@ -48,6 +48,8 @@ pub trait Window {
     fn pos(&self) -> Pos;
     /// Closes the window
     fn close(&mut self);
+    /// Display the window
+    fn show(&mut self);
     /// Returns true if the window should be closed
     fn should_close(&self) -> bool;
     /// Polls an input event from window
@@ -155,6 +157,7 @@ impl RenderWindow {
 
         window.set_key_polling(true);
         window.make_current();
+        window.show();
 
         // enable Vertical Sync
         glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
@@ -231,6 +234,7 @@ impl RenderWindow {
                 }
             }
         }
+        // update all button keys
         for tuple in self.pressed_buttons.iter_mut() {
             *tuple = (tuple.0, tuple.1 + 1);
         }
@@ -250,6 +254,10 @@ impl Window for RenderWindow {
             width: width as u32,
             height: height as u32,
         }
+    }
+
+    fn show(&mut self) {
+        self.window.show();
     }
 
     fn close(&mut self) {
@@ -284,10 +292,12 @@ impl OpenGLWindow for RenderWindow {
     }
     /// Set the Window into fullscreen mode
     fn set_fullscreen(&mut self, mode: Fullscreen) {
+        self.glfw.set_swap_interval(glfw::SwapInterval::Sync(0));
         set_fullscreen(&mut self.glfw, &mut self.window, mode);
     }
     /// Set the Window into Windowed mode
     fn set_windowed(&mut self, pos: &Pos, size: &Size) {
+        self.glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
         self.window.set_monitor(
             glfw::WindowMode::Windowed,
             pos.x,

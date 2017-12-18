@@ -32,8 +32,11 @@ use std::sync::mpsc::Receiver;
 use std::time::{Duration, Instant};
 use std::thread;
 use std::thread::JoinHandle;
+use std::collections::VecDeque;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
+
+const MAX_FPS_COUNT: u32 = 50;
 
 fn watch_program(
     rx: &Receiver<notify::DebouncedEvent>,
@@ -51,9 +54,15 @@ fn watch_program(
     None
 }
 
+fn from_duration(d: Duration) -> f32 {
+    (d.as_secs() as f64 + d.subsec_nanos() as f64 * 1e-9) as f32
+}
+
 fn main() {
-    let mut window = RenderWindow::create(1024, 768, "Hello This is window")
+    let mut window = RenderWindow::create(600, 400, "Hello This is window")
         .expect("Failed to create Render Window");
+
+    println!("Context version: {:?}", window.window.get_context_version());
 
     // create shader program
     let vertex_file = String::from("./examples/raymarching/shaders/vertex.glsl");
@@ -90,6 +99,8 @@ fn main() {
     };
 
     let start_time = Instant::now();
+    let mut last_time = start_time;
+    let mut list_frames = VecDeque::new();
 
     loop {
         if let Some(new_program) = watch_program(&rx, &vertex_file, &fragment_file) {
@@ -97,8 +108,19 @@ fn main() {
         }
 
         let now = Instant::now();
-        let elapsed = now.duration_since(start_time);
-        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+        let elapsed = from_duration(now.duration_since(start_time));
+        let frame_elapsed = from_duration(now.duration_since(last_time));
+
+        last_time = now;
+
+        // update fps calulation
+        list_frames.push_back(frame_elapsed);
+        if list_frames.len() > (MAX_FPS_COUNT as usize) {
+            list_frames.pop_front();
+        }
+        let fps: f32 = list_frames.iter().sum();
+        let fps = 1.0 / fps * (MAX_FPS_COUNT as f32);
+        println!("FPS: {}", fps);
 
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
@@ -127,6 +149,7 @@ fn main() {
 
         program.unbind();
 
+        // limits to 60 frames a second
         window.swap_buffers();
 
         window.poll_events();
