@@ -256,17 +256,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "noire"
-version = "0.1.0"
-dependencies = [
- "cgmath 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "gl 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "glfw 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "notify 4.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "regex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "nom"
 version = "1.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
