@@ -82,9 +82,6 @@ fn main() {
         )
         .set_position(point3(0.0, 2.0, 20.0));
 
-    // set input callbacks
-    window.set_keypress_callback(keypress_callback);
-
     // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();

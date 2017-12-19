@@ -4,17 +4,13 @@ use std::cell::Cell;
 use std::sync::mpsc::Receiver;
 
 use glfw;
-use glfw::{Context, Glfw, Error, Key, Window, WindowEvent};
+use glfw::{Context, Glfw, Error, Window, WindowEvent};
 
 pub struct RenderWindow {
     pub glfw: Glfw,
     pub window: Window,
     events: Receiver<(f64, WindowEvent)>,
-    keypress_callback: Box<FnMut(Key)>,
-    keyrelease_callback: Box<FnMut(Key)>,
 }
-
-fn default_callback(key: Key) {}
 
 fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<usize>) {
     panic!("GL ERROR: {} - {}", error, description);
@@ -80,8 +76,6 @@ impl RenderWindow {
             glfw: glfw,
             window: window,
             events: events,
-            keypress_callback: Box::new(default_callback),
-            keyrelease_callback: Box::new(default_callback),
         })
     }
 
@@ -92,10 +86,6 @@ impl RenderWindow {
 
     pub fn close(&mut self) {
         self.window.set_should_close(true);
-    }
-
-    pub fn set_keypress_callback<CB: 'static + FnMut(Key)>(&mut self, callback: CB) {
-        self.keypress_callback = Box::new(callback);
     }
 
     pub fn get_framebuffer_size(&self) -> (i32, i32) {
@@ -120,12 +110,8 @@ impl RenderWindow {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
             match event {
-                WindowEvent::Key(key, _, glfw::Action::Press, mods) => {
-                    (self.keypress_callback)(key);
-                }
-                WindowEvent::Key(key, _, glfw::Action::Release, mods) => {
-                    (self.keyrelease_callback)(key);
-                }
+                WindowEvent::Key(key, _, glfw::Action::Press, mods) => {}
+                WindowEvent::Key(key, _, glfw::Action::Release, mods) => {}
                 _ => {}
             }
         }
