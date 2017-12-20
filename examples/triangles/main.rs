@@ -12,7 +12,7 @@ use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
-use noire::render::window::RenderWindow;
+use noire::render::window::{Window, RenderWindow};
 
 use notify::*;
 use std::sync::mpsc::channel;

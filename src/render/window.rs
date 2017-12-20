@@ -1,49 +1,144 @@
 #![allow(unused_variables)]
-use gl;
+#![allow(unused_imports)]
+
 use std::cell::Cell;
+use std::ffi::*;
 use std::sync::mpsc::Receiver;
+use std::collections::VecDeque;
 
+use gl;
 use glfw;
-use glfw::{Context, Glfw, Error, Key, Window, WindowEvent};
+use glfw::{Context, Glfw, Error, WindowEvent};
 
-pub struct RenderWindow {
-    pub glfw: Glfw,
-    pub window: Window,
-    events: Receiver<(f64, WindowEvent)>,
-    keypress_callback: Box<FnMut(Key)>,
-    keyrelease_callback: Box<FnMut(Key)>,
+use input::{Button, Input};
+use input::keyboard::Key;
+
+/// Struct to provide size dimensions
+#[derive(Debug, Copy, Clone)]
+pub struct Size {
+    /// width in pixels
+    pub width: u32,
+    /// height in pixels
+    pub height: u32,
 }
 
-fn default_callback(key: Key) {}
+/// Struct to provide coordinates
+pub struct Pos {
+    /// x coordinate
+    pub x: i32,
+    /// y coordinate
+    pub y: i32,
+}
 
+/// Struct to define fullscreen mode
+pub enum Fullscreen {
+    /// Use current screen resolution
+    Current,
+    /// Specify dimensions directly
+    Size(Size),
+}
+
+/// Trait that handles a Window
+///
+/// The basic behavior of a Window is defined here
+pub trait Window {
+    /// Returns the size of the window
+    fn size(&self) -> Size;
+    /// Returns the position of the window
+    fn pos(&self) -> Pos;
+    /// Closes the window
+    fn close(&mut self);
+    /// Display the window
+    fn show(&mut self);
+    /// Returns true if the window should be closed
+    fn should_close(&self) -> bool;
+    /// Polls an input event from window
+    fn poll_event(&mut self) -> Option<Input>;
+}
+
+/// Trait that defines an OpenGL specific Window
+pub trait OpenGLWindow: Window {
+    /// Returns true if this window is the current one
+    fn is_current(&self) -> bool;
+    /// Make this window the current one
+    fn make_current(&mut self);
+    /// Returns true if window is running in fullscreen mode
+    fn is_fullscreen(&self) -> bool;
+    /// Set the Window into fullscreen mode
+    fn set_fullscreen(&mut self, mode: Fullscreen);
+    /// set windowed mode
+    fn set_windowed(&mut self, pos: &Pos, size: &Size);
+    /// Return the size of the frame buffer
+    fn get_framebuffer_size(&self) -> Size;
+    /// Clear window to a color
+    fn clear(&self, r: f32, g: f32, b: f32, a: f32);
+    /// Clear the depth buffer to a value
+    fn clear_depth(&self, value: f32);
+    /// Swaps frame buffer and displays content
+    fn swap_buffers(&mut self);
+}
+
+/// Struct that defines a window to render graphics
+pub struct RenderWindow {
+    /// GL instance
+    pub glfw: Glfw,
+    /// GL Window instance
+    pub window: glfw::Window,
+    /// Listener of new window events from glfw
+    events: Receiver<(f64, WindowEvent)>,
+    /// vector of input events
+    input_events: VecDeque<Input>,
+    /// vector of pressed keys / buttons
+    pressed_buttons: VecDeque<(Button, u32)>,
+}
+
+/// callback function to report error
 fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<usize>) {
     panic!("GL ERROR: {} - {}", error, description);
 }
 
-// make struct function
-pub fn set_fullscreen(glfw: &mut Glfw, window: &mut Window) {
+/// make struct function?
+pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window, mode: Fullscreen) {
     glfw.with_primary_monitor_mut(|_: &mut _, m: Option<&glfw::Monitor>| {
         let monitor = m.unwrap();
-        let mode: glfw::VidMode = monitor.get_video_mode().unwrap();
+        let video_mode: glfw::VidMode = monitor.get_video_mode().unwrap();
+
+        let mut new_size = Size {
+            width: 0,
+            height: 0,
+        };
+        let refresh_rate = video_mode.refresh_rate;
+
+        match mode {
+            Fullscreen::Current => {
+                new_size.width = video_mode.width;
+                new_size.height = video_mode.height;
+            }
+            Fullscreen::Size(size) => {
+                new_size.width = size.width;
+                new_size.height = size.height;
+            }
+        }
 
         window.set_monitor(
             glfw::WindowMode::FullScreen(&monitor),
             0,
             0,
-            mode.width,
-            mode.height,
-            Some(mode.refresh_rate),
+            new_size.width,
+            new_size.height,
+            Some(refresh_rate),
         );
         println!(
             "{}x{} fullscreen enabled at {}Hz on monitor {}",
-            mode.width,
-            mode.height,
-            mode.refresh_rate,
+            new_size.width,
+            new_size.height,
+            refresh_rate,
             monitor.get_name()
         );
     });
 }
 
+/// Struct to render a window
 impl RenderWindow {
     pub fn create(width: u32, height: u32, title: &str) -> Result<RenderWindow, String> {
         let mut glfw = match glfw::init(Some(glfw::Callback {
@@ -56,7 +151,7 @@ impl RenderWindow {
 
         glfw.window_hint(glfw::WindowHint::ContextVersionMajor(3));
         glfw.window_hint(glfw::WindowHint::ContextVersionMinor(3));
-        glfw.window_hint(glfw::WindowHint::Resizable(false));
+        glfw.window_hint(glfw::WindowHint::Resizable(true));
         glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
         glfw.window_hint(glfw::WindowHint::OpenGlProfile(
             glfw::OpenGlProfileHint::Core,
@@ -70,7 +165,9 @@ impl RenderWindow {
 
         window.set_key_polling(true);
         window.make_current();
+        window.show();
 
+        // enable Vertical Sync
         glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
 
         // load gl functions
@@ -80,8 +177,8 @@ impl RenderWindow {
             glfw: glfw,
             window: window,
             events: events,
-            keypress_callback: Box::new(default_callback),
-            keyrelease_callback: Box::new(default_callback),
+            input_events: VecDeque::new(),
+            pressed_buttons: VecDeque::new(),
         })
     }
 
@@ -90,52 +187,132 @@ impl RenderWindow {
         width as f32 / height as f32
     }
 
-    pub fn close(&mut self) {
-        self.window.set_should_close(true);
-    }
-
-    pub fn set_keypress_callback<CB: 'static + FnMut(Key)>(&mut self, callback: CB) {
-        self.keypress_callback = Box::new(callback);
-    }
-
-    pub fn get_framebuffer_size(&self) -> (i32, i32) {
-        self.window.get_framebuffer_size()
-    }
-
-    pub fn clear(&self, r: f32, g: f32, b: f32, a: f32) {
-        unsafe {
-            gl::ClearColor(r, g, b, a);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
-        }
-    }
-
-    pub fn clear_depth(&self, value: f32) {
-        unsafe {
-            gl::ClearDepthf(value);
-            gl::Clear(gl::DEPTH_BUFFER_BIT);
-        }
-    }
-
+    /// Poll all events from glfw instance
     pub fn poll_events(&mut self) {
         self.glfw.poll_events();
         for (_, event) in glfw::flush_messages(&self.events) {
             match event {
                 WindowEvent::Key(key, _, glfw::Action::Press, mods) => {
-                    (self.keypress_callback)(key);
+                    let button = Button::Keyboard(key.into());
+                    self.pressed_buttons.push_back((button, 0))
                 }
                 WindowEvent::Key(key, _, glfw::Action::Release, mods) => {
-                    (self.keyrelease_callback)(key);
+                    let button = Button::Keyboard(key.into());
+                    if let Some(index) = self.pressed_buttons.iter().position(|&(b, _)| b == button) {
+                        self.pressed_buttons.remove(index);
+                    }
                 }
-                _ => {}
+                _ => (),
             }
+        }
+        // check if keys are presed and queue input events
+        for &(button, count) in &self.pressed_buttons {
+            match count {
+                0 => {
+                    self.input_events.push_back(Input::Press(button));
+                }
+                _ => {
+                    self.input_events.push_back(Input::Pressed(button));
+                }
+            }
+        }
+        // update all button keys
+        for tuple in self.pressed_buttons.iter_mut() {
+            *tuple = (tuple.0, tuple.1 + 1);
+        }
+    }
+}
+
+/// Implement Window functions
+impl Window for RenderWindow {
+    fn pos(&self) -> Pos {
+        let (x, y) = self.window.get_pos();
+        Pos { x, y }
+    }
+
+    fn size(&self) -> Size {
+        let (width, height) = self.window.get_size();
+        Size {
+            width: width as u32,
+            height: height as u32,
         }
     }
 
-    pub fn should_close(&self) -> bool {
+    fn show(&mut self) {
+        self.window.show();
+    }
+
+    fn close(&mut self) {
+        self.window.set_should_close(true);
+    }
+
+    fn should_close(&self) -> bool {
         self.window.should_close()
     }
 
-    pub fn swap_buffers(&mut self) {
+    fn poll_event(&mut self) -> Option<Input> {
+        self.input_events.pop_front()
+    }
+}
+
+/// OpenGL version of the render window
+impl OpenGLWindow for RenderWindow {
+    /// Returns true if the window is the current one
+    fn is_current(&self) -> bool {
+        self.window.is_current()
+    }
+    /// Sets the window as current
+    fn make_current(&mut self) {
+        self.window.make_current()
+    }
+    /// Returns true if Window is running in fullscreen
+    fn is_fullscreen(&self) -> bool {
+        self.window.with_window_mode(|mode| match mode {
+            glfw::WindowMode::Windowed => false,
+            glfw::WindowMode::FullScreen(_) => true,
+        })
+    }
+    /// Set the Window into fullscreen mode
+    fn set_fullscreen(&mut self, mode: Fullscreen) {
+        self.glfw.set_swap_interval(glfw::SwapInterval::Sync(0));
+        set_fullscreen(&mut self.glfw, &mut self.window, mode);
+    }
+    /// Set the Window into Windowed mode
+    fn set_windowed(&mut self, pos: &Pos, size: &Size) {
+        self.glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
+        self.window.set_monitor(
+            glfw::WindowMode::Windowed,
+            pos.x,
+            pos.y,
+            size.width,
+            size.height,
+            None,
+        );
+    }
+    /// Return the size of the frame buffer
+    fn get_framebuffer_size(&self) -> Size {
+        let (width, height) = self.window.get_framebuffer_size();
+        Size {
+            width: width as u32,
+            height: height as u32,
+        }
+    }
+    /// Clear the frame buffer of the window to a color
+    fn clear(&self, r: f32, g: f32, b: f32, a: f32) {
+        unsafe {
+            gl::ClearColor(r, g, b, a);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
+    }
+    /// Clear the depth buffer to a value
+    fn clear_depth(&self, value: f32) {
+        unsafe {
+            gl::ClearDepthf(value);
+            gl::Clear(gl::DEPTH_BUFFER_BIT);
+        }
+    }
+    /// Swap frame buffer, update with content
+    fn swap_buffers(&mut self) {
         self.window.swap_buffers()
     }
 }

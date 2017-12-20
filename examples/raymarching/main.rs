@@ -11,7 +11,6 @@ extern crate notify;
 extern crate noire;
 
 use gl::types::*;
-use glfw::Key;
 
 use cgmath::{Point3, Vector3};
 use cgmath::vec3;
@@ -20,11 +19,12 @@ use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
-use noire::render::window::RenderWindow;
+use noire::render::window::*;
 use noire::math::camera::*;
 use noire::math::color::*;
 use noire::math::*;
-use noire::render::window::set_fullscreen;
+use noire::input::*;
+use noire::input::keyboard::*;
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -32,8 +32,11 @@ use std::sync::mpsc::Receiver;
 use std::time::{Duration, Instant};
 use std::thread;
 use std::thread::JoinHandle;
+use std::collections::VecDeque;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
+
+const MAX_FPS_COUNT: u32 = 50;
 
 fn watch_program(
     rx: &Receiver<notify::DebouncedEvent>,
@@ -51,13 +54,15 @@ fn watch_program(
     None
 }
 
-fn keypress_callback(key: Key) {
-    // TODO
+fn from_duration(d: Duration) -> f32 {
+    (d.as_secs() as f64 + d.subsec_nanos() as f64 * 1e-9) as f32
 }
 
 fn main() {
-    let mut window = RenderWindow::create(1024, 768, "Hello This is window")
+    let mut window = RenderWindow::create(600, 400, "Hello This is window")
         .expect("Failed to create Render Window");
+
+    println!("Context version: {:?}", window.window.get_context_version());
 
     // create shader program
     let vertex_file = String::from("./examples/raymarching/shaders/vertex.glsl");
@@ -74,7 +79,7 @@ fn main() {
 
     let mut camera = Camera::new();
     camera
-        .perspective(60.0, window.aspect(), 0.1, 100.0)
+        .perspective(60.0, window.aspect(), 0.1, 80.0)
         .lookat(
             point3(0.0, 2.0, -4.5),
             point3(0.0, 2.0, 0.0),
@@ -82,15 +87,20 @@ fn main() {
         )
         .set_position(point3(0.0, 2.0, 20.0));
 
-    // set input callbacks
-    window.set_keypress_callback(keypress_callback);
-
     // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
 
+    let mut last_pos = Pos { x: 0, y: 0 };
+    let mut last_size = Size {
+        width: 0,
+        height: 0,
+    };
+
     let start_time = Instant::now();
+    let mut last_time = start_time;
+    let mut list_frames = VecDeque::new();
 
     loop {
         if let Some(new_program) = watch_program(&rx, &vertex_file, &fragment_file) {
@@ -98,17 +108,32 @@ fn main() {
         }
 
         let now = Instant::now();
-        let elapsed = now.duration_since(start_time);
-        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+        let elapsed = from_duration(now.duration_since(start_time));
+        let frame_elapsed = from_duration(now.duration_since(last_time));
+
+        last_time = now;
+
+        // update fps calulation
+        list_frames.push_back(frame_elapsed);
+        if list_frames.len() > (MAX_FPS_COUNT as usize) {
+            list_frames.pop_front();
+        }
+        let fps: f32 = list_frames.iter().sum();
+        let fps = 1.0 / fps * (MAX_FPS_COUNT as f32);
+        // println!("FPS: {}", fps);
 
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
 
-        let (width, height) = window.get_framebuffer_size();
+        camera.perspective(60.0, window.aspect(), 0.1, 100.0);
+        let size = window.get_framebuffer_size();
 
         program.bind();
-        program.uniform("u_resolution", Uniform::Size(width as f32, height as f32));
-        program.uniform("u_aspect", Uniform::Float(camera.aspect));
+        program.uniform(
+            "u_resolution",
+            Uniform::Size(size.width as f32, size.height as f32),
+        );
+        program.uniform("u_aspect", camera.aspect.into());
         program.uniform("u_time", Uniform::Float(elapsed));
         program.uniform("u_znear", Uniform::Float(camera.znear));
         program.uniform("u_zfar", Uniform::Float(camera.zfar));
@@ -124,9 +149,44 @@ fn main() {
 
         program.unbind();
 
+        // limits to 60 frames a second
         window.swap_buffers();
 
         window.poll_events();
+        while let Some(input) = window.poll_event() {
+            match input {
+                Input::Press(Button::Keyboard(Key::Enter)) => {
+                    if window.is_fullscreen() {
+                        window.set_windowed(&last_pos, &last_size);
+                    } else {
+                        last_pos = window.pos();
+                        last_size = window.size();
+                        window.set_fullscreen(Fullscreen::Current);
+                    }
+                }
+                Input::Pressed(Button::Keyboard(Key::Left)) => {
+                    let pos = camera.position + camera.right() * -0.5;
+                    camera.set_position(pos);
+                }
+                Input::Pressed(Button::Keyboard(Key::Right)) => {
+                    let pos = camera.position + camera.right() * 0.5;
+                    camera.set_position(pos);
+                }
+                Input::Pressed(Button::Keyboard(Key::Up)) => {
+                    let pos = camera.position + camera.forward() * -0.5;
+                    camera.set_position(pos);
+                }
+                Input::Pressed(Button::Keyboard(Key::Down)) => {
+                    let pos = camera.position + camera.forward() * 0.5;
+                    camera.set_position(pos);
+                }
+                Input::Press(Button::Keyboard(Key::Escape)) => {
+                    window.close();
+                }
+                _ => (),
+            }
+        }
+
         if window.should_close() {
             return;
         }

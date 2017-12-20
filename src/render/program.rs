@@ -30,6 +30,7 @@ pub struct Program {
     pub attributes: HashMap<String, Variable>,
 }
 
+#[derive(Debug)]
 pub enum Uniform {
     Color(Color),
     Float(f32),
@@ -40,6 +41,12 @@ pub enum Uniform {
     Vec3(Vector3<f32>),
     Point3(Point3<f32>),
     Size(f32, f32),
+}
+
+impl From<f32> for Uniform {
+    fn from(v: f32) -> Self {
+        Uniform::Float(v)
+    }
 }
 
 fn get_link_error(program: u32) -> String {
