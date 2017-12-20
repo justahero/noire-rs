@@ -68,6 +68,14 @@ pub trait OpenGLWindow: Window {
     fn set_fullscreen(&mut self, mode: Fullscreen);
     /// set windowed mode
     fn set_windowed(&mut self, pos: &Pos, size: &Size);
+    /// Return the size of the frame buffer
+    fn get_framebuffer_size(&self) -> Size;
+    /// Clear window to a color
+    fn clear(&self, r: f32, g: f32, b: f32, a: f32);
+    /// Clear the depth buffer to a value
+    fn clear_depth(&self, value: f32);
+    /// Swaps frame buffer and displays content
+    fn swap_buffers(&mut self);
 }
 
 /// Struct that defines a window to render graphics
@@ -179,32 +187,6 @@ impl RenderWindow {
         width as f32 / height as f32
     }
 
-    pub fn get_framebuffer_size(&self) -> Size {
-        let (width, height) = self.window.get_framebuffer_size();
-        Size {
-            width: width as u32,
-            height: height as u32,
-        }
-    }
-
-    pub fn clear(&self, r: f32, g: f32, b: f32, a: f32) {
-        unsafe {
-            gl::ClearColor(r, g, b, a);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
-        }
-    }
-
-    pub fn clear_depth(&self, value: f32) {
-        unsafe {
-            gl::ClearDepthf(value);
-            gl::Clear(gl::DEPTH_BUFFER_BIT);
-        }
-    }
-
-    pub fn swap_buffers(&mut self) {
-        self.window.swap_buffers()
-    }
-
     /// Poll all events from glfw instance
     pub fn poll_events(&mut self) {
         self.glfw.poll_events();
@@ -306,5 +288,31 @@ impl OpenGLWindow for RenderWindow {
             size.height,
             None,
         );
+    }
+    /// Return the size of the frame buffer
+    fn get_framebuffer_size(&self) -> Size {
+        let (width, height) = self.window.get_framebuffer_size();
+        Size {
+            width: width as u32,
+            height: height as u32,
+        }
+    }
+    /// Clear the frame buffer of the window to a color
+    fn clear(&self, r: f32, g: f32, b: f32, a: f32) {
+        unsafe {
+            gl::ClearColor(r, g, b, a);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
+        }
+    }
+    /// Clear the depth buffer to a value
+    fn clear_depth(&self, value: f32) {
+        unsafe {
+            gl::ClearDepthf(value);
+            gl::Clear(gl::DEPTH_BUFFER_BIT);
+        }
+    }
+    /// Swap frame buffer, update with content
+    fn swap_buffers(&mut self) {
+        self.window.swap_buffers()
     }
 }
