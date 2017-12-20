@@ -120,7 +120,7 @@ fn main() {
         }
         let fps: f32 = list_frames.iter().sum();
         let fps = 1.0 / fps * (MAX_FPS_COUNT as f32);
-        println!("FPS: {}", fps);
+        // println!("FPS: {}", fps);
 
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
