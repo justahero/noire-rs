@@ -35,6 +35,8 @@ pub enum Input {
     Pressed(Button),
     /// Button release input
     Release(Button),
+    /// more complex button state
+    Button(ButtonArgs),
     /// Mouse cursor moved
     Move(Motion),
 }
@@ -46,23 +48,34 @@ impl From<keyboard::Key> for Button {
     }
 }
 
-#[test]
-fn button_press() {
-    let button = keyboard::Key::Escape.into();
-    let input = Input::Press(button);
-    assert_eq!("Press(Keyboard(Escape))", format!("{:?}", input))
-}
+#[cfg(test)]
+mod tests {
+    use input::keyboard;
+    use input::button::ButtonArgs;
+    use input::{Button,Input};
 
-#[test]
-fn button_press() {
-    use input::button::ButtonState;
-    let args = ButtonArgs {
-        button: Button::Keyboard(keyboard::Key::Escape.into()),
-        state: ButtonState::Press,
-    };
-    let input = Input::Button(args);
-    assert_eq!(
-        "Button(ButtonArgs { state: Press, button: Keyboard(Escape) })",
-        format!("{:?}", input)
-    )
+    #[test]
+    fn test_keypress_button() {
+        let button = keyboard::Key::Escape.into();
+        let input = Input::Press(button);
+        assert_eq!("Press(Keyboard(Escape))", format!("{:?}", input))
+    }
+
+    #[test]
+    fn test_general_button_state() {
+        use input::button::ButtonState;
+        let key = keyboard::Key::Escape.into();
+        let button = Button::Keyboard(key);
+
+        let args = ButtonArgs {
+            button: button,
+            state: ButtonState::Press,
+        };
+
+        let input = Input::Button(args);
+        assert_eq!(
+            "Button(ButtonArgs { state: Press, button: Keyboard(Escape) })",
+            format!("{:?}", input)
+        )
+    }
 }

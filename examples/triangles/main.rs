@@ -12,7 +12,7 @@ use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
-use noire::render::window::{Window, RenderWindow};
+use noire::render::window::{OpenGLWindow,RenderWindow,Window};
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -66,10 +66,10 @@ fn main() {
 
         window.clear(0.3, 0.3, 0.3, 1.0);
 
-        let (width, height) = window.get_framebuffer_size();
+        let size = window.get_framebuffer_size();
 
         program.bind();
-        program.uniform("u_resolution", Uniform::Float2(width as f32, height as f32));
+        program.uniform("u_resolution", Uniform::Float2(size.width as f32, size.height as f32));
         program.uniform("u_time", Uniform::Float(elapsed as f32));
 
         vao.bind();
