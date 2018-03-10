@@ -17,8 +17,8 @@ path = "examples/raymarching/main.rs"
 name = "filewatch"
 
 [dependencies]
-cgmath = "0.15.0"
-regex  = "0.2.3"
-glfw   = "0.20.0"
-gl     = "0.7.0"
+cgmath = "0.16.0"
+regex  = "0.2.7"
+glfw   = "0.21.0"
+gl     = "0.10.0"
 notify = "4.0.3"
