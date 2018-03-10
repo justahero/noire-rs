@@ -25,3 +25,5 @@ or
 ```shell
 cargo run --example triangles
 ```
+
+The latter example also supports live editing of the shader files, check shader files, open them in `./examples/triangles/shaders` and edit them. If the new shader code compiles successfully, changes are applied immediately or otherwise error logs are displayed in the terminal.
