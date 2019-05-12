@@ -49,6 +49,12 @@ impl From<f32> for Uniform {
     }
 }
 
+// impl From<Size<u32>> for Uniform {
+//     fn from(s: Size) -> Self {
+//         Uniform::Size(s.width as f32, s.height as f32)
+//     }
+// }
+
 fn get_link_error(program: u32) -> String {
     let log_text: String;
     unsafe {

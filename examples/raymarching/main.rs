@@ -15,6 +15,7 @@ use gl::types::*;
 use cgmath::{Point3, Vector3};
 use cgmath::vec3;
 
+use noire::render::Size;
 use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;

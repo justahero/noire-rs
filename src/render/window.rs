@@ -12,15 +12,7 @@ use glfw::{Context, Glfw, Error, WindowEvent};
 
 use input::{Button, Input};
 use input::keyboard::Key;
-
-/// Struct to provide size dimensions
-#[derive(Debug, Copy, Clone)]
-pub struct Size<T> {
-    /// width
-    pub width: T,
-    /// height
-    pub height: T,
-}
+use super::Size;
 
 /// Struct to provide coordinates
 pub struct Pos {
