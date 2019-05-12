@@ -133,7 +133,7 @@ pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window, mode: Fullscre
             new_size.width,
             new_size.height,
             refresh_rate,
-            monitor.get_name()
+            monitor.get_name().unwrap()
         );
     });
 }
