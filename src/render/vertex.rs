@@ -45,13 +45,11 @@ impl Bindable for VertexArrayObject {
     }
 
     fn unbind(&self) {
-        let mut i = 0;
-        for ref vb in &self.vbs {
+        for (i, ref vb) in self.vbs.iter().enumerate() {
             vb.unbind();
             unsafe {
-                gl::DisableVertexAttribArray(i);
+                gl::DisableVertexAttribArray(i as u32);
             }
-            i += 1;
         }
         unsafe {
             gl::BindVertexArray(0);
