@@ -157,7 +157,7 @@ float map(vec3 pos) {
     sdHexPrism(opRepetition(pos - vec3(0.0, -1.8, 0.0), repetition), vec2(0.8, size * 0.75)),
     0.1
   );
-  d = opSubtraction(sdSphere(pos - vec3(0.0, 1.0, 0.0), 15.0), d);
+  d = opSubtraction(sdSphere(pos - vec3(0.0, 1.0, 0.0), 15.0) - 0.5 + 2.5 * sin(0.25 * PI * u_time), d);
   d = opUnion(d, sdSphere(pos - vec3(0.0, 1.0, 0.0), 3.2));
   return d;
 }

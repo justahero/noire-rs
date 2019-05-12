@@ -19,6 +19,7 @@ use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
+use noire::render::vertex_buffer::*;
 use noire::render::window::*;
 use noire::math::camera::*;
 use noire::math::color::*;

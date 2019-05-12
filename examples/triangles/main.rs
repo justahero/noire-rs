@@ -12,6 +12,7 @@ use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
+use noire::render::vertex_buffer::*;
 use noire::render::window::{OpenGLWindow,RenderWindow,Window};
 
 use notify::*;
@@ -69,6 +70,7 @@ fn main() {
         let size = window.get_framebuffer_size();
 
         program.bind();
+        // is there a way to use deref coercion to not specify Uniform type?
         program.uniform("u_resolution", Uniform::Float2(size.width as f32, size.height as f32));
         program.uniform("u_time", Uniform::Float(elapsed as f32));
 
