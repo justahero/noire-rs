@@ -15,11 +15,11 @@ use input::keyboard::Key;
 use super::Size;
 
 /// Struct to provide coordinates
-pub struct Pos {
+pub struct Pos<T> {
     /// x coordinate
-    pub x: i32,
+    pub x: T,
     /// y coordinate
-    pub y: i32,
+    pub y: T,
 }
 
 /// Struct to define fullscreen mode
@@ -37,7 +37,7 @@ pub trait Window {
     /// Returns the size of the window
     fn size(&self) -> Size<u32>;
     /// Returns the position of the window
-    fn pos(&self) -> Pos;
+    fn pos(&self) -> Pos<i32>;
     /// Closes the window
     fn close(&mut self);
     /// Display the window
@@ -59,7 +59,7 @@ pub trait OpenGLWindow: Window {
     /// Set the Window into fullscreen mode
     fn set_fullscreen(&mut self, mode: Fullscreen);
     /// set windowed mode
-    fn set_windowed(&mut self, pos: &Pos, size: &Size<u32>);
+    fn set_windowed(&mut self, pos: &Pos<i32>, size: &Size<u32>);
     /// Return the size of the frame buffer
     fn get_framebuffer_size(&self) -> Size<u32>;
     /// Clear window to a color
@@ -217,7 +217,7 @@ impl RenderWindow {
 
 /// Implement Window functions
 impl Window for RenderWindow {
-    fn pos(&self) -> Pos {
+    fn pos(&self) -> Pos<i32> {
         let (x, y) = self.window.get_pos();
         Pos { x, y }
     }
@@ -270,7 +270,7 @@ impl OpenGLWindow for RenderWindow {
         set_fullscreen(&mut self.glfw, &mut self.window, mode);
     }
     /// Set the Window into Windowed mode
-    fn set_windowed(&mut self, pos: &Pos, size: &Size<u32>) {
+    fn set_windowed(&mut self, pos: &Pos<i32>, size: &Size<u32>) {
         self.glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
         self.window.set_monitor(
             glfw::WindowMode::Windowed,

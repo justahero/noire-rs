@@ -71,7 +71,7 @@ fn main() {
 
         program.bind();
         // is there a way to use deref coercion to not specify Uniform type?
-        program.uniform("u_resolution", Uniform::Float2(size.width as f32, size.height as f32));
+        program.uniform("u_resolution", size.into());
         program.uniform("u_time", elapsed.into());
 
         vao.bind();
