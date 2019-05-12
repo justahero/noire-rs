@@ -15,11 +15,11 @@ use input::keyboard::Key;
 
 /// Struct to provide size dimensions
 #[derive(Debug, Copy, Clone)]
-pub struct Size {
-    /// width in pixels
-    pub width: u32,
-    /// height in pixels
-    pub height: u32,
+pub struct Size<T> {
+    /// width
+    pub width: T,
+    /// height
+    pub height: T,
 }
 
 /// Struct to provide coordinates
@@ -35,7 +35,7 @@ pub enum Fullscreen {
     /// Use current screen resolution
     Current,
     /// Specify dimensions directly
-    Size(Size),
+    Size(Size<u32>),
 }
 
 /// Trait that handles a Window
@@ -43,7 +43,7 @@ pub enum Fullscreen {
 /// The basic behavior of a Window is defined here
 pub trait Window {
     /// Returns the size of the window
-    fn size(&self) -> Size;
+    fn size(&self) -> Size<u32>;
     /// Returns the position of the window
     fn pos(&self) -> Pos;
     /// Closes the window
@@ -67,9 +67,9 @@ pub trait OpenGLWindow: Window {
     /// Set the Window into fullscreen mode
     fn set_fullscreen(&mut self, mode: Fullscreen);
     /// set windowed mode
-    fn set_windowed(&mut self, pos: &Pos, size: &Size);
+    fn set_windowed(&mut self, pos: &Pos, size: &Size<u32>);
     /// Return the size of the frame buffer
-    fn get_framebuffer_size(&self) -> Size;
+    fn get_framebuffer_size(&self) -> Size<u32>;
     /// Clear window to a color
     fn clear(&self, r: f32, g: f32, b: f32, a: f32);
     /// Clear the depth buffer to a value
@@ -103,7 +103,7 @@ pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window, mode: Fullscre
         let monitor = m.unwrap();
         let video_mode: glfw::VidMode = monitor.get_video_mode().unwrap();
 
-        let mut new_size = Size {
+        let mut new_size: Size<u32> = Size {
             width: 0,
             height: 0,
         };
@@ -230,7 +230,7 @@ impl Window for RenderWindow {
         Pos { x, y }
     }
 
-    fn size(&self) -> Size {
+    fn size(&self) -> Size<u32> {
         let (width, height) = self.window.get_size();
         Size {
             width: width as u32,
@@ -278,7 +278,7 @@ impl OpenGLWindow for RenderWindow {
         set_fullscreen(&mut self.glfw, &mut self.window, mode);
     }
     /// Set the Window into Windowed mode
-    fn set_windowed(&mut self, pos: &Pos, size: &Size) {
+    fn set_windowed(&mut self, pos: &Pos, size: &Size<u32>) {
         self.glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
         self.window.set_monitor(
             glfw::WindowMode::Windowed,
@@ -290,7 +290,7 @@ impl OpenGLWindow for RenderWindow {
         );
     }
     /// Return the size of the frame buffer
-    fn get_framebuffer_size(&self) -> Size {
+    fn get_framebuffer_size(&self) -> Size<u32> {
         let (width, height) = self.window.get_framebuffer_size();
         Size {
             width: width as u32,
