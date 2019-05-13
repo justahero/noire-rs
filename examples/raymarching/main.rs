@@ -15,6 +15,7 @@ use gl::types::*;
 use cgmath::{Point3, Vector3};
 use cgmath::vec3;
 
+use noire::render::Size;
 use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
@@ -130,19 +131,16 @@ fn main() {
         let size = window.get_framebuffer_size();
 
         program.bind();
-        program.uniform(
-            "u_resolution",
-            Uniform::Size(size.width as f32, size.height as f32),
-        );
+        program.uniform("u_resolution", size.into());
         program.uniform("u_aspect", camera.aspect.into());
-        program.uniform("u_time", Uniform::Float(elapsed));
-        program.uniform("u_znear", Uniform::Float(camera.znear));
-        program.uniform("u_zfar", Uniform::Float(camera.zfar));
-        program.uniform("u_cameraPos", Uniform::Point3(camera.position));
+        program.uniform("u_time", elapsed.into());
+        program.uniform("u_znear", camera.znear.into());
+        program.uniform("u_zfar", camera.zfar.into());
+        program.uniform("u_cameraPos", camera.position.into());
         program.uniform("u_camView", Uniform::Mat4(camera.invert_view().unwrap()));
-        program.uniform("u_ambientColor", Uniform::Color(color!(0.0, 0.0, 0.0)));
-        program.uniform("u_light", Uniform::Float3(0.0, 20.0, 0.0));
-        program.uniform("u_lightColor", Uniform::Color(color!(0.4, 1.0, 1.0)));
+        program.uniform("u_ambientColor", color!(0.0, 0.0, 0.0).into());
+        program.uniform("u_light", vec3(0.0, 20.0, 0.0).into());
+        program.uniform("u_lightColor", color!(0.4, 1.0, 1.0).into());
 
         vao.bind();
         vao.draw();

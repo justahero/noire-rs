@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::ptr;
 use std::str;
 
+use super::Size;
 use render::shader::Shader;
 use render::traits::Bindable;
 use render::shader::create_shdaer_from_file;
@@ -46,6 +47,36 @@ pub enum Uniform {
 impl From<f32> for Uniform {
     fn from(v: f32) -> Self {
         Uniform::Float(v)
+    }
+}
+
+impl From<Size<u32>> for Uniform {
+    fn from(s: Size<u32>) -> Self {
+        Uniform::Size(s.width as f32, s.height as f32)
+    }
+}
+
+impl From<Size<f32>> for Uniform {
+    fn from(s: Size<f32>) -> Self {
+        Uniform::Size(s.width, s.height)
+    }
+}
+
+impl From<Point3<f32>> for Uniform {
+    fn from(p: Point3<f32>) -> Self {
+        Uniform::Point3(p)
+    }
+}
+
+impl From<Color> for Uniform {
+    fn from(c: Color) -> Self {
+        Uniform::Color(c)
+    }
+}
+
+impl From<Vector3<f32>> for Uniform {
+    fn from(v: Vector3<f32>) -> Self {
+        Uniform::Vec3(v)
     }
 }
 
