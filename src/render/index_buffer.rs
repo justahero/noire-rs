@@ -19,14 +19,14 @@ impl IndexBuffer {
         unsafe {
             gl::GenBuffers(1, &mut id);
 
-            gl::BindBuffer(gl::ARRAY_BUFFER, id);
+            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, id);
             gl::BufferData(
-                gl::ARRAY_BUFFER,
+                gl::ELEMENT_ARRAY_BUFFER,
                 total_size as GLsizeiptr,
                 mem::transmute(&indices[0]),
                 gl::STATIC_DRAW,
             );
-            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }
 
         IndexBuffer {
@@ -39,13 +39,13 @@ impl IndexBuffer {
 impl Bindable for IndexBuffer {
     fn bind(&self) {
         unsafe {
-            gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
+            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.id);
         }
     }
 
     fn unbind(&self) {
         unsafe {
-            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }
     }
 }
