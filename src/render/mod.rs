@@ -1,5 +1,6 @@
 pub mod traits;
 
+pub mod index_buffer;
 pub mod program;
 pub mod shader;
 pub mod vertex;

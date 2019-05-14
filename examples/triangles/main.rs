@@ -13,6 +13,7 @@ use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
 use noire::render::vertex_buffer::*;
+use noire::render::index_buffer::*;
 use noire::render::window::{OpenGLWindow,RenderWindow,Window};
 
 use notify::*;
@@ -22,6 +23,7 @@ use std::thread;
 use std::thread::JoinHandle;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
+static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
 
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
@@ -42,8 +44,11 @@ fn main() {
 
     // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
+    let ib = IndexBuffer::create(&INDICES);
+
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
+    vao.add_ib(ib);
 
     let start_time = Instant::now();
 
