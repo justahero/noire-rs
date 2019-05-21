@@ -5,7 +5,6 @@ use math::color::Color;
 use gl;
 use gl::types::*;
 
-use std::collections::HashMap;
 use std::ptr;
 use std::str;
 
@@ -27,8 +26,8 @@ pub struct Program {
     vertex_shader: Shader,
     pixel_shader: Shader,
     pub id: u32,
-    pub uniforms: HashMap<String, Variable>,
-    pub attributes: HashMap<String, Variable>,
+    pub uniforms: Vec<Variable>,
+    pub attributes: Vec<Variable>,
 }
 
 #[derive(Debug)]
@@ -103,8 +102,8 @@ fn get_link_error(program: u32) -> String {
     log_text
 }
 
-fn find_attributes(program: u32) -> HashMap<String, Variable> {
-    let mut result = HashMap::new();
+fn find_attributes(program: u32) -> Vec<Variable> {
+    let mut result = Vec::new();
     let mut num_attributes = 0;
     let mut max_name_length = 0;
 
@@ -146,21 +145,21 @@ fn find_attributes(program: u32) -> HashMap<String, Variable> {
                 .to_string();
 
             let uniform: Variable = Variable {
-                name: name.clone(),
+                name: name,
                 location: location,
                 data_type: attrib_type,
                 size: attrib_size,
             };
 
-            result.insert(name, uniform);
+            result.push(uniform);
         }
     }
 
     result
 }
 
-fn find_uniforms(program: u32) -> HashMap<String, Variable> {
-    let mut result = HashMap::new();
+fn find_uniforms(program: u32) -> Vec<Variable> {
+    let mut result = Vec::new();
 
     let mut num_uniforms = 0;
     let mut max_name_length = 0;
@@ -199,13 +198,13 @@ fn find_uniforms(program: u32) -> HashMap<String, Variable> {
                 .to_string();
 
             let uniform: Variable = Variable {
-                name: name.clone(),
+                name: name,
                 location: location,
                 data_type: uniform_type,
                 size: uniform_size,
             };
 
-            result.insert(name, uniform);
+            result.push(uniform);
         }
     }
 
@@ -265,7 +264,8 @@ impl Program {
     }
 
     pub fn uniform(&self, name: &str, uniform: Uniform) {
-        if let Some(location) = self.uniform_location(name) {
+        if let Some(variable) = self.uniform_by_name(name) {
+            let location = variable.location;
             match uniform {
                 Uniform::Color(c) => Program::color(location, c),
                 Uniform::Float(v) => Program::uniform1f(location, v),
@@ -322,11 +322,13 @@ impl Program {
         }
     }
 
-    pub fn uniform_location(&self, name: &str) -> Option<i32> {
-        match self.uniforms.get(name) {
-            Some(uniform) => Some(uniform.location),
-            _ => None,
+    pub fn uniform_by_name(&self, name: &str) -> Option<&Variable> {
+        for uniform in &self.uniforms {
+            if uniform.name == name {
+                return Some(uniform);
+            }
         }
+        None
     }
 }
 
