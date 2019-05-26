@@ -89,28 +89,25 @@ fn glfw_error_callback(error: Error, description: String, _error_count: &Cell<us
     panic!("GL ERROR: {} - {}", error, description);
 }
 
+/// Conversion helper to get Size struct
+impl From<glfw::VidMode> for Size<u32> {
+    fn from(video_mode: glfw::VidMode) -> Self {
+        Size { width: video_mode.width, height: video_mode.height }
+    }
+}
+
 /// make struct function?
 pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window, mode: Fullscreen) {
     glfw.with_primary_monitor_mut(|_: &mut _, m: Option<&glfw::Monitor>| {
         let monitor = m.unwrap();
         let video_mode: glfw::VidMode = monitor.get_video_mode().unwrap();
 
-        let mut new_size: Size<u32> = Size {
-            width: 0,
-            height: 0,
-        };
         let refresh_rate = video_mode.refresh_rate;
 
-        match mode {
-            Fullscreen::Current => {
-                new_size.width = video_mode.width;
-                new_size.height = video_mode.height;
-            }
-            Fullscreen::Size(size) => {
-                new_size.width = size.width;
-                new_size.height = size.height;
-            }
-        }
+        let new_size = match mode {
+            Fullscreen::Current => video_mode.into(),
+            Fullscreen::Size(size) => size,
+        };
 
         window.set_monitor(
             glfw::WindowMode::FullScreen(&monitor),
