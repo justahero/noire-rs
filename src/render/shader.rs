@@ -17,24 +17,6 @@ pub struct Shader {
     pub shader_type: GLenum,
 }
 
-pub fn create_shdaer_from_file(file_path: &String, shader_type: GLenum) -> Result<Shader, String> {
-    let path = Path::new(file_path);
-    let display = path.display();
-
-    let mut file = match File::open(&path) {
-        Ok(file) => file,
-        Err(_) => return Err(format!("Failed to open file {}", display)),
-    };
-
-    let mut source = String::new();
-    let source = match file.read_to_string(&mut source) {
-        Ok(_) => source,
-        Err(_) => return Err(format!("Could not read content from file {}", display)),
-    };
-
-    Shader::create(&source, shader_type)
-}
-
 fn get_compile_error(shader: u32) -> String {
     let log_text: String;
     unsafe {
@@ -86,7 +68,7 @@ fn get_errors(errors: &String, source: &str) -> Vec<String> {
     result
 }
 
-pub fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> {
+fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> {
     let c_str = CString::new(source.as_bytes()).unwrap();
 
     let shader = unsafe { gl::CreateShader(shader_type) };
@@ -107,11 +89,29 @@ pub fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> 
 }
 
 impl Shader {
+    pub fn from_file(file_path: &String, shader_type: GLenum) -> Result<Self, String> {
+        let path = Path::new(file_path);
+        let display = path.display();
+
+        let mut file = match File::open(&path) {
+            Ok(file) => file,
+            Err(_) => return Err(format!("Failed to open file {}", display)),
+        };
+
+        let mut source = String::new();
+        let source = match file.read_to_string(&mut source) {
+            Ok(_) => source,
+            Err(_) => return Err(format!("Could not read content from file {}", display)),
+        };
+
+        Shader::create(&source, shader_type)
+    }
+
     pub fn create(source: &str, shader_type: GLenum) -> Result<Self, String> {
         match compile_shader(source, shader_type) {
             Ok(id) => {
                 Ok(Shader {
-                    id: id,
+                    id,
                     source: String::from(source),
                     shader_type,
                 })

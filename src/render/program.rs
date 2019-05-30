@@ -11,7 +11,6 @@ use std::str;
 use super::Size;
 use render::shader::Shader;
 use render::traits::Bindable;
-use render::shader::create_shdaer_from_file;
 
 #[derive(Debug)]
 pub struct Variable {
@@ -109,11 +108,7 @@ fn find_attributes(program: u32) -> Vec<Variable> {
 
     unsafe {
         gl::GetProgramiv(program, gl::ACTIVE_ATTRIBUTES, &mut num_attributes);
-        gl::GetProgramiv(
-            program,
-            gl::ACTIVE_ATTRIBUTE_MAX_LENGTH,
-            &mut max_name_length,
-        );
+        gl::GetProgramiv(program, gl::ACTIVE_ATTRIBUTE_MAX_LENGTH, &mut max_name_length);
     }
 
     if num_attributes > 0 {
@@ -145,8 +140,8 @@ fn find_attributes(program: u32) -> Vec<Variable> {
                 .to_string();
 
             let uniform: Variable = Variable {
-                name: name,
-                location: location,
+                name,
+                location,
                 data_type: attrib_type,
                 size: attrib_size,
             };
@@ -160,7 +155,6 @@ fn find_attributes(program: u32) -> Vec<Variable> {
 
 fn find_uniforms(program: u32) -> Vec<Variable> {
     let mut result = Vec::new();
-
     let mut num_uniforms = 0;
     let mut max_name_length = 0;
 
@@ -198,8 +192,8 @@ fn find_uniforms(program: u32) -> Vec<Variable> {
                 .to_string();
 
             let uniform: Variable = Variable {
-                name: name,
-                location: location,
+                name,
+                location,
                 data_type: uniform_type,
                 size: uniform_size,
             };
@@ -230,9 +224,9 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
     }
 
     let program = Program {
-        vertex_shader: vertex_shader,
-        pixel_shader: pixel_shader,
-        id: id,
+        vertex_shader,
+        pixel_shader,
+        id,
         uniforms: find_uniforms(id),
         attributes: find_attributes(id),
     };
@@ -248,11 +242,11 @@ impl Program {
         vertex_file: &String,
         fragment_file: &String,
     ) -> Result<Program, String> {
-        let vertex_shader = match create_shdaer_from_file(vertex_file, gl::VERTEX_SHADER) {
+        let vertex_shader = match Shader::from_file(vertex_file, gl::VERTEX_SHADER) {
             Ok(shader) => shader,
             Err(e) => return Err(e),
         };
-        let fragment_shader = match create_shdaer_from_file(fragment_file, gl::FRAGMENT_SHADER) {
+        let fragment_shader = match Shader::from_file(fragment_file, gl::FRAGMENT_SHADER) {
             Ok(shader) => shader,
             Err(e) => return Err(e),
         };
