@@ -6,6 +6,10 @@ keywords = ["noire", "gl", "3d", "graphics"]
 repository = "https://github.com/justahero/noire-rs.git"
 
 [[example]]
+name = "spinningcube"
+path = "examples/01-spinning-cube/main.rs"
+
+[[example]]
 name = "triangles"
 path = "examples/triangles/main.rs"
 
