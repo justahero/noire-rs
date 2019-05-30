@@ -8,6 +8,9 @@ extern crate notify;
 
 use gl::types::*;
 
+use noire::mesh;
+use noire::mesh::mesh::Mesh;
+use noire::mesh::cube::Cube;
 use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
@@ -22,49 +25,22 @@ use std::time::{Duration, Instant};
 use std::thread;
 use std::thread::JoinHandle;
 
-static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
-static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
-
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
 
     // create shader program
-    let vertex_file = String::from("./examples/triangles/shaders/vertex.glsl");
-    let fragment_file = String::from("./examples/triangles/shaders/fragment.glsl");
-    let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
-
-    // enable file watching
-    let files = vec![&vertex_file, &fragment_file];
-    let (tx, rx) = channel();
-    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(125)).unwrap();
-    for file in &files {
-        watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
-    }
+    let vertex_file = String::from("./examples/01-spinning-cube/shaders/vertex.glsl");
+    let fragment_file = String::from("./examples/01-spinning-cube/shaders/fragment.glsl");
+    let program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
-    let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
-    let ib = IndexBuffer::create(&INDICES);
-
-    let mut vao = VertexArrayObject::new();
-    vao.add_vb(vb);
-    vao.add_ib(ib);
+    let mesh = Mesh::create(Cube::create(1.0));
+    let vao = mesh.vao;
 
     let start_time = Instant::now();
 
     loop {
-        // check if there is a file system event
-        match rx.try_recv() {
-            Ok(DebouncedEvent::Write(path)) => {
-                match Program::compile_from_files(&vertex_file, &fragment_file) {
-                    Ok(new_program) => {
-                        program = new_program;
-                    }
-                    Err(e) => println!("Failed to set new program: {:?}", e),
-                }
-            }
-            _ => (),
-        }
 
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
