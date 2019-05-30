@@ -230,9 +230,9 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
     }
 
     let program = Program {
-        vertex_shader: vertex_shader,
-        pixel_shader: pixel_shader,
-        id: id,
+        vertex_shader,
+        pixel_shader,
+        id,
         uniforms: find_uniforms(id),
         attributes: find_attributes(id),
     };

@@ -111,7 +111,7 @@ impl Shader {
         match compile_shader(source, shader_type) {
             Ok(id) => {
                 Ok(Shader {
-                    id: id,
+                    id,
                     source: String::from(source),
                     shader_type,
                 })
