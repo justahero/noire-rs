@@ -47,6 +47,7 @@ impl Camera {
         self
     }
 
+    // TODO change up vector to a default constant
     pub fn lookat(&mut self, eye: Point3<f32>, center: Point3<f32>, up: Vector3<f32>) -> &mut Self {
         self.position = eye.clone();
         self.view = Matrix4::look_at(eye, center, up);

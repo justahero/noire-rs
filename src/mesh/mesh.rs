@@ -15,8 +15,8 @@ impl Mesh {
         let mut vao = VertexArrayObject::new();
 
         vao.add_vb(VertexBuffer::create(&cube.vertices, cube.num_vertices() as u32, Primitive::Triangles));
-        vao.add_vb(VertexBuffer::create(&cube.texcoords, cube.num_vertices() as u32, Primitive::Triangles));
-        vao.add_ib(IndexBuffer::create(&cube.indices));
+        // vao.add_vb(VertexBuffer::create(&cube.texcoords, cube.num_vertices() as u32, Primitive::Triangles));
+        // vao.add_ib(IndexBuffer::create(&cube.indices));
 
         Mesh { vao }
     }

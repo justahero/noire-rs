@@ -9,8 +9,11 @@ extern crate notify;
 
 use gl::types::*;
 
-use cgmath::{Matrix4, SquareMatrix};
+use cgmath::vec3;
+use cgmath::{Deg, Point3, Matrix4, SquareMatrix, Vector3};
 
+use noire::math::*;
+use noire::math::camera::*;
 use noire::mesh;
 use noire::mesh::mesh::Mesh;
 use noire::mesh::cube::Cube;
@@ -43,21 +46,34 @@ fn main() {
 
     let start_time = Instant::now();
 
-    let model_view_proj = Matrix4::<f32>::identity();
+    let mut camera = Camera::new();
+    camera
+        .perspective(60.0, window.aspect(), 0.1, 80.0)
+        .lookat(
+            point3(0.0, 0.0, -2.5),
+            point3(0.0, 0.0, 0.0),
+            vec3(0.0, 1.0, 0.0)
+        );
 
     loop {
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
-        window.clear(0.3, 0.3, 0.3, 1.0);
+        window.clear(0.95, 0.95, 0.95, 1.0);
 
         let size = window.get_framebuffer_size();
 
+        // update matrices
+        let model_matrix    = Matrix4::from_angle_y(Deg(elapsed));
+        let model_view      = camera.view * model_matrix;
+        let model_view_proj = camera.projection * model_view;
+
         program.bind();
-        // is there a way to use deref coercion to not specify Uniform type?
+
         program.uniform("u_resolution", size.into());
         program.uniform("u_time", elapsed.into());
+        program.uniform("u_modelView", model_view.into());
         program.uniform("u_modelViewProjection", model_view_proj.into());
 
         vao.bind();
