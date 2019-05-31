@@ -16,3 +16,17 @@ pub struct Size<T> {
     /// height
     pub height: T,
 }
+
+pub enum Primitive {
+    Triangles,
+    TriangleStrip,
+}
+
+impl Primitive {
+    fn gl_primitive(&self) -> u32 {
+        match *self {
+            Primitive::Triangles     => gl::TRIANGLES,
+            Primitive::TriangleStrip => gl::TRIANGLE_STRIP,
+        }
+    }
+}

@@ -75,9 +75,8 @@ impl Drawable for VertexArrayObject {
 
         // render buffers depending on index buffers are set or not
         if self.ibs.len() == 0 {
-            let render_type = self.vbs[0].render_type;
             unsafe {
-                gl::DrawArrays(render_type, 0, count);
+                gl::DrawArrays(self.vbs[0].gl_primitive(), 0, count);
             }
         } else {
             unsafe {

@@ -1,5 +1,3 @@
-use super::*;
-
 pub struct Cube {
     pub vertices: Vec<f32>,
     // pub texcoords: Vec<f32>,
@@ -60,5 +58,9 @@ impl Cube {
             vertices: create_vertices(size),
             indices: create_indices(),
         }
+    }
+
+    pub fn num_vertices(&self) -> usize {
+        self.vertices.len()
     }
 }
