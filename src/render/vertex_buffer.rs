@@ -8,7 +8,7 @@ use render::traits::{Bindable};
 
 pub struct VertexBuffer {
     pub id: u32,
-    pub count: u32,
+    pub count: usize,
     num_components: i32,
     pub render_type: Primitive,
 }
@@ -34,10 +34,14 @@ impl VertexBuffer {
 
         VertexBuffer {
             id: id,
-            count: (vertex_data.len() as u32) / num_components,
+            count: vertex_data.len() / (num_components as usize),
             num_components: num_components as i32,
             render_type,
         }
+    }
+
+    pub fn size(&self) -> usize {
+        self.count
     }
 
     pub fn component_size(&self) -> i32 {

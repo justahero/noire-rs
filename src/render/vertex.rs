@@ -71,16 +71,16 @@ impl Bindable for VertexArrayObject {
 impl Drawable for VertexArrayObject {
     /// Render the VertexArrayObject
     fn draw(&self) {
-        let count: i32 = self.vbs[0].count as i32;
-
         // render buffers depending on index buffers are set or not
         if self.ibs.len() == 0 {
+            let vb = &self.vbs[0];
             unsafe {
-                gl::DrawArrays(self.vbs[0].gl_primitive(), 0, count);
+                gl::DrawArrays(gl::TRIANGLES, 0, vb.size() as i32);
             }
         } else {
+            let ib = &self.ibs[0];
             unsafe {
-                gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, ptr::null());
+                gl::DrawElements(gl::TRIANGLES, ib.size() as i32, gl::UNSIGNED_INT, ptr::null());
             }
         }
     }
