@@ -6,7 +6,9 @@ use render::traits::{Bindable, Drawable};
 use render::index_buffer::{IndexBuffer};
 use render::vertex_buffer::{VertexBuffer};
 
+/// A struct to represent a OpenGL vertex array object (VAO)
 pub struct VertexArrayObject {
+    /// the OpenGL instance id
     id: u32,
     vbs: Vec<VertexBuffer>,
     ibs: Vec<IndexBuffer>,
