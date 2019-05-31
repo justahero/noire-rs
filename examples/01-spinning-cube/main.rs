@@ -2,11 +2,14 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
+extern crate cgmath;
 extern crate gl;
 extern crate noire;
 extern crate notify;
 
 use gl::types::*;
+
+use cgmath::{Matrix4, SquareMatrix};
 
 use noire::mesh;
 use noire::mesh::mesh::Mesh;
@@ -40,8 +43,9 @@ fn main() {
 
     let start_time = Instant::now();
 
-    loop {
+    let model_view_proj = Matrix4::<f32>::identity();
 
+    loop {
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
@@ -54,6 +58,7 @@ fn main() {
         // is there a way to use deref coercion to not specify Uniform type?
         program.uniform("u_resolution", size.into());
         program.uniform("u_time", elapsed.into());
+        program.uniform("u_modelViewProjection", model_view_proj.into());
 
         vao.bind();
         vao.draw();

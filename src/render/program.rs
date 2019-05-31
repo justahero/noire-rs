@@ -78,6 +78,12 @@ impl From<Vector3<f32>> for Uniform {
     }
 }
 
+impl From<Matrix4<f32>> for Uniform {
+    fn from(m: Matrix4<f32>) -> Self {
+        Uniform::Mat4(m)
+    }
+}
+
 fn get_link_error(program: u32) -> String {
     let log_text: String;
     unsafe {
