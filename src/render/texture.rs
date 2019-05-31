@@ -1,8 +1,4 @@
-// use std::mem;
-use std::ptr;
-
 use gl;
-use gl::types::*;
 
 use render::traits::{Bindable};
 
@@ -25,7 +21,19 @@ impl Texture {
         })
     }
 
-    pub fn linear(&mut self) -> &Self {
+    pub fn linear(&self) -> &Self {
+        unsafe {
+            gl::TexParameteri(self.id, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+            gl::TexParameteri(self.id, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
+        }
+        self
+    }
+
+    pub fn clamp_to_edge(&self) -> &Self {
+        unsafe {
+            gl::TexParameteri(self.id, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as i32);
+            gl::TexParameteri(self.id, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as i32);
+        }
         self
     }
 }
