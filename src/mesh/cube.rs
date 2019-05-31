@@ -1,6 +1,6 @@
 pub struct Cube {
     pub vertices: Vec<f32>,
-    // pub texcoords: Vec<f32>,
+    pub texcoords: Vec<f32>,
     // pub normals: Vec<f32>,
     pub indices: Vec<u32>,
 }
@@ -41,6 +41,40 @@ fn create_vertices(size: f32) -> Vec<f32> {
     ]
 }
 
+fn create_texcoords() -> Vec<f32> {
+    vec![
+      0.0,  0.0,
+      1.0,  0.0,
+      1.0,  1.0,
+      0.0,  1.0,
+
+      0.0,  0.0,
+      1.0,  0.0,
+      1.0,  1.0,
+      0.0,  1.0,
+
+      0.0,  0.0,
+      1.0,  0.0,
+      1.0,  1.0,
+      0.0,  1.0,
+
+      0.0,  0.0,
+      1.0,  0.0,
+      1.0,  1.0,
+      0.0,  1.0,
+
+      0.0,  0.0,
+      1.0,  0.0,
+      1.0,  1.0,
+      0.0,  1.0,
+
+      0.0,  0.0,
+      1.0,  0.0,
+      1.0,  1.0,
+      0.0,  1.0,
+    ]
+}
+
 fn create_indices() -> Vec<u32> {
     vec![
        0,  1,  2,    0,  2,  3,  // Front face
@@ -56,6 +90,7 @@ impl Cube {
     pub fn create(size: f32) -> Self {
         Cube {
             vertices: create_vertices(size),
+            texcoords: create_texcoords(),
             indices: create_indices(),
         }
     }
