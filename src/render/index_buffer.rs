@@ -35,7 +35,7 @@ impl IndexBuffer {
         }
     }
 
-    pub fn size(&self) -> usize {
+    pub fn num_indices(&self) -> usize {
         self.count
     }
 }

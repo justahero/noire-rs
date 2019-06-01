@@ -10,7 +10,8 @@ extern crate notify;
 use gl::types::*;
 
 use cgmath::vec3;
-use cgmath::{Deg, Point3, Matrix4, SquareMatrix, Vector3};
+use cgmath::{Deg, Matrix4, Point3, Rad, SquareMatrix, Vector3};
+use cgmath::{perspective};
 
 use noire::math::*;
 use noire::math::camera::*;
@@ -50,7 +51,7 @@ fn main() {
     camera
         .perspective(60.0, window.aspect(), 0.1, 80.0)
         .lookat(
-            point3(0.0, 0.0, -2.5),
+            point3(0.0, 1.0, -4.0),
             point3(0.0, 0.0, 0.0),
             vec3(0.0, 1.0, 0.0)
         );
@@ -65,15 +66,22 @@ fn main() {
         let size = window.get_framebuffer_size();
 
         // update matrices
-        let model_matrix    = Matrix4::from_angle_y(Deg(elapsed));
-        let model_view      = camera.view * model_matrix;
+        let view = Matrix4::look_at(
+            Point3::new(0.0, 1.0, -4.0),
+            Point3::new(0.0, 0.0, 0.0),
+            vec3(0.0, 1.0, 0.0),
+        );
+        // let projection = perspective(Deg(45.0), 1.0 * (size.width as f32) / (size.height as f32), 0.1, 10.0);
+
+        let anim = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
+
+        let model_view = view * anim;
         let model_view_proj = camera.projection * model_view;
 
         program.bind();
 
         program.uniform("u_resolution", size.into());
         program.uniform("u_time", elapsed.into());
-        program.uniform("u_modelView", model_view.into());
         program.uniform("u_modelViewProjection", model_view_proj.into());
 
         vao.bind();

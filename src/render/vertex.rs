@@ -46,7 +46,7 @@ impl Bindable for VertexArrayObject {
         for (i, ref vb) in self.vbs.iter().enumerate() {
             vb.bind();
             unsafe {
-                gl::VertexAttribPointer(i as u32, 2, gl::FLOAT, gl::FALSE, stride, ptr::null());
+                gl::VertexAttribPointer(i as u32, vb.num_components(), gl::FLOAT, gl::FALSE, stride, ptr::null());
                 gl::EnableVertexAttribArray(i as u32);
             }
             stride += vb.component_size();
@@ -81,7 +81,7 @@ impl Drawable for VertexArrayObject {
         } else {
             let ib = &self.ibs[0];
             unsafe {
-                gl::DrawElements(vb.render_type.gl_primitive(), ib.size() as i32, gl::UNSIGNED_INT, ptr::null());
+                gl::DrawElements(gl::TRIANGLES, ib.num_indices() as i32, gl::UNSIGNED_INT, ptr::null());
             }
         }
     }

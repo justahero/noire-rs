@@ -95,6 +95,10 @@ impl Cube {
         }
     }
 
+    pub fn num_components(&self) -> usize {
+        3
+    }
+
     pub fn num_vertices(&self) -> usize {
         self.vertices.len()
     }

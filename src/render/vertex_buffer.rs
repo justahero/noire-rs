@@ -33,7 +33,7 @@ impl VertexBuffer {
         }
 
         VertexBuffer {
-            id: id,
+            id,
             count: vertex_data.len() / (num_components as usize),
             num_components: num_components as i32,
             render_type,
@@ -42,6 +42,10 @@ impl VertexBuffer {
 
     pub fn size(&self) -> usize {
         self.count
+    }
+
+    pub fn num_components(&self) -> i32 {
+        self.num_components
     }
 
     pub fn component_size(&self) -> i32 {
