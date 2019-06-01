@@ -65,17 +65,8 @@ fn main() {
 
         let size = window.get_framebuffer_size();
 
-        // update matrices
-        let view = Matrix4::look_at(
-            Point3::new(0.0, 1.0, -4.0),
-            Point3::new(0.0, 0.0, 0.0),
-            vec3(0.0, 1.0, 0.0),
-        );
-        // let projection = perspective(Deg(45.0), 1.0 * (size.width as f32) / (size.height as f32), 0.1, 10.0);
-
         let anim = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
-
-        let model_view = view * anim;
+        let model_view = camera.view * anim;
         let model_view_proj = camera.projection * model_view;
 
         program.bind();
