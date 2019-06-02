@@ -55,7 +55,7 @@ fn main() {
             point3(0.0, 0.0, 0.0),
             vec3(0.0, 1.0, 0.0)
         );
-    let light_pos = vec3(3.0, 2.0, 0.0);
+    let light_pos = vec3(-4.0, 0.0, 2.0);
 
     loop {
         let now = Instant::now();
@@ -76,12 +76,13 @@ fn main() {
 
         program.bind();
 
+        program.uniform("u_cameraPos", camera.position.into());
         program.uniform("u_resolution", size.into());
         program.uniform("u_time", elapsed.into());
         program.uniform("u_modelView", model_view.into());
         program.uniform("u_modelViewProjection", model_view_proj.into());
         program.uniform("u_normalMatrix", normal_matrix.into());
-        program.uniform("u_light_pos", light_pos.into());
+        program.uniform("u_lightPos", light_pos.into());
 
         vao.bind();
         vao.draw();
