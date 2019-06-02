@@ -60,11 +60,14 @@ fn main() {
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
         window.clear(0.95, 0.95, 0.95, 1.0);
+        window.clear_depth(1.0);
 
         let size = window.get_framebuffer_size();
 
-        let anim = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
-        let model_view = camera.view * anim;
+        let rotate_x = Matrix4::from_angle_x(Rad::from(Deg(elapsed * 22.5)));
+        let rotate_y = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
+
+        let model_view = camera.view * rotate_y * rotate_x;
         let model_view_proj = camera.projection * model_view;
         let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 

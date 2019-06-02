@@ -50,6 +50,8 @@ pub trait Window {
 
 /// Trait that defines an OpenGL specific Window
 pub trait OpenGLWindow: Window {
+    /// Basic setup of an OpenGLWindow
+    fn setup(&self);
     /// Returns true if this window is the current one
     fn is_current(&self) -> bool;
     /// Make this window the current one
@@ -162,13 +164,17 @@ impl RenderWindow {
         // load gl functions
         gl::load_with(|s| window.get_proc_address(s) as *const _);
 
-        Ok(RenderWindow {
+        // create instance and initialize the window
+        let render_window = RenderWindow {
             glfw: glfw,
             window: window,
             events: events,
             input_events: VecDeque::new(),
             pressed_buttons: VecDeque::new(),
-        })
+        };
+        render_window.setup();
+
+        Ok(render_window)
     }
 
     pub fn aspect(&self) -> f32 {
@@ -246,6 +252,13 @@ impl Window for RenderWindow {
 
 /// OpenGL version of the render window
 impl OpenGLWindow for RenderWindow {
+    fn setup(&self) {
+        unsafe {
+            gl::DepthFunc(gl::LESS);
+            gl::Enable(gl::DEPTH_TEST);
+        }
+    }
+
     /// Returns true if the window is the current one
     fn is_current(&self) -> bool {
         self.window.is_current()
