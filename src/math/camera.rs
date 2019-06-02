@@ -18,6 +18,7 @@ pub struct Camera {
     pub orientation: Quaternion<f32>,
 }
 
+/// Default settings for a new Camera instance
 impl Default for Camera {
     fn default() -> Self {
         Camera {
@@ -48,7 +49,7 @@ impl Camera {
         // self.projection = perspective(Rad::from(Deg(fov)), aspect, znear, zfar);
         self.projection = Matrix4::from(PerspectiveFov {
             fovy: Rad::from(Deg(fov)),
-            aspect: aspect,
+            aspect,
             near: znear,
             far: zfar,
         });

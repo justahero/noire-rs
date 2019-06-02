@@ -14,8 +14,9 @@ pub struct VertexArrayObject {
     ibs: Vec<IndexBuffer>,
 }
 
-impl VertexArrayObject {
-    pub fn new() -> VertexArrayObject {
+/// Fill default struct
+impl Default for VertexArrayObject {
+    fn default() -> Self {
         let mut id = 0;
         unsafe {
             gl::GenVertexArrays(1, &mut id);
@@ -25,6 +26,12 @@ impl VertexArrayObject {
             vbs: vec![],
             ibs: vec![],
         }
+    }
+}
+
+impl VertexArrayObject {
+    pub fn new() -> VertexArrayObject {
+        Default::default()
     }
 
     pub fn add_vb(&mut self, vb: VertexBuffer) {

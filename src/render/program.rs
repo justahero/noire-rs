@@ -107,7 +107,6 @@ fn get_link_error(program: u32) -> String {
         );
 
         log_text = str::from_utf8(&buffer)
-            .ok()
             .expect("GetProgramInfoLog not valid utf8")
             .to_string();
     }
@@ -148,7 +147,6 @@ fn find_attributes(program: u32) -> Vec<Variable> {
 
             name.truncate(length as usize);
             let name = str::from_utf8(&name)
-                .ok()
                 .expect("GetActiveAttrib not valid utf8")
                 .to_string();
 
@@ -200,7 +198,6 @@ fn find_uniforms(program: u32) -> Vec<Variable> {
 
             name.truncate(length as usize);
             let name = str::from_utf8(&name)
-                .ok()
                 .expect("GetActiveUniform not valid utf8")
                 .to_string();
 
@@ -251,10 +248,7 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 }
 
 impl Program {
-    pub fn compile_from_files(
-        vertex_file: &String,
-        fragment_file: &String,
-    ) -> Result<Program, String> {
+    pub fn compile_from_files(vertex_file: &str, fragment_file: &str) -> Result<Program, String> {
         let vertex_shader = match Shader::from_file(vertex_file, gl::VERTEX_SHADER) {
             Ok(shader) => shader,
             Err(e) => return Err(e),
