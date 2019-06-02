@@ -12,6 +12,7 @@ use gl::types::*;
 use cgmath::*;
 
 use noire::math::*;
+use noire::math::color::Color;
 use noire::math::camera::*;
 use noire::mesh;
 use noire::mesh::mesh::Mesh;
@@ -51,6 +52,7 @@ fn main() {
             point3(0.0, 0.0, 0.0),
             vec3(0.0, 1.0, 0.0)
         );
+    let light_pos = vec3(3.0, 2.0, 0.0);
 
     loop {
         let now = Instant::now();
@@ -73,6 +75,7 @@ fn main() {
         program.uniform("u_modelView", model_view.into());
         program.uniform("u_modelViewProjection", model_view_proj.into());
         program.uniform("u_normalMatrix", normal_matrix.into());
+        program.uniform("u_light_pos", light_pos.into());
 
         vao.bind();
         vao.draw();
