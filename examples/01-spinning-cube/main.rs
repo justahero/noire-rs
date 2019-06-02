@@ -9,9 +9,7 @@ extern crate notify;
 
 use gl::types::*;
 
-use cgmath::vec3;
-use cgmath::{Deg, Matrix4, Point3, Rad, SquareMatrix, Vector3};
-use cgmath::{perspective};
+use cgmath::*;
 
 use noire::math::*;
 use noire::math::camera::*;
@@ -22,8 +20,6 @@ use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
-use noire::render::vertex_buffer::*;
-use noire::render::index_buffer::*;
 use noire::render::window::{OpenGLWindow,RenderWindow,Window};
 
 use notify::*;
@@ -51,7 +47,7 @@ fn main() {
     camera
         .perspective(60.0, window.aspect(), 0.1, 80.0)
         .lookat(
-            point3(0.0, 1.0, -4.0),
+            point3(0.0, 1.0, -2.5),
             point3(0.0, 0.0, 0.0),
             vec3(0.0, 1.0, 0.0)
         );
@@ -68,12 +64,15 @@ fn main() {
         let anim = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
         let model_view = camera.view * anim;
         let model_view_proj = camera.projection * model_view;
+        let normal_matrix = model_view.invert().unwrap().transpose();
 
         program.bind();
 
         program.uniform("u_resolution", size.into());
         program.uniform("u_time", elapsed.into());
+        program.uniform("u_modelView", model_view.into());
         program.uniform("u_modelViewProjection", model_view_proj.into());
+        program.uniform("u_normalMatrix", normal_matrix.into());
 
         vao.bind();
         vao.draw();
