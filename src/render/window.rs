@@ -63,15 +63,15 @@ pub trait OpenGLWindow: Window {
     /// Return the size of the frame buffer
     fn get_framebuffer_size(&self) -> Size<u32>;
     /// Clear window to a color
-    fn clear(&self, r: f32, g: f32, b: f32, a: f32);
+    fn clear(&self, r: f32, g: f32, b: f32, a: f32) -> &Self;
     /// Clear the depth buffer to a value
-    fn clear_depth(&self, value: f32);
+    fn clear_depth(&self, value: f32) -> &Self;
     /// Swaps frame buffer and displays content
-    fn swap_buffers(&mut self);
+    fn swap_buffers(&mut self) -> &Self;
     /// enable specific GL functionality
-    fn enable(&mut self, cap: Capability);
+    fn enable(&mut self, cap: Capability) -> &Self;
     /// disable specific GL functionality
-    fn disable(&mut self, cap: Capability);
+    fn disable(&mut self, cap: Capability) -> &Self;
 }
 
 /// Struct that defines a window to render graphics
@@ -292,35 +292,40 @@ impl OpenGLWindow for RenderWindow {
         }
     }
     /// Clear the frame buffer of the window to a color
-    fn clear(&self, r: f32, g: f32, b: f32, a: f32) {
+    fn clear(&self, r: f32, g: f32, b: f32, a: f32) -> &Self {
         unsafe {
             gl::ClearColor(r, g, b, a);
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
+        self
     }
     /// Clear the depth buffer to a value
-    fn clear_depth(&self, value: f32) {
+    fn clear_depth(&self, value: f32) -> &Self {
         unsafe {
             gl::ClearDepthf(value);
             gl::Clear(gl::DEPTH_BUFFER_BIT);
         }
+        self
     }
     /// Swap frame buffer, update with content
-    fn swap_buffers(&mut self) {
-        self.window.swap_buffers()
+    fn swap_buffers(&mut self) -> &Self {
+        self.window.swap_buffers();
+        self
     }
 
     /// Implements GL specific logic to enable functionality
-    fn enable(&mut self, cap: Capability) {
+    fn enable(&mut self, cap: Capability) -> &Self {
         unsafe {
             gl::Enable(cap.into());
         }
+        self
     }
 
     /// Implements GL specific logic to disable functionality
-    fn disable(&mut self, cap: Capability) {
+    fn disable(&mut self, cap: Capability) -> &Self {
         unsafe {
             gl::Disable(cap.into());
         }
+        self
     }
 }

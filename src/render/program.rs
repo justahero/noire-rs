@@ -264,7 +264,7 @@ impl Program {
         link_program(vertex_shader, pixel_shader)
     }
 
-    pub fn uniform(&self, name: &str, uniform: Uniform) {
+    pub fn uniform(&self, name: &str, uniform: Uniform) -> &Self {
         if let Some(variable) = self.uniform_by_name(name) {
             let location = variable.location;
             match uniform {
@@ -280,6 +280,7 @@ impl Program {
                 Uniform::Size(x, y) => Program::uniform2f(location, x, y),
             }
         }
+        self
     }
 
     pub fn color(location: i32, color: Color) {
