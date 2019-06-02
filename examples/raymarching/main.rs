@@ -15,7 +15,7 @@ use gl::types::*;
 use cgmath::{Point3, Vector3};
 use cgmath::vec3;
 
-use noire::render::Size;
+use noire::render::{Primitive, Size};
 use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
@@ -90,7 +90,7 @@ fn main() {
         .set_position(point3(0.0, 2.0, 20.0));
 
     // create vertex data
-    let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
+    let vb = VertexBuffer::create(&VERTICES, 2, Primitive::TriangleStrip);
     let mut vao = VertexArrayObject::new();
     vao.add_vb(vb);
 

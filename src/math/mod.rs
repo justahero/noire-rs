@@ -2,7 +2,7 @@
 pub mod camera;
 pub mod color;
 
-use cgmath::Point3;
+use cgmath::{Matrix3, Matrix4, Point3, Quaternion};
 
 #[macro_export]
 macro_rules! color {
@@ -20,8 +20,6 @@ macro_rules! color {
 pub fn point3(x: f32, y: f32, z: f32) -> Point3<f32> {
     Point3 { x, y, z }
 }
-
-use cgmath::{Matrix4, Quaternion};
 
 pub fn convert_to_quaternion(mat: &Matrix4<f32>) -> Quaternion<f32> {
     let trace = mat.x.x + mat.y.y + mat.z.z;
@@ -59,4 +57,12 @@ pub fn convert_to_quaternion(mat: &Matrix4<f32>) -> Quaternion<f32> {
     }
 
     Quaternion::new(w, x, y, z)
+}
+
+pub fn convert_to_matrix3(mat: &Matrix4<f32>) -> Matrix3<f32> {
+    Matrix3::new(
+        mat.x.x, mat.x.y, mat.x.z,
+        mat.y.x, mat.y.y, mat.y.z,
+        mat.z.x, mat.z.y, mat.z.z,
+    )
 }

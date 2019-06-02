@@ -12,7 +12,7 @@ use glfw::{Context, Glfw, Error, WindowEvent};
 
 use input::{Button, Input};
 use input::keyboard::Key;
-use super::Size;
+use super::{Capability, Size};
 
 /// Struct to provide coordinates
 pub struct Pos<T> {
@@ -68,6 +68,10 @@ pub trait OpenGLWindow: Window {
     fn clear_depth(&self, value: f32);
     /// Swaps frame buffer and displays content
     fn swap_buffers(&mut self);
+    /// enable specific GL functionality
+    fn enable(&mut self, cap: Capability);
+    /// disable specific GL functionality
+    fn disable(&mut self, cap: Capability);
 }
 
 /// Struct that defines a window to render graphics
@@ -162,6 +166,7 @@ impl RenderWindow {
         // load gl functions
         gl::load_with(|s| window.get_proc_address(s) as *const _);
 
+        // create instance and initialize the window
         Ok(RenderWindow {
             glfw: glfw,
             window: window,
@@ -303,5 +308,19 @@ impl OpenGLWindow for RenderWindow {
     /// Swap frame buffer, update with content
     fn swap_buffers(&mut self) {
         self.window.swap_buffers()
+    }
+
+    /// Implements GL specific logic to enable functionality
+    fn enable(&mut self, cap: Capability) {
+        unsafe {
+            gl::Enable(cap.gl_func());
+        }
+    }
+
+    /// Implements GL specific logic to disable functionality
+    fn disable(&mut self, cap: Capability) {
+        unsafe {
+            gl::Disable(cap.gl_func());
+        }
     }
 }

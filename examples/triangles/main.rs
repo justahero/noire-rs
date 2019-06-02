@@ -8,6 +8,7 @@ extern crate notify;
 
 use gl::types::*;
 
+use noire::render::Primitive;
 use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
@@ -43,7 +44,7 @@ fn main() {
     }
 
     // create vertex data
-    let vb = VertexBuffer::create(&VERTICES, 2, gl::TRIANGLE_STRIP);
+    let vb = VertexBuffer::create(&VERTICES, 2, Primitive::TriangleStrip);
     let ib = IndexBuffer::create(&INDICES);
 
     let mut vao = VertexArrayObject::new();

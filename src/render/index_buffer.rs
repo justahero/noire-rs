@@ -34,6 +34,10 @@ impl IndexBuffer {
             count: indices.len(),
         }
     }
+
+    pub fn num_indices(&self) -> usize {
+        self.count
+    }
 }
 
 impl Bindable for IndexBuffer {

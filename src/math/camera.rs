@@ -32,7 +32,7 @@ impl Camera {
         }
     }
 
-    pub fn perspective(&mut self, fov: f32, aspect: f32, znear: f32, zfar: f32) -> &mut Camera {
+    pub fn perspective(&mut self, fov: f32, aspect: f32, znear: f32, zfar: f32) -> &mut Self {
         self.fov = fov;
         self.aspect = aspect;
         self.znear = znear;
@@ -47,6 +47,7 @@ impl Camera {
         self
     }
 
+    // TODO change up vector to a default constant
     pub fn lookat(&mut self, eye: Point3<f32>, center: Point3<f32>, up: Vector3<f32>) -> &mut Self {
         self.position = eye.clone();
         self.view = Matrix4::look_at(eye, center, up);
@@ -96,7 +97,7 @@ impl Camera {
     fn update_view(&mut self) -> &mut Self {
         let rotation = Matrix4::from(self.orientation);
         let translation = Matrix4::from_translation(self.position.to_vec());
-        self.view = rotation * translation;
+        self.view = rotation * translation.invert().unwrap();
         self
     }
 }
