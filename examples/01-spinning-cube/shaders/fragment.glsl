@@ -17,5 +17,5 @@ void main() {
 
     float intensity = max(dot(normal, lightDir), 0.0);
 
-    out_color = u_ambientColor * (1.0 - intensity);
+    out_color = intensity * u_lightColor;
 }

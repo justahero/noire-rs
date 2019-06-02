@@ -1,4 +1,4 @@
-use cgmath::{Matrix, Matrix4, Point3, Vector2, Vector3};
+use cgmath::{Matrix, Matrix3, Matrix4, Point3, Vector2, Vector3};
 
 use math::color::Color;
 
@@ -35,6 +35,7 @@ pub enum Uniform {
     Float(f32),
     Float2(f32, f32),
     Float3(f32, f32, f32),
+    Mat3(Matrix3<f32>),
     Mat4(Matrix4<f32>),
     Vec2(Vector2<f32>),
     Vec3(Vector3<f32>),
@@ -75,6 +76,12 @@ impl From<Color> for Uniform {
 impl From<Vector3<f32>> for Uniform {
     fn from(v: Vector3<f32>) -> Self {
         Uniform::Vec3(v)
+    }
+}
+
+impl From<Matrix3<f32>> for Uniform {
+    fn from(m: Matrix3<f32>) -> Self {
+        Uniform::Mat3(m)
     }
 }
 
@@ -271,6 +278,7 @@ impl Program {
                 Uniform::Float(v) => Program::uniform1f(location, v),
                 Uniform::Float2(x, y) => Program::uniform2f(location, x, y),
                 Uniform::Float3(x, y, z) => Program::uniform3f(location, x, y, z),
+                Uniform::Mat3(m) => Program::matrix3(location, &m),
                 Uniform::Mat4(m) => Program::matrix4(location, &m),
                 Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
                 Uniform::Vec3(v) => Program::uniform3f(location, v.x, v.y, v.z),
@@ -283,6 +291,12 @@ impl Program {
     pub fn color(location: i32, color: Color) {
         unsafe {
             gl::Uniform4f(location, color.red, color.green, color.blue, color.alpha);
+        }
+    }
+
+    pub fn matrix3(location: i32, matrix: &Matrix3<f32>) {
+        unsafe {
+            gl::UniformMatrix3fv(location, 1, gl::FALSE, matrix.as_ptr());
         }
     }
 

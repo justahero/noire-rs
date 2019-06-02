@@ -64,7 +64,7 @@ fn main() {
         let anim = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
         let model_view = camera.view * anim;
         let model_view_proj = camera.projection * model_view;
-        let normal_matrix = model_view.invert().unwrap().transpose();
+        let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 
         program.bind();
 
