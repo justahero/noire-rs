@@ -18,7 +18,9 @@ pub struct Size<T> {
 }
 
 pub enum Primitive {
+    /// used to render separate triangles
     Triangles,
+    /// used to render connected triangle strips
     TriangleStrip,
 }
 
@@ -27,6 +29,21 @@ impl Primitive {
         match *self {
             Primitive::Triangles     => gl::TRIANGLES,
             Primitive::TriangleStrip => gl::TRIANGLE_STRIP,
+        }
+    }
+}
+
+/// An enum containing all capabilities that can be enabled / disabled (GL specific)
+pub enum Capability {
+    /// enable or disable depth tests
+    DepthTest,
+}
+
+/// Implements GL specific functions
+impl Capability {
+    fn gl_func(&self) -> u32 {
+        match *self {
+            Capability::DepthTest => gl::DEPTH_TEST
         }
     }
 }

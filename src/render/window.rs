@@ -12,7 +12,7 @@ use glfw::{Context, Glfw, Error, WindowEvent};
 
 use input::{Button, Input};
 use input::keyboard::Key;
-use super::Size;
+use super::{Capability, Size};
 
 /// Struct to provide coordinates
 pub struct Pos<T> {
@@ -50,8 +50,6 @@ pub trait Window {
 
 /// Trait that defines an OpenGL specific Window
 pub trait OpenGLWindow: Window {
-    /// Basic setup of an OpenGLWindow
-    fn setup(&self);
     /// Returns true if this window is the current one
     fn is_current(&self) -> bool;
     /// Make this window the current one
@@ -70,6 +68,10 @@ pub trait OpenGLWindow: Window {
     fn clear_depth(&self, value: f32);
     /// Swaps frame buffer and displays content
     fn swap_buffers(&mut self);
+    /// enable specific GL functionality
+    fn enable(&mut self, cap: Capability);
+    /// disable specific GL functionality
+    fn disable(&mut self, cap: Capability);
 }
 
 /// Struct that defines a window to render graphics
@@ -165,16 +167,13 @@ impl RenderWindow {
         gl::load_with(|s| window.get_proc_address(s) as *const _);
 
         // create instance and initialize the window
-        let render_window = RenderWindow {
+        Ok(RenderWindow {
             glfw: glfw,
             window: window,
             events: events,
             input_events: VecDeque::new(),
             pressed_buttons: VecDeque::new(),
-        };
-        render_window.setup();
-
-        Ok(render_window)
+        })
     }
 
     pub fn aspect(&self) -> f32 {
@@ -252,13 +251,6 @@ impl Window for RenderWindow {
 
 /// OpenGL version of the render window
 impl OpenGLWindow for RenderWindow {
-    fn setup(&self) {
-        unsafe {
-            gl::DepthFunc(gl::LESS);
-            gl::Enable(gl::DEPTH_TEST);
-        }
-    }
-
     /// Returns true if the window is the current one
     fn is_current(&self) -> bool {
         self.window.is_current()
@@ -316,5 +308,19 @@ impl OpenGLWindow for RenderWindow {
     /// Swap frame buffer, update with content
     fn swap_buffers(&mut self) {
         self.window.swap_buffers()
+    }
+
+    /// Implements GL specific logic to enable functionality
+    fn enable(&mut self, cap: Capability) {
+        unsafe {
+            gl::Enable(cap.gl_func());
+        }
+    }
+
+    /// Implements GL specific logic to disable functionality
+    fn disable(&mut self, cap: Capability) {
+        unsafe {
+            gl::Disable(cap.gl_func());
+        }
     }
 }

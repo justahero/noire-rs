@@ -21,6 +21,7 @@ use noire::render::shader::*;
 use noire::render::program::*;
 use noire::render::traits::*;
 use noire::render::vertex::*;
+use noire::render::{Capability};
 use noire::render::window::{OpenGLWindow,RenderWindow,Window};
 
 use notify::*;
@@ -32,6 +33,8 @@ use std::thread::JoinHandle;
 fn main() {
     let mut window = RenderWindow::create(600, 600, "Hello This is window")
         .expect("Failed to create Render Window");
+
+    window.enable(Capability::DepthTest);
 
     // create shader program
     let vertex_file = String::from("./examples/01-spinning-cube/shaders/vertex.glsl");
