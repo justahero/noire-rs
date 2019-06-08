@@ -59,6 +59,8 @@ impl FrameBuffer {
     ///
     /// * `texture` - The texture to attach
     pub fn set_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
+        debug_assert!(self.bound());
+
         unsafe {
             gl::FramebufferTexture2D(
                 gl::FRAMEBUFFER,
@@ -81,6 +83,8 @@ impl FrameBuffer {
     ///
     /// * `texture` - the depth Texture instance
     pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
+        debug_assert!(self.bound());
+
         unsafe {
             gl::FramebufferTexture2D(
                 gl::FRAMEBUFFER,

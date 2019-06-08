@@ -1,8 +1,6 @@
 use std::error;
 use std::fmt;
 
-pub mod traits;
-
 pub mod capabilities;
 pub mod context;
 pub mod frame_buffer;
@@ -11,6 +9,7 @@ pub mod opengl;
 pub mod program;
 pub mod shader;
 pub mod texture;
+pub mod traits;
 pub mod vertex;
 pub mod vertex_buffer;
 pub mod window;
