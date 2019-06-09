@@ -99,16 +99,27 @@ impl FrameBuffer {
 }
 
 impl Bindable for FrameBuffer {
-    fn bind(&self) {
+    fn bind(&self) -> &Self {
         unsafe {
             gl::BindFramebuffer(gl::FRAMEBUFFER, self.id);
         }
+        self
     }
 
-    fn unbind(&self) {
+    fn unbind(&self) -> &Self {
         unsafe {
             gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
         }
+        self
+    }
+
+    fn bound(&self) -> bool {
+        let mut id = 0;
+        unsafe {
+            gl::GetIntegerv(gl::FRAMEBUFFER_BINDING, &mut id);
+        }
+
+        self.id == (id as u32)
     }
 }
 

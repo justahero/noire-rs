@@ -49,18 +49,30 @@ impl Sample {
 }
 
 impl Bindable for Sample {
-    fn bind(&self) {
+    fn bind(&self) -> &Self {
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0 + self.unit);
             gl::BindTexture(gl::TEXTURE_2D, self.id);
         }
+        self
     }
 
-    fn unbind(&self) {
+    fn unbind(&self) -> &Self {
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0 + self.unit);
             gl::BindTexture(gl::TEXTURE_2D, 0);
         }
+        self
+    }
+
+    fn bound(&self) -> bool {
+        let mut id = 0;
+
+        unsafe {
+            gl::GetIntegerv(gl::TEXTURE_BINDING_2D, &mut id);
+        }
+
+        self.id == (id as u32)
     }
 }
 
@@ -424,16 +436,27 @@ impl Program {
 }
 
 impl Bindable for Program {
-    fn bind(&self) {
+    fn bind(&self) -> &Self {
         unsafe {
             gl::UseProgram(self.id);
         }
+        self
     }
 
-    fn unbind(&self) {
+    fn unbind(&self) -> &Self {
         unsafe {
             gl::UseProgram(0);
         }
+        self
+    }
+
+    fn bound(&self) -> bool {
+        let mut id = 0;
+        unsafe {
+            gl::GetIntegerv(gl::CURRENT_PROGRAM, &mut id);
+        }
+
+        self.id == (id as u32)
     }
 }
 
