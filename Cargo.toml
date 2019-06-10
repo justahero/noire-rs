@@ -11,11 +11,11 @@ path = "examples/01-spinning-cube/main.rs"
 
 [[example]]
 name = "triangles"
-path = "examples/triangles/main.rs"
+path = "examples/02-triangles/main.rs"
 
 [[example]]
 name = "raymarching"
-path = "examples/raymarching/main.rs"
+path = "examples/03-raymarching/main.rs"
 
 [[example]]
 name = "filewatch"

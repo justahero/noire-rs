@@ -67,8 +67,8 @@ fn main() {
     println!("Context version: {:?}", window.window.get_context_version());
 
     // create shader program
-    let vertex_file = String::from("./examples/raymarching/shaders/vertex.glsl");
-    let fragment_file = String::from("./examples/raymarching/shaders/fragment.glsl");
+    let vertex_file = String::from("./examples/03-raymarching/shaders/vertex.glsl");
+    let fragment_file = String::from("./examples/03-raymarching/shaders/fragment.glsl");
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // enable file watching
