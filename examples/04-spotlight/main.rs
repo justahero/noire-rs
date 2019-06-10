@@ -43,7 +43,7 @@ fn main() {
 
     let light_pos = point3(-2.5, 0.0, 1.0);
 
-    let mut cube  = Node::new(Mesh::create_cube(Cube::create(0.75), Color::rgb(1.0, 1.0, 1.0)).unwrap());
+    let cube = Node::new(Mesh::create_cube(Cube::create(0.75), Color::rgb(1.0, 1.0, 1.0)).unwrap());
     let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(1.0, 1.0, 1.0)).unwrap());
     let mut scene = Scene::new();
 
@@ -111,9 +111,16 @@ fn main() {
         light_program.bind();
         light_program
             .uniform("u_lightView", spot_light.view.into())
-            .uniform("u_lightProj", spot_light.projection.into())
-            .uniform("u_ambientColor", Color::rgb(0.3, 0.3, 0.3).into());
+            .uniform("u_lightProj", spot_light.projection.into());
 
+        // render all nodes
+        scene.nodes(&mut |node| {
+            light_program
+                .uniform("u_ambientColor", Color::rgb(1.0, 1.0, 1.0).into())
+                .uniform("u_model", node.model_view.into())
+                .uniform("u_normalModel", node.normal_view().into());
+        });
+        light_frame_buffer.unbind();
 
 
 

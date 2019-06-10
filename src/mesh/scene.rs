@@ -24,6 +24,14 @@ impl Scene {
         self.add_node(Node::new(mesh));
         self
     }
+
+    /// Iterate over all scene meshes, allow to set callback
+    pub fn nodes<F>(&mut self, callback: &mut F)
+    where F: FnMut(&Node) {
+        for node in self.nodes.iter_mut() {
+            callback(node);
+        }
+    }
 }
 
 impl Default for Scene {

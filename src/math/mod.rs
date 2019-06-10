@@ -6,7 +6,7 @@ pub use self::color::Color;
 pub mod camera;
 pub mod color;
 
-use cgmath::{Matrix3, Matrix4, Point3, Quaternion};
+use cgmath::{Matrix, Matrix3, Matrix4, Point3, Quaternion, SquareMatrix};
 
 #[macro_export]
 macro_rules! color {
@@ -69,4 +69,9 @@ pub fn convert_to_matrix3(mat: &Matrix4<f32>) -> Matrix3<f32> {
         mat.y.x, mat.y.y, mat.y.z,
         mat.z.x, mat.z.y, mat.z.z,
     )
+}
+
+/// Creates a normal matrix from a Matrix4, returning a Matrix3
+pub fn normal_matrix(mat: &Matrix4<f32>) -> Matrix3<f32> {
+    convert_to_matrix3(&mat.transpose().invert().unwrap())
 }
