@@ -39,7 +39,7 @@ fn main() {
 
     let vertex_file = String::from("./examples/04-spotlight/shaders/light_vertex.glsl");
     let fragment_file = String::from("./examples/04-spotlight/shaders/light_fragment.glsl");
-    let light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
+    let mut light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     let light_pos = point3(-2.5, 0.0, 1.0);
 
@@ -107,10 +107,14 @@ fn main() {
         window.set_cullmode(CullMode::Front);
 
         light_program.bind();
-        light_program.unbind();
+        light_program
+            .uniform("u_lightView", spot_light.view.into())
+            .uniform("u_lightProj", spot_light.projection.into())
+            .uniform("u_ambientColor", Color::rgb(0.3, 0.3, 0.3).into());
 
 
-        // set some basic shader uniform variables
+        //----------------------------------------------------------
+        // Render Scene
         display_program.bind();
         display_program
             .uniform("u_cameraPos", camera.position.into())
