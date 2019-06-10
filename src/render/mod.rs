@@ -74,13 +74,13 @@ pub struct Point2<T> {
 }
 
 impl<T> Point2<T> {
-    /// Creates a new Point with x,y coordinates
-    fn new(x: T, y: T) -> Self {
+    pub fn new(x: T, y: T) -> Self {
         Point2 { x, y }
     }
 }
 
 impl Default for Point2<u32> {
+    /// Creates a new Point with x,y coordinates
     fn default() -> Self {
         Point2 { x: 0, y: 0 }
     }
