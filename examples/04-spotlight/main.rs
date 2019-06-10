@@ -13,9 +13,9 @@ use cgmath::*;
 
 use noire::math::*;
 use noire::math::{Camera, Color};
-use noire::mesh::{Cube, Mesh, Plane};
-use noire::render::opengl::get_render_error;
-use noire::render::{Bindable, Drawable, FrameBuffer, Program, Shader, Spotlight, Texture, VertexArrayObject};
+use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
+use noire::render::{FrameBuffer, Program, Shader, Spotlight, Texture, VertexArrayObject};
+use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Primitive, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
 use noire::render::spot_light::*;
@@ -101,6 +101,7 @@ fn main() {
 
         //----------------------------------------------------------
         // render light first
+        light_frame_buffer.bind();
         window.set_viewport(&Point2::default(), &light_depth_texture.size);
         window.clear(0.0, 0.0, 0.0, 0.0);
         window.clear_depth(1.0);
@@ -111,6 +112,8 @@ fn main() {
             .uniform("u_lightView", spot_light.view.into())
             .uniform("u_lightProj", spot_light.projection.into())
             .uniform("u_ambientColor", Color::rgb(0.3, 0.3, 0.3).into());
+
+
 
 
         //----------------------------------------------------------
