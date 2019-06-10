@@ -43,9 +43,10 @@ fn main() {
 
     let light_pos = point3(-2.5, 0.0, 1.0);
 
-    // create vertex data
-    let cube = Mesh::create_cube(Cube::create(0.75)).unwrap();
-    let mut plane = Mesh::create_plane(Plane::create(10.0, 10.0)).unwrap();
+    let mut cube  = Node::new(Mesh::create_cube(Cube::create(0.75), Color::rgb(1.0, 1.0, 1.0)).unwrap());
+    let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(1.0, 1.0, 1.0)).unwrap());
+    let mut scene = Scene::new();
+
     plane.translate(Vector3{ x: 0.0, y: -3.0, z: 0.0});
 
     let mut camera = Camera::new();
@@ -137,9 +138,7 @@ fn main() {
             .uniform("u_objectColor", Color::rgb(0.4, 0.8, 0.25).into())
             .uniform("u_shininess", 64.0.into());
 
-        plane.vao.bind();
-        plane.vao.draw();
-        plane.vao.unbind();
+        plane.draw();
 
         // animate and render plane
         let rotate_x = Matrix4::from_angle_x(Rad::from(Deg(elapsed * 22.5)));
@@ -155,9 +154,7 @@ fn main() {
         display_program.uniform("u_objectColor", Color::rgb(0.2, 0.5, 0.95).into());
         display_program.uniform("u_shininess", 16.0.into());
 
-        cube.vao.bind();
-        cube.vao.draw();
-        cube.vao.unbind();
+        cube.draw();
 
         // remove program
         display_program.unbind();
