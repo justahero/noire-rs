@@ -16,7 +16,7 @@ use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Plane};
 use noire::render::opengl::get_render_error;
 use noire::render::{Bindable, Drawable, FrameBuffer, Program, Shader, Texture, VertexArrayObject};
-use noire::render::{Capability, Primitive, Size};
+use noire::render::{Capability, CullMode, Point2, Primitive, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
 use noire::render::spot_light::*;
 
@@ -33,9 +33,13 @@ fn main() {
     window.enable(Capability::DepthTest);
 
     // create shader program
-    let vertex_file = String::from("./examples/04-spotlight/shaders/vertex.glsl");
-    let fragment_file = String::from("./examples/04-spotlight/shaders/fragment.glsl");
-    let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
+    let vertex_file = String::from("./examples/04-spotlight/shaders/scene_vertex.glsl");
+    let fragment_file = String::from("./examples/04-spotlight/shaders/scene_fragment.glsl");
+    let mut display_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
+
+    let vertex_file = String::from("./examples/04-spotlight/shaders/light_vertex.glsl");
+    let fragment_file = String::from("./examples/04-spotlight/shaders/light_fragment.glsl");
+    let light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     let light_pos = point3(-2.5, 0.0, 1.0);
 
@@ -95,9 +99,20 @@ fn main() {
         window.clear(0.0, 0.0, 0.0, 0.0);
         window.clear_depth(1.0);
 
+        //----------------------------------------------------------
+        // render light first
+        window.set_viewport(&Point2::default(), &light_depth_texture.size);
+        window.clear(0.0, 0.0, 0.0, 0.0);
+        window.clear_depth(1.0);
+        window.set_cullmode(CullMode::Front);
+
+        light_program.bind();
+        light_program.unbind();
+
+
         // set some basic shader uniform variables
-        program.bind();
-        program
+        display_program.bind();
+        display_program
             .uniform("u_cameraPos", camera.position.into())
             .uniform("u_resolution", window.get_framebuffer_size().into())
             .uniform("u_time", elapsed.into())
@@ -108,7 +123,7 @@ fn main() {
         let model_view_proj = camera.projection * model_view;
         let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 
-        program
+        display_program
             .uniform("u_modelView", model_view.into())
             .uniform("u_modelViewProjection", model_view_proj.into())
             .uniform("u_normalMatrix", normal_matrix.into())
@@ -127,18 +142,18 @@ fn main() {
         let model_view_proj = camera.projection * model_view;
         let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 
-        program.uniform("u_modelView", model_view.into());
-        program.uniform("u_modelViewProjection", model_view_proj.into());
-        program.uniform("u_normalMatrix", normal_matrix.into());
-        program.uniform("u_objectColor", Color::rgb(0.2, 0.5, 0.95).into());
-        program.uniform("u_shininess", 16.0.into());
+        display_program.uniform("u_modelView", model_view.into());
+        display_program.uniform("u_modelViewProjection", model_view_proj.into());
+        display_program.uniform("u_normalMatrix", normal_matrix.into());
+        display_program.uniform("u_objectColor", Color::rgb(0.2, 0.5, 0.95).into());
+        display_program.uniform("u_shininess", 16.0.into());
 
         cube.vao.bind();
         cube.vao.draw();
         cube.vao.unbind();
 
         // remove program
-        program.unbind();
+        display_program.unbind();
 
         // render scene
         window.swap_buffers();
