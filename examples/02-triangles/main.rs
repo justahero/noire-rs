@@ -31,8 +31,8 @@ fn main() {
         .expect("Failed to create Render Window");
 
     // create shader program
-    let vertex_file = String::from("./examples/triangles/shaders/vertex.glsl");
-    let fragment_file = String::from("./examples/triangles/shaders/fragment.glsl");
+    let vertex_file = String::from("./examples/02-triangles/shaders/vertex.glsl");
+    let fragment_file = String::from("./examples/02-triangles/shaders/fragment.glsl");
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // enable file watching

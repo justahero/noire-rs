@@ -11,18 +11,19 @@ path = "examples/01-spinning-cube/main.rs"
 
 [[example]]
 name = "triangles"
-path = "examples/triangles/main.rs"
+path = "examples/02-triangles/main.rs"
 
 [[example]]
 name = "raymarching"
-path = "examples/raymarching/main.rs"
+path = "examples/03-raymarching/main.rs"
 
 [[example]]
 name = "filewatch"
 
 [dependencies]
-cgmath = "0.17.0"
-regex  = "1.1.6"
-glfw   = "0.28.0"
-gl     = "0.12.0"
-notify = "4.0.11"
+backtrace = "0.3.30"
+cgmath    = "0.17.0"
+gl        = "0.12.0"
+glfw      = "0.29.0"
+notify    = "4.0.12"
+regex     = "1.1.7"
