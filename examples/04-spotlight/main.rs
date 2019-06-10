@@ -15,7 +15,7 @@ use noire::math::*;
 use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Plane};
 use noire::render::opengl::get_render_error;
-use noire::render::{Bindable, Drawable, FrameBuffer, Program, Shader, Texture, VertexArrayObject};
+use noire::render::{Bindable, Drawable, FrameBuffer, Program, Shader, Spotlight, Texture, VertexArrayObject};
 use noire::render::{Capability, CullMode, Point2, Primitive, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
 use noire::render::spot_light::*;

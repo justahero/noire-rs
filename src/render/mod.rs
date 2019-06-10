@@ -9,6 +9,7 @@ pub use self::frame_buffer::FrameBuffer;
 pub use self::index_buffer::IndexBuffer;
 pub use self::program::{Program, Uniform};
 pub use self::shader::Shader;
+pub use self::spot_light::Spotlight;
 pub use self::texture::Texture;
 pub use self::traits::*;
 pub use self::vertex::VertexArrayObject;
