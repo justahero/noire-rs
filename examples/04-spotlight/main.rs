@@ -31,6 +31,8 @@ fn main() {
         .expect("Failed to create Render Window");
 
     window.enable(Capability::DepthTest);
+    window.disable(Capability::CullFace);
+    // window.set_cullmode(CullMode::Back);
 
     // create shader program
     let vertex_file = String::from("./examples/04-spotlight/shaders/scene_vertex.glsl");
@@ -104,14 +106,15 @@ fn main() {
         // render light first
         light_frame_buffer.bind();
         window.set_viewport(&Point2::default(), &light_depth_texture.size);
-        window.clear(0.0, 0.0, 0.0, 0.0);
+        window.clear(1.0, 1.0, 1.0, 1.0);
         window.clear_depth(1.0);
-        window.set_cullmode(CullMode::Front);
+        // window.set_cullmode(CullMode::Front);
 
         light_program.bind();
         light_program
             .uniform("u_lightView", spot_light.view.into())
-            .uniform("u_lightProj", spot_light.projection.into());
+            .uniform("u_lightProj", spot_light.projection.into())
+            .uniform("u_lightPos", spot_light.pos.into());
 
         // render all nodes
         scene.nodes(&mut |node| {
@@ -129,7 +132,7 @@ fn main() {
         //----------------------------------------------------------
         // Render Scene / Camera
         window.set_viewport(&Point2::ZERO, &window.size());
-        window.set_cullmode(CullMode::Back);
+        // window.set_cullmode(CullMode::Back);
         window.clear(0.0, 0.0, 0.0, 0.0);
         window.clear_depth(1.0);
 
