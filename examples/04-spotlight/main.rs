@@ -125,13 +125,21 @@ fn main() {
 
 
         //----------------------------------------------------------
-        // Render Scene
+        // Render Scene / Camera
+        window.set_viewport(&Point2::ZERO, &window.size());
+        window.set_cullmode(CullMode::Back);
+        window.clear(0.0, 0.0, 0.0, 0.0);
+        window.clear_depth(1.0);
+
         display_program.bind();
         display_program
-            .uniform("u_cameraPos", camera.position.into())
-            .uniform("u_resolution", window.get_framebuffer_size().into())
-            .uniform("u_time", elapsed.into())
-            .uniform("u_lightPos", light_pos.into());
+            .uniform("u_camProj", camera.projection.into())
+            .uniform("u_camView", camera.view.into())
+            .uniform("u_lightView", spot_light.view.into())
+            .uniform("u_lightRot", normal_matrix(&spot_light.view).into())
+            .uniform("u_lightProj", spot_light.projection.into())
+            .sampler("u_sShadowMap", 0, &light_depth_texture)
+            .uniform("u_shadowMapSize", light_texture_size.into());
 
         // render plane!
         let model_view = camera.view * plane.model_view;
@@ -142,8 +150,7 @@ fn main() {
             .uniform("u_modelView", model_view.into())
             .uniform("u_modelViewProjection", model_view_proj.into())
             .uniform("u_normalMatrix", normal_matrix.into())
-            .uniform("u_objectColor", Color::rgb(0.4, 0.8, 0.25).into())
-            .uniform("u_shininess", 64.0.into());
+            .uniform("u_objectColor", Color::rgb(0.4, 0.8, 0.25).into());
 
         plane.draw();
 
