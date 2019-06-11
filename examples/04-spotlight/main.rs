@@ -119,9 +119,11 @@ fn main() {
                 .uniform("u_ambientColor", Color::rgb(1.0, 1.0, 1.0).into())
                 .uniform("u_model", node.model_view.into())
                 .uniform("u_normalModel", node.normal_view().into());
-        });
-        light_frame_buffer.unbind();
 
+            node.draw();
+        });
+
+        light_frame_buffer.unbind();
 
 
         //----------------------------------------------------------
@@ -162,18 +164,21 @@ fn main() {
         let model_view_proj = camera.projection * model_view;
         let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 
-        display_program.uniform("u_modelView", model_view.into());
-        display_program.uniform("u_modelViewProjection", model_view_proj.into());
-        display_program.uniform("u_normalMatrix", normal_matrix.into());
-        display_program.uniform("u_objectColor", Color::rgb(0.2, 0.5, 0.95).into());
-        display_program.uniform("u_shininess", 16.0.into());
+        // render all nodes
+        scene.nodes(&mut |node| {
+            display_program
+                .uniform("u_ambientColor", Color::rgb(1.0, 1.0, 1.0).into())
+                .uniform("u_model", node.model_view.into())
+                .uniform("u_normalModel", node.normal_view().into());
 
-        cube.draw();
+            node.draw();
+        });
 
-        // remove program
         display_program.unbind();
 
-        // render scene
+
+        //----------------------------------------------------------
+        // display everything on screen
         window.swap_buffers();
 
         // handle events
