@@ -51,6 +51,10 @@ fn main() {
 
     plane.translate(Vector3{ x: 0.0, y: -3.0, z: 0.0});
 
+    let mut scene = Scene::new();
+    scene.add_node(&cube);
+    scene.add_node(&plane);
+
     let mut camera = Camera::new();
     camera
         .perspective(60.0, window.aspect(), 0.1, 80.0)
