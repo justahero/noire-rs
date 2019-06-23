@@ -107,10 +107,14 @@ pub fn get_render_error() -> Result<(), RenderError> {
     Err(RenderError { message: errors.join(", ") })
 }
 
+/// A Backtrace frame
 #[derive(Debug, Clone)]
 struct Frame {
+    /// The line number if present
     pub lineno: Option<u32>,
+    /// The function name
     pub name: Option<String>,
+    /// The name of the file
     pub filename: Option<PathBuf>,
 }
 
