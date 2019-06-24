@@ -18,6 +18,10 @@ name = "raymarching"
 path = "examples/03-raymarching/main.rs"
 
 [[example]]
+name = "spotlight"
+path = "examples/04-spotlight/main.rs"
+
+[[example]]
 name = "filewatch"
 
 [dependencies]
