@@ -76,10 +76,10 @@ fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> {
         gl::ShaderSource(shader, 1, &c_str.as_ptr(), ptr::null());
         gl::CompileShader(shader);
 
-        let mut status: GLint = gl::FALSE as GLint;
+        let mut status: GLint = i32::from(gl::FALSE);
         gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
 
-        if status != (gl::TRUE as GLint) {
+        if status != i32::from(gl::TRUE) {
             let log_text = get_compile_error(shader);
             let error_msg = get_errors(&log_text, source).join("\n");
             return Err(error_msg);

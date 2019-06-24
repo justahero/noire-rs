@@ -228,9 +228,9 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 
         gl::LinkProgram(id);
 
-        let mut status = gl::FALSE as GLint;
+        let mut status = i32::from(gl::FALSE);
         gl::GetProgramiv(id, gl::LINK_STATUS, &mut status);
-        if status != (gl::TRUE as GLint) {
+        if status != i32::from(gl::TRUE) {
             gl::DeleteProgram(id);
             return Err(get_link_error(id));
         }

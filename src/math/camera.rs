@@ -18,8 +18,8 @@ pub struct Camera {
     pub orientation: Quaternion<f32>,
 }
 
-impl Camera {
-    pub fn new() -> Camera {
+impl Default for Camera {
+    fn default() -> Self {
         Camera {
             znear: 0.1,
             zfar: 100.0,
@@ -31,7 +31,15 @@ impl Camera {
             orientation: Quaternion::one(),
         }
     }
+}
 
+impl Camera {
+    /// Creates a new default Camera object
+    pub fn new() -> Camera {
+        Default::default()
+    }
+
+    /// Set perspective projection matrix
     pub fn perspective(&mut self, fov: f32, aspect: f32, znear: f32, zfar: f32) -> &mut Self {
         self.fov = fov;
         self.aspect = aspect;
@@ -49,7 +57,7 @@ impl Camera {
 
     // TODO change up vector to a default constant
     pub fn lookat(&mut self, eye: Point3<f32>, center: Point3<f32>, up: Vector3<f32>) -> &mut Self {
-        self.position = eye.clone();
+        self.position = eye;
         self.view = Matrix4::look_at(eye, center, up);
         self.orientation = convert_to_quaternion(&self.view);
         self.update_view()
