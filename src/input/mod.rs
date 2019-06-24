@@ -68,7 +68,7 @@ mod tests {
         let button = Button::Keyboard(key);
 
         let args = ButtonArgs {
-            button: button,
+            button,
             state: ButtonState::Press,
         };
 

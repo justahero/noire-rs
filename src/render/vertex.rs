@@ -21,7 +21,7 @@ impl VertexArrayObject {
             gl::GenVertexArrays(1, &mut id);
         }
         VertexArrayObject {
-            id: id,
+            id,
             vbs: vec![],
             ibs: vec![],
         }
@@ -74,7 +74,7 @@ impl Drawable for VertexArrayObject {
     /// Render the VertexArrayObject
     fn draw(&self) {
         let vb = &self.vbs[0];
-        if self.ibs.len() == 0 {
+        if self.ibs.is_empty() {
             unsafe {
                 gl::DrawArrays(vb.render_type.gl_primitive(), 0, vb.size() as i32);
             }

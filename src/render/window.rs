@@ -168,9 +168,9 @@ impl RenderWindow {
 
         // create instance and initialize the window
         Ok(RenderWindow {
-            glfw: glfw,
-            window: window,
-            events: events,
+            glfw,
+            window,
+            events,
             input_events: VecDeque::new(),
             pressed_buttons: VecDeque::new(),
         })
