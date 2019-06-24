@@ -1,10 +1,14 @@
+use std::ptr;
 use gl;
 
+use render::Size;
 use render::traits::{Bindable};
 
 /// A texture struct
 pub struct Texture {
     pub id: u32,
+    pub format: u32,
+    pub size: Size<u32>,
 }
 
 impl Texture {
@@ -16,9 +20,36 @@ impl Texture {
             gl::BindTexture(gl::TEXTURE_2D, id);
         }
 
+        let format = gl::RGB;
+
         Ok(Texture {
-            id
+            id,
+            format,
+            size: Size { width: 0, height: 0 },
         })
+    }
+
+    pub fn set_size(&mut self, size: Size<u32>) -> &mut Self {
+        self.size = size;
+
+        let level = 0;
+        let pixel_type = gl::UNSIGNED_BYTE;
+
+        unsafe {
+            gl::TexImage2D(
+                self.id,
+                level,
+                self.format as i32,
+                size.width as i32,
+                size.height as i32,
+                0,
+                self.format,
+                pixel_type,
+                ptr::null(),
+            );
+        }
+
+        self
     }
 
     pub fn linear(&self) -> &Self {
