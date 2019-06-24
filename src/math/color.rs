@@ -30,6 +30,15 @@ impl Color {
         }
     }
 
+    pub fn rgb(red: f32, green: f32, blue: f32) -> Self {
+        Color {
+            red,
+            green,
+            blue,
+            alpha: 1.0
+        }
+    }
+
     pub fn values(&self) -> [f32; 4] {
         [self.red, self.green, self.blue, self.alpha]
     }
