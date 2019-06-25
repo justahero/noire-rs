@@ -53,7 +53,7 @@ impl VertexBuffer {
     }
 
     pub fn gl_primitive(&self) -> u32 {
-        self.render_type.gl_primitive()
+        self.render_type.into()
     }
 }
 
