@@ -33,7 +33,6 @@ fn get_compile_error(shader: u32) -> String {
         );
 
         log_text = str::from_utf8(&buffer)
-            .ok()
             .expect("ShaderInfoLog not valid utf8")
             .to_string();
     }
@@ -52,7 +51,7 @@ fn get_source_location(line: i32, source: &str) -> String {
     result.join("\n").to_string()
 }
 
-fn get_errors(errors: &String, source: &str) -> Vec<String> {
+fn get_errors(errors: &str, source: &str) -> Vec<String> {
     let mut result = Vec::new();
     let lines: Vec<&str> = errors.split('\n').collect();
     for line in lines {
@@ -89,7 +88,7 @@ fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> {
 }
 
 impl Shader {
-    pub fn from_file(file_path: &String, shader_type: GLenum) -> Result<Self, String> {
+    pub fn from_file(file_path: &str, shader_type: GLenum) -> Result<Self, String> {
         let path = Path::new(file_path);
         let display = path.display();
 

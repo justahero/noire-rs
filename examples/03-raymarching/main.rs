@@ -42,8 +42,8 @@ const MAX_FPS_COUNT: u32 = 50;
 
 fn watch_program(
     rx: &Receiver<notify::DebouncedEvent>,
-    vertex_file: &String,
-    fragment_file: &String,
+    vertex_file: &str,
+    fragment_file: &str,
 ) -> std::option::Option<Program> {
     match rx.try_recv() {
         Ok(DebouncedEvent::Write(path)) => {
