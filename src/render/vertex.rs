@@ -76,7 +76,7 @@ impl Drawable for VertexArrayObject {
         let vb = &self.vbs[0];
         if self.ibs.is_empty() {
             unsafe {
-                gl::DrawArrays(vb.render_type.gl_primitive(), 0, vb.size() as i32);
+                gl::DrawArrays(vb.render_type.into(), 0, vb.size() as i32);
             }
         } else {
             let ib = &self.ibs[0];

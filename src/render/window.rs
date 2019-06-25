@@ -313,14 +313,14 @@ impl OpenGLWindow for RenderWindow {
     /// Implements GL specific logic to enable functionality
     fn enable(&mut self, cap: Capability) {
         unsafe {
-            gl::Enable(cap.gl_func());
+            gl::Enable(cap.into());
         }
     }
 
     /// Implements GL specific logic to disable functionality
     fn disable(&mut self, cap: Capability) {
         unsafe {
-            gl::Disable(cap.gl_func());
+            gl::Disable(cap.into());
         }
     }
 }

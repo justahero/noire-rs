@@ -27,10 +27,10 @@ pub enum Primitive {
     TriangleStrip = gl::TRIANGLE_STRIP,
 }
 
-impl Primitive {
-    fn gl_primitive(&self) -> u32 {
-        match *self {
-            Primitive::Triangles     => gl::TRIANGLES,
+impl From<Primitive> for gl::types::GLenum {
+    fn from(primitive: Primitive) -> Self {
+        match primitive {
+            Primitive::Triangles => gl::TRIANGLES,
             Primitive::TriangleStrip => gl::TRIANGLE_STRIP,
         }
     }
@@ -87,16 +87,30 @@ impl PixelType {
 }
 
 /// An enum containing all capabilities that can be enabled / disabled (GL specific)
+#[derive(Copy, Clone, Debug, PartialEq)]
+#[repr(u32)]
 pub enum Capability {
     /// enable or disable depth tests
-    DepthTest,
+    DepthTest = gl::DEPTH_TEST,
+    /// back side culling faces / polygons
+    CullFace = gl::CULL_FACE,
 }
 
-/// Implements GL specific functions
-impl Capability {
-    fn gl_func(&self) -> u32 {
-        match *self {
-            Capability::DepthTest => gl::DEPTH_TEST
+impl From<gl::types::GLenum> for Capability {
+    fn from(value: gl::types::GLenum) -> Self {
+        match value {
+            gl::DEPTH_TEST => Capability::DepthTest,
+            gl::CULL_FACE => Capability::CullFace,
+            _ => panic!("Unknown capability found: {}", value),
+        }
+    }
+}
+
+impl From<Capability> for gl::types::GLenum {
+    fn from(cap: Capability) -> Self {
+        match cap {
+            Capability::DepthTest => gl::DEPTH_TEST,
+            Capability::CullFace => gl::CULL_FACE,
         }
     }
 }
