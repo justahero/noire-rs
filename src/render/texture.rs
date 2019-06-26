@@ -4,6 +4,39 @@ use gl;
 use render::Size;
 use render::traits::{Bindable};
 
+/// Specific the Format of the Pixel Data
+#[derive(Clone, Copy, Debug, PartialEq)]
+#[repr(u32)]
+pub enum PixelFormat {
+    RGBA = gl::RGBA,
+    BGRA = gl::BGRA,
+    DepthComponent = gl::DEPTH_COMPONENT,
+    DepthStencil = gl::DEPTH_STENCIL,
+}
+
+impl From<PixelFormat> for gl::types::GLenum {
+    fn from(pixel_format: PixelFormat) -> Self {
+        match pixel_format {
+            PixelFormat::RGBA => gl::RGBA,
+            PixelFormat::BGRA => gl::BGRA,
+            PixelFormat::DepthComponent => gl::DEPTH_COMPONENT,
+            PixelFormat::DepthStencil => gl::DEPTH_STENCIL,
+        }
+    }
+}
+
+impl From<gl::types::GLenum> for PixelFormat {
+    fn from(pixel_format: gl::types::GLenum) -> Self {
+        match pixel_format {
+            gl::RGBA => PixelFormat::RGBA,
+            gl::BGRA => PixelFormat::BGRA,
+            gl::DEPTH_COMPONENT => PixelFormat::DepthComponent,
+            gl::DEPTH_STENCIL => PixelFormat::DepthStencil,
+            _ => panic!("Unknown pixel format found: {}", pixel_format),
+        }
+    }
+}
+
 /// A texture struct
 pub struct Texture {
     pub id: u32,
@@ -46,7 +79,7 @@ impl Texture {
                 size.width as i32,
                 size.height as i32,
                 0,
-                self.format,
+                PixelFormat::BGRA.into(),
                 pixel_type,
                 ptr::null(),
             );

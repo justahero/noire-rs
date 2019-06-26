@@ -46,13 +46,25 @@ pub enum Format {
     RGBA8 = gl::RGBA8,
 }
 
-impl Format {
-    fn gl_format(&self) -> u32 {
-        match *self {
+impl From<Format> for gl::types::GLenum {
+    fn from(format: Format) -> Self {
+        match format {
             Format::RGB   => gl::RGB,
             Format::RGB8  => gl::RGB8,
             Format::RGBA  => gl::RGBA,
             Format::RGBA8 => gl::RGBA8,
+        }
+    }
+}
+
+impl From<gl::types::GLenum> for Format {
+    fn from(format: gl::types::GLenum) -> Self {
+        match format {
+            gl::RGB => Format::RGB,
+            gl::RGB8 => Format::RGB8,
+            gl::RGBA => Format::RGBA,
+            gl::RGBA8 => Format::RGBA8,
+            _ => panic!("Unknown format found: {}", format),
         }
     }
 }
@@ -71,9 +83,9 @@ pub enum PixelType {
     HalfFloat = gl::HALF_FLOAT,
 }
 
-impl PixelType {
-    fn gl_type(&self) -> u32 {
-        match *self {
+impl From<PixelType> for gl::types::GLenum {
+    fn from(pixel_type: PixelType) -> Self {
+        match pixel_type {
             PixelType::UnsignedByte  => gl::UNSIGNED_BYTE,
             PixelType::Byte          => gl::BYTE,
             PixelType::UnsignedShort => gl::UNSIGNED_SHORT,
