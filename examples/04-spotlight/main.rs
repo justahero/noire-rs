@@ -71,21 +71,23 @@ fn main() {
 
         // set some basic shader uniform variables
         program.bind();
-        program.uniform("u_cameraPos", camera.position.into());
-        program.uniform("u_resolution", window.get_framebuffer_size().into());
-        program.uniform("u_time", elapsed.into());
-        program.uniform("u_lightPos", light_pos.into());
+        program
+            .uniform("u_cameraPos", camera.position.into())
+            .uniform("u_resolution", window.get_framebuffer_size().into())
+            .uniform("u_time", elapsed.into())
+            .uniform("u_lightPos", light_pos.into());
 
         // render room cube!
         let model_view = camera.view;
         let model_view_proj = camera.projection * model_view;
         let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 
-        program.uniform("u_objectColor", Color::rgb(0.4, 0.8, 0.25).into());
-        program.uniform("u_modelView", model_view.into());
-        program.uniform("u_modelViewProjection", model_view_proj.into());
-        program.uniform("u_normalMatrix", normal_matrix.into());
-        program.uniform("u_shininess", 4.0.into());
+        program
+            .uniform("u_modelView", model_view.into())
+            .uniform("u_modelViewProjection", model_view_proj.into())
+            .uniform("u_normalMatrix", normal_matrix.into())
+            .uniform("u_objectColor", Color::rgb(0.4, 0.8, 0.25).into())
+            .uniform("u_shininess", 4.0.into());
 
         room_vao.bind();
         room_vao.draw();
