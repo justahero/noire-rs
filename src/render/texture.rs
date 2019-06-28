@@ -1,7 +1,7 @@
 use std::ptr;
 use gl;
 
-use render::Size;
+use render::{Format, Size};
 use render::traits::{Bindable};
 
 /// Specific the Format of the Pixel Data
@@ -42,6 +42,7 @@ pub struct Texture {
     pub id: u32,
     pub target: u32,
     pub format: u32,
+    pub pixel_format: PixelFormat,
     pub size: Size<u32>,
 }
 
@@ -55,14 +56,44 @@ impl Texture {
             gl::BindTexture(target, id);
         }
 
-        let format = gl::RGB;
-
-        Ok(Texture {
+        let texture = Texture {
             id,
             target,
-            format,
+            format: Format::RGB.into(),
+            pixel_format: PixelFormat::BGRA,
             size: Size { width: 0, height: 0 },
-        })
+        };
+
+        unsafe {
+            gl::BindTexture(target, 0);
+        }
+
+        Ok(texture)
+    }
+
+    /// Creates a Texture with a depth level
+    pub fn create_depth_texture() -> Result<Self, String> {
+        let mut id = 0;
+        let target = gl::TEXTURE_2D;
+
+        unsafe {
+            gl::GenTextures(1, &mut id);
+            gl::BindTexture(target, id);
+        }
+
+        let texture = Texture {
+            id,
+            target,
+            format: Format::RGB.into(),
+            pixel_format: PixelFormat::DepthComponent,
+            size: Size { width: 0, height: 0 },
+        };
+
+        unsafe {
+            gl::BindTexture(target, 0);
+        }
+
+        Ok(texture)
     }
 
     pub fn set_size(&mut self, size: Size<u32>) -> &mut Self {
