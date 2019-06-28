@@ -3,7 +3,10 @@ use std::fmt;
 
 pub mod traits;
 
+pub mod capabilities;
+pub mod context;
 pub mod index_buffer;
+pub mod opengl;
 pub mod program;
 pub mod shader;
 pub mod texture;
