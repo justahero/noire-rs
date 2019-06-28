@@ -1,3 +1,6 @@
+use std::error;
+use std::fmt;
+
 pub mod traits;
 
 pub mod index_buffer;
@@ -8,6 +11,26 @@ pub mod vertex;
 pub mod vertex_buffer;
 pub mod window;
 
+/// A generic Render error
+#[derive(Debug, Clone)]
+pub struct RenderError {
+    message: String
+}
+
+/// Generates an appropriate error message for Display
+impl fmt::Display for RenderError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", format!("Render Error: {}", self.message ))
+    }
+}
+
+/// This allows other error types to wrap this one
+impl error::Error for RenderError {
+    fn source(&self) -> Option<&(dyn error::Error + 'static)> {
+        None
+    }
+}
+
 /// Struct to provide size dimensions
 #[derive(Debug, Copy, Clone)]
 pub struct Size<T> {
@@ -15,6 +38,42 @@ pub struct Size<T> {
     pub width: T,
     /// height
     pub height: T,
+}
+
+impl Default for Size<u32> {
+    fn default() -> Self {
+        Size {
+            width: 0,
+            height: 0,
+        }
+    }
+}
+
+/// Struct to represent a 2 dimensional point
+#[derive(Debug, Copy, Clone)]
+pub struct Point2<T> {
+    /// x coordinate
+    pub x: T,
+    /// y coordinate
+    pub y: T,
+}
+
+impl<T> Point2<T> {
+    /// Creates a new Point with x,y coordinates
+    fn new(x: T, y: T) -> Self {
+        Point2 { x, y }
+    }
+}
+
+impl Default for Point2<u32> {
+    fn default() -> Self {
+        Point2 { x: 0, y: 0 }
+    }
+}
+
+impl Point2<u32> {
+    /// Creates a new Point with coordinates set to zero
+    pub const ZERO: Point2<u32> = Point2{ x: 0, y: 0 };
 }
 
 /// Primitive type to render
@@ -123,6 +182,39 @@ impl From<Capability> for gl::types::GLenum {
         match cap {
             Capability::DepthTest => gl::DEPTH_TEST,
             Capability::CullFace => gl::CULL_FACE,
+        }
+    }
+}
+
+/// Defines the culling mode
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+#[repr(u32)]
+pub enum CullMode {
+    /// Cull Front face
+    Front = gl::FRONT,
+    /// Cull Back face
+    Back = gl::BACK,
+    /// Culls both Front and Back faces
+    Both = gl::FRONT_AND_BACK,
+}
+
+impl From<CullMode> for gl::types::GLenum {
+    fn from(cull_mode: CullMode) -> Self {
+        match cull_mode {
+            CullMode::Front => gl::FRONT,
+            CullMode::Back  => gl::BACK,
+            CullMode::Both  => gl::FRONT_AND_BACK,
+        }
+    }
+}
+
+impl From<gl::types::GLenum> for CullMode {
+    fn from(cull_mode: gl::types::GLenum) -> Self {
+        match cull_mode {
+            gl::FRONT => CullMode::Front,
+            gl::BACK => CullMode::Back,
+            gl::FRONT_AND_BACK => CullMode::Both,
+            _ => panic!("Unknown cull mode found: {}", cull_mode),
         }
     }
 }
