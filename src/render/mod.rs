@@ -35,7 +35,7 @@ pub struct RenderError {
 /// Generates an appropriate error message for Display
 impl fmt::Display for RenderError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", format!("Render Error: {}", self.message ))
+        write!(f, "{}", format!("Render Error: {}", self.message))
     }
 }
 
