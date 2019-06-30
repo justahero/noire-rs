@@ -5,7 +5,7 @@ pub mod traits;
 
 pub mod capabilities;
 pub mod context;
-pub mod framebuffer;
+pub mod frame_buffer;
 pub mod index_buffer;
 pub mod opengl;
 pub mod program;
