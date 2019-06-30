@@ -32,7 +32,7 @@ fn main() {
     // create shader program
     let vertex_file = String::from("./examples/01-spinning-cube/shaders/vertex.glsl");
     let fragment_file = String::from("./examples/01-spinning-cube/shaders/fragment.glsl");
-    let program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
+    let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
     let mesh = Mesh::create_cube(Cube::create(1.0)).unwrap();

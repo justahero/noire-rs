@@ -1,16 +1,15 @@
 use cgmath::{Matrix, Matrix3, Matrix4, Point3, Vector2, Vector3};
 
-use math::color::Color;
-
 use gl;
 use gl::types::*;
 
 use std::ptr;
 use std::str;
 
+use math::color::Color;
+
 use super::Size;
-use render::shader::Shader;
-use render::texture::Texture;
+use render::{Shader, Texture};
 use render::traits::Bindable;
 
 /// A shader variable, can be an uniform or attribute
@@ -93,6 +92,7 @@ pub struct Program {
     pub samples: Vec<Sample>,
 }
 
+/// An enum to provide a unified interface for all Uniforms
 #[derive(Debug)]
 pub enum Uniform {
     Color(Color),
@@ -335,7 +335,7 @@ impl Program {
     ///
     /// * `name` - The name of the uniform variable
     /// * `uniform` - The Uniform to set
-    pub fn uniform(&self, name: &str, uniform: Uniform) -> &Self {
+    pub fn uniform(&mut self, name: &str, uniform: Uniform) -> &mut Self {
         if let Some(variable) = self.uniform_by_name(name) {
             let location = variable.location;
             match uniform {
