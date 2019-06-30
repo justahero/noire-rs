@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-#![allow(unused_imports)]
 #![allow(unused_variables)]
 
 extern crate cgmath;
@@ -7,24 +6,16 @@ extern crate gl;
 extern crate noire;
 extern crate notify;
 
-use gl::types::*;
-
 use cgmath::*;
+use std::time::Instant;
 
 use noire::math::*;
 use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
-use noire::render::{FrameBuffer, Program, Shader, Spotlight, Texture, VertexArrayObject};
+use noire::render::{FrameBuffer, Program, Spotlight, Texture};
 use noire::render::traits::*;
-use noire::render::{Capability, CullMode, Point2, Primitive, Size};
+use noire::render::{Capability, Point2, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
-use noire::render::spot_light::*;
-
-use notify::*;
-use std::sync::mpsc::channel;
-use std::time::{Duration, Instant};
-use std::thread;
-use std::thread::JoinHandle;
 
 fn main() {
     let mut window = RenderWindow::create(1024, 1024, "Hello This is window")
