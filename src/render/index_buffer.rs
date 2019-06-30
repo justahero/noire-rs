@@ -3,7 +3,9 @@ use std::mem;
 use gl;
 use gl::types::*;
 
+use render::RenderError;
 use render::traits::{Bindable};
+use render::opengl::get_render_error;
 
 pub struct IndexBuffer {
     pub id: u32,
@@ -11,7 +13,7 @@ pub struct IndexBuffer {
 }
 
 impl IndexBuffer {
-    pub fn create(indices: &[u32]) -> IndexBuffer {
+    pub fn create(indices: &[u32]) -> Result<IndexBuffer, RenderError> {
         let total_size = indices.len() * mem::size_of::<u32>();
 
         let mut id = 0;
@@ -29,10 +31,12 @@ impl IndexBuffer {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }
 
-        IndexBuffer {
+        get_render_error()?;
+
+        Ok(IndexBuffer {
             id,
             count: indices.len(),
-        }
+        })
     }
 
     pub fn num_indices(&self) -> usize {

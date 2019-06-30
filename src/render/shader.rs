@@ -22,6 +22,7 @@ fn get_compile_error(shader: u32) -> String {
     unsafe {
         let mut length: i32 = 0;
         gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut length);
+
         let mut buffer = Vec::with_capacity(length as usize);
         buffer.set_len((length as usize) - 1);
 
@@ -108,13 +109,11 @@ impl Shader {
 
     pub fn create(source: &str, shader_type: GLenum) -> Result<Self, String> {
         match compile_shader(source, shader_type) {
-            Ok(id) => {
-                Ok(Shader {
-                    id,
-                    source: String::from(source),
-                    shader_type,
-                })
-            }
+            Ok(id) => Ok(Shader {
+                id,
+                source: String::from(source),
+                shader_type,
+            }),
             Err(message) => Err(message),
         }
     }

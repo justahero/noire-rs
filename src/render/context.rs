@@ -159,7 +159,7 @@ pub struct Context {
 }
 
 impl Context {
-    /// Create a new Context,
+    /// Create a new Context
     pub fn new(debug: bool) -> Result<Rc<Context>, OpenGLError> {
         let capabilities = Capabilities::enumerate();
 

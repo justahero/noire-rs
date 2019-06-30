@@ -2,16 +2,16 @@ use std::ptr;
 
 use gl;
 
-use render::RenderError;
+use render::{IndexBuffer, RenderError, VertexBuffer};
 use render::traits::{Bindable, Drawable};
-use render::index_buffer::{IndexBuffer};
-use render::vertex_buffer::{VertexBuffer};
 
 /// A struct to represent a OpenGL vertex array object (VAO)
 pub struct VertexArrayObject {
     /// the OpenGL instance id
     id: u32,
+    /// The list of Vertex Buffers
     vbs: Vec<VertexBuffer>,
+    /// The list of Index Buffers,
     ibs: Vec<IndexBuffer>,
 }
 
@@ -54,7 +54,14 @@ impl Bindable for VertexArrayObject {
         for (i, ref vb) in self.vbs.iter().enumerate() {
             vb.bind();
             unsafe {
-                gl::VertexAttribPointer(i as u32, vb.num_components(), gl::FLOAT, gl::FALSE, stride, ptr::null());
+                gl::VertexAttribPointer(
+                    i as u32,
+                    vb.num_components(),
+                    gl::FLOAT,
+                    gl::FALSE,
+                    stride,
+                    ptr::null(),
+                );
                 gl::EnableVertexAttribArray(i as u32);
             }
             stride += vb.component_size();
@@ -100,7 +107,12 @@ impl Drawable for VertexArrayObject {
         } else {
             let ib = &self.ibs[0];
             unsafe {
-                gl::DrawElements(gl::TRIANGLES, ib.num_indices() as i32, gl::UNSIGNED_INT, ptr::null());
+                gl::DrawElements(
+                    gl::TRIANGLES,
+                    ib.num_indices() as i32,
+                    gl::UNSIGNED_INT,
+                    ptr::null(),
+                );
             }
         }
     }

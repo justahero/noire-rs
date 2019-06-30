@@ -40,7 +40,7 @@ fn main() {
 
     // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, Primitive::TriangleStrip);
-    let ib = IndexBuffer::create(&INDICES);
+    let ib = IndexBuffer::create(&INDICES).unwrap();
 
     let mut vao = VertexArrayObject::new().unwrap();
     vao.add_vb(vb);
