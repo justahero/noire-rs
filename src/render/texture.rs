@@ -1,7 +1,7 @@
 use std::ptr;
 use gl;
 
-use render::{Format, Size};
+use render::{Format, PixelType, RenderError, Size};
 use render::traits::{Bindable};
 
 /// Specific the Format of the Pixel Data
@@ -39,15 +39,22 @@ impl From<gl::types::GLenum> for PixelFormat {
 
 /// A texture struct
 pub struct Texture {
+    /// OpenGL id
     pub id: u32,
+    /// Target type of the Texture
     pub target: u32,
-    pub format: u32,
+    /// Texture format, internal
+    pub format: Format,
+    /// Texture pixel format
     pub pixel_format: PixelFormat,
+    /// The size of the Texture in pixels
     pub size: Size<u32>,
+    /// The data type of the pixel data
+    pub pixel_type: PixelType,
 }
 
 impl Texture {
-    pub fn create2d() -> Result<Self, String> {
+    pub fn create2d() -> Result<Self, RenderError> {
         let mut id = 0;
         let target = gl::TEXTURE_2D;
 
@@ -59,9 +66,10 @@ impl Texture {
         let texture = Texture {
             id,
             target,
-            format: Format::RGB.into(),
+            format: Format::RGB,
             pixel_format: PixelFormat::BGRA,
             size: Size { width: 0, height: 0 },
+            pixel_type: PixelType::UnsignedByte,
         };
 
         unsafe {
@@ -72,7 +80,7 @@ impl Texture {
     }
 
     /// Creates a Texture with a depth level
-    pub fn create_depth_texture() -> Result<Self, String> {
+    pub fn create_depth_texture() -> Result<Self, RenderError> {
         let mut id = 0;
         let target = gl::TEXTURE_2D;
 
@@ -84,9 +92,10 @@ impl Texture {
         let texture = Texture {
             id,
             target,
-            format: Format::RGB.into(),
+            format: Format::DepthComponent,
             pixel_format: PixelFormat::DepthComponent,
             size: Size { width: 0, height: 0 },
+            pixel_type: PixelType::Float,
         };
 
         unsafe {
@@ -96,22 +105,31 @@ impl Texture {
         Ok(texture)
     }
 
+    /// Sets the size of the Texture
+    ///
+    /// For more details check documentation on
+    /// [TexImage2D](https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glTexImage2D.xhtml)
+    ///
+    /// ## Arguments
+    ///
+    /// * `size` - the Size of the texture, best to provide a multiple of 2
+    ///
+    /// Returns either reference to self or an Error message
     pub fn set_size(&mut self, size: Size<u32>) -> &mut Self {
         self.size = size;
 
-        let level = 0;
-        let pixel_type = gl::UNSIGNED_BYTE;
+        let format: gl::types::GLenum = self.format.into();
 
         unsafe {
             gl::TexImage2D(
                 self.target,
-                level,
-                self.format as i32,
+                0,
+                format as i32,
                 size.width as i32,
                 size.height as i32,
                 0,
-                PixelFormat::BGRA.into(),
-                pixel_type,
+                self.pixel_format.into(),
+                self.pixel_type.into(),
                 ptr::null(),
             );
         }
