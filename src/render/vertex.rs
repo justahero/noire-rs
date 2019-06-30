@@ -19,6 +19,7 @@ impl VertexArrayObject {
     /// Create a new instance of a VertexArrayObject
     pub fn new() -> Result<VertexArrayObject, RenderError> {
         let mut id = 0;
+
         unsafe {
             gl::GenVertexArrays(1, &mut id);
         }
@@ -30,11 +31,13 @@ impl VertexArrayObject {
         })
     }
 
+    /// Add a vertex buffer to use
     pub fn add_vb(&mut self, vb: VertexBuffer) -> &mut Self {
         self.vbs.push(vb);
         self
     }
 
+    /// Add an index buffer
     pub fn add_ib(&mut self, ib: IndexBuffer) -> &mut Self {
         self.ibs.push(ib);
         self

@@ -122,7 +122,8 @@ impl Shader {
 
 impl Drop for Shader {
     fn drop(&mut self) {
-        assert!(self.id > 0);
+        debug_assert!(self.id > 0);
+
         unsafe {
             gl::DeleteShader(self.id);
         }

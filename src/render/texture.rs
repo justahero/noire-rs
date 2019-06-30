@@ -53,7 +53,9 @@ pub struct Texture {
     pub pixel_type: PixelType,
 }
 
+/// A Texture object
 impl Texture {
+    /// Creates a new Texture object
     pub fn create2d() -> Result<Self, RenderError> {
         let mut id = 0;
         let target = gl::TEXTURE_2D;
@@ -132,12 +134,17 @@ impl Texture {
                 self.pixel_type.into(),
                 ptr::null(),
             );
+
+            gl::GenerateMipmap(self.target);
         }
 
         self
     }
 
+    /// Enable linear interpolation
     pub fn linear(&self) -> &Self {
+        debug_assert!(self.bound());
+
         unsafe {
             gl::TexParameteri(self.target, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
             gl::TexParameteri(self.target, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
@@ -147,15 +154,18 @@ impl Texture {
 
     /// Enables nearest neighbor interpolation
     pub fn nearest(&self) -> &Self {
+        debug_assert!(self.bound());
+
         unsafe {
             gl::TexParameteri(self.target, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32);
             gl::TexParameteri(self.target, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
         }
-
         self
     }
 
     pub fn clamp_to_edge(&self) -> &Self {
+        debug_assert!(self.bound());
+
         unsafe {
             gl::TexParameteri(self.target, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as i32);
             gl::TexParameteri(self.target, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as i32);
@@ -166,17 +176,21 @@ impl Texture {
 
 impl Bindable for Texture {
     fn bind(&self) -> &Self {
+        debug_assert!(!self.bound());
+
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0);
-            gl::BindTexture(gl::TEXTURE_2D, self.id);
+            gl::BindTexture(self.target, self.id);
         }
         self
     }
 
     fn unbind(&self) -> &Self {
+        debug_assert!(self.bound());
+
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0);
-            gl::BindTexture(gl::TEXTURE_2D, 0);
+            gl::BindTexture(self.target, 0);
         }
         self
     }

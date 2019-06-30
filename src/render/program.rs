@@ -333,6 +333,7 @@ impl Program {
     ///
     /// ## Arguments
     ///
+    /// * `name` - The name of the uniform variable
     /// * `uniform` - The Uniform to set
     pub fn uniform(&self, name: &str, uniform: Uniform) -> &Self {
         if let Some(variable) = self.uniform_by_name(name) {
