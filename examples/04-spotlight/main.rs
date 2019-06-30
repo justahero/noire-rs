@@ -42,7 +42,7 @@ fn main() {
     let program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
-    let cube = Mesh::create(Cube::create(0.75));
+    let cube = Mesh::create_cube(Cube::create(0.75));
     let cube_vao = cube.vao;
 
     let room = Mesh::create(Cube::create(10.0));
