@@ -1,5 +1,7 @@
 use gl;
 
+use render::RenderError;
+
 /// Callback signature for the OpenGL debug API callback function
 pub type DebugCallback = Box<dyn FnMut(Source, MessageType, Severity, u32, &str)>;
 
@@ -84,5 +86,49 @@ impl From<gl::types::GLenum> for MessageType {
             gl::DEBUG_TYPE_OTHER => MessageType::Other,
             _ => panic!("Unknown message type given: {}", message_type),
         }
+    }
+}
+
+/// Aggregates the list of GL errors, returns either Ok or Err
+pub fn get_render_error() -> Result<(), RenderError> {
+    let mut errors = Vec::new();
+
+    while let Err(error) = get_error() {
+        errors.push(error);
+    }
+
+    if errors.is_empty() {
+        return Ok(());
+    }
+
+    Err(RenderError { message: errors.join(", ") })
+}
+
+/// Fetches the last GL error, if present returns ERR, otherwise Ok
+pub fn get_error<'a>() -> Result<(), String> {
+    unsafe {
+        let error = gl::GetError();
+
+        if error == gl::NO_ERROR {
+            return Ok(());
+        }
+        Err(get_error_msg(error).to_string())
+    }
+}
+
+/// Converts a GL error code to a string message
+///
+/// ## Arguments
+///
+/// * `error` - The OpenGL error code
+///
+fn get_error_msg<'a>(error: u32) -> &'a str {
+    match error {
+        gl::INVALID_ENUM      => "Invalid Enum",
+        gl::INVALID_VALUE     => "Invalid Value",
+        gl::INVALID_OPERATION => "Invalid Operation",
+        gl::STACK_OVERFLOW    => "Stack Overflow",
+        gl::OUT_OF_MEMORY     => "Out of Memory",
+        _ => "Unknown",
     }
 }
