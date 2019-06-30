@@ -1,4 +1,8 @@
 #![allow(unused_variables)]
+
+pub use self::camera::Camera;
+pub use self::color::Color;
+
 pub mod camera;
 pub mod color;
 

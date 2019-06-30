@@ -12,18 +12,10 @@ use gl::types::*;
 use cgmath::*;
 
 use noire::math::*;
-use noire::math::color::Color;
-use noire::math::camera::*;
-use noire::mesh;
-use noire::mesh::mesh::Mesh;
-use noire::mesh::plane::Plane;
-use noire::mesh::cube::Cube;
-use noire::render::shader::*;
-use noire::render::program::*;
-use noire::render::traits::*;
-use noire::render::vertex::*;
-use noire::render::{Capability};
-use noire::render::window::{OpenGLWindow,RenderWindow,Window};
+use noire::math::{Camera, Color};
+use noire::mesh::{Cube, Mesh, Plane};
+use noire::render::{Bindable, Capability, Drawable, Program, Shader, VertexArrayObject};
+use noire::render::{OpenGLWindow, RenderWindow, Window};
 
 use notify::*;
 use std::sync::mpsc::channel;
