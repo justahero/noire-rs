@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 
 use std::cell::Cell;
+use std::rc::Rc;
 use std::sync::mpsc::Receiver;
 use std::collections::VecDeque;
 
@@ -9,6 +10,7 @@ use glfw;
 use glfw::{Context, Glfw, Error, WindowEvent};
 
 use input::{Button, Input};
+use super::context;
 use super::{Capability, CullMode, Point2, Size};
 
 /// Struct to provide coordinates
@@ -83,6 +85,8 @@ pub struct RenderWindow {
     pub glfw: Glfw,
     /// GL Window instance
     pub window: glfw::Window,
+    /// OpenGL specific context
+    pub context: Rc<context::Context>,
     /// Listener of new window events from glfw
     events: Receiver<(f64, WindowEvent)>,
     /// vector of input events
@@ -169,11 +173,14 @@ impl RenderWindow {
         // load gl functions
         gl::load_with(|s| window.get_proc_address(s) as *const _);
 
-        // create instance and initialize the window
+        // create new Context to abstract GL specific functions
+        let context = context::Context::new(true).expect("Failed to create context");
+
         Ok(RenderWindow {
             glfw,
             window,
             events,
+            context: context,
             input_events: VecDeque::new(),
             pressed_buttons: VecDeque::new(),
         })

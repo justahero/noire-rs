@@ -2,6 +2,7 @@ use std::error;
 use std::fmt;
 
 pub use self::capabilities::Capabilities;
+pub use self::context::Context;
 pub use self::frame_buffer::FrameBuffer;
 pub use self::index_buffer::IndexBuffer;
 pub use self::program::{Program, Uniform};
