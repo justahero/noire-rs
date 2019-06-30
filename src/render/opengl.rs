@@ -1,3 +1,6 @@
+use std::path::PathBuf;
+
+use backtrace::{Backtrace, BacktraceFrame};
 use gl;
 
 use render::RenderError;
@@ -104,16 +107,54 @@ pub fn get_render_error() -> Result<(), RenderError> {
     Err(RenderError { message: errors.join(", ") })
 }
 
-/// Fetches the last GL error, if present returns ERR, otherwise Ok
-pub fn get_error<'a>() -> Result<(), String> {
-    unsafe {
-        let error = gl::GetError();
+#[derive(Debug, Clone)]
+struct Frame {
+    pub lineno: Option<u32>,
+    pub name: Option<String>,
+    pub filename: Option<PathBuf>,
+}
 
-        if error == gl::NO_ERROR {
-            return Ok(());
-        }
-        Err(get_error_msg(error).to_string())
+/// Fetches the last GL error, if present returns ERR, otherwise Ok
+/// The function also tries to find the source file location where the error originates from
+/// by traversing the back trace
+fn get_error<'a>() -> Result<(), String> {
+    let mut error = 0;
+
+    unsafe {
+        error = gl::GetError();
     }
+
+    // resolve the associated frame, get function, file and line number
+    // TODO can this be made simpler?
+    if error != gl::NO_ERROR {
+        let frames: Vec<BacktraceFrame> = Backtrace::new().into();
+
+        let index = frames.iter().position(|frame| {
+            let mut found = false;
+            backtrace::resolve(frame.ip(), |symbol| {
+                if let Some(name) = symbol.name() {
+                    found = !name.to_string().starts_with("backtrace::");
+                }
+            });
+            found
+        });
+
+        if let Some(index) = index {
+            let mut message: String = String::new();
+            backtrace::resolve(frames[index + 2].ip(), |symbol| {
+                let name: String = match symbol.name() {
+                    Some(name) => name.to_string(),
+                    None => "unknown".to_string(),
+                };
+
+                message = format!("{} in {}", get_error_msg(error), name);
+            });
+
+            return Err(message);
+        }
+    }
+
+    Ok(())
 }
 
 /// Converts a GL error code to a string message

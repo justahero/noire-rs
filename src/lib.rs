@@ -1,6 +1,7 @@
 #![crate_type="lib"]
 #![crate_type="dylib"]
 
+extern crate backtrace;
 extern crate cgmath;
 extern crate gl;
 extern crate glfw;
