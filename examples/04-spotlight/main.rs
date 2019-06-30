@@ -16,6 +16,7 @@ use noire::math::color::Color;
 use noire::math::camera::*;
 use noire::mesh;
 use noire::mesh::mesh::Mesh;
+use noire::mesh::plane::Plane;
 use noire::mesh::cube::Cube;
 use noire::render::shader::*;
 use noire::render::program::*;
@@ -42,13 +43,9 @@ fn main() {
     let program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
-    let cube = Mesh::create(Cube::create(0.75));
-    let cube_vao = cube.vao;
-
-    let room = Mesh::create(Cube::create(10.0));
-    let room_vao = room.vao;
-
-    let start_time = Instant::now();
+    let cube = Mesh::create_cube(Cube::create(0.75)).unwrap();
+    let mut plane = Mesh::create_plane(Plane::create(10.0, 10.0)).unwrap();
+    plane.translate(Vector3{ x: 0.0, y: -3.0, z: 0.0});
 
     let mut camera = Camera::new();
     camera
@@ -60,13 +57,15 @@ fn main() {
         );
     let light_pos = vec3(-2.5, 0.0, 1.0);
 
+    let start_time = Instant::now();
+
     loop {
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
         // clear scene
-        window.clear(0.95, 0.95, 0.95, 1.0);
+        window.clear(0.0, 0.0, 0.0, 0.0);
         window.clear_depth(1.0);
 
         // set some basic shader uniform variables
@@ -77,8 +76,8 @@ fn main() {
             .uniform("u_time", elapsed.into())
             .uniform("u_lightPos", light_pos.into());
 
-        // render room cube!
-        let model_view = camera.view;
+        // render plane!
+        let model_view = camera.view * plane.model_view;
         let model_view_proj = camera.projection * model_view;
         let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 
@@ -89,14 +88,14 @@ fn main() {
             .uniform("u_objectColor", Color::rgb(0.4, 0.8, 0.25).into())
             .uniform("u_shininess", 4.0.into());
 
-        room_vao.bind();
-        room_vao.draw();
-        room_vao.unbind();
+        plane.vao.bind();
+        plane.vao.draw();
+        plane.vao.unbind();
 
-        // animate and render cube in room
+        // animate and render plane
         let rotate_x = Matrix4::from_angle_x(Rad::from(Deg(elapsed * 22.5)));
         let rotate_y = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
-        let model_view = camera.view * rotate_y * rotate_x;
+        let model_view = camera.view * cube.model_view * rotate_y * rotate_x;;
         let model_view_proj = camera.projection * model_view;
         let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 
@@ -106,9 +105,9 @@ fn main() {
         program.uniform("u_objectColor", Color::rgb(1.0, 1.0, 1.0).into());
         program.uniform("u_shininess", 32.0.into());
 
-        cube_vao.bind();
-        cube_vao.draw();
-        cube_vao.unbind();
+        cube.vao.bind();
+        cube.vao.draw();
+        cube.vao.unbind();
 
         // remove program
         program.unbind();

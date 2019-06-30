@@ -2,6 +2,7 @@ use std::ptr;
 
 use gl;
 
+use render::RenderError;
 use render::traits::{Bindable, Drawable};
 use render::index_buffer::{IndexBuffer};
 use render::vertex_buffer::{VertexBuffer};
@@ -14,32 +15,29 @@ pub struct VertexArrayObject {
     ibs: Vec<IndexBuffer>,
 }
 
-/// Fill default struct
-impl Default for VertexArrayObject {
-    fn default() -> Self {
+impl VertexArrayObject {
+    /// Create a new instance of a VertexArrayObject
+    pub fn new() -> Result<VertexArrayObject, RenderError> {
         let mut id = 0;
         unsafe {
             gl::GenVertexArrays(1, &mut id);
         }
-        VertexArrayObject {
+
+        Ok(VertexArrayObject {
             id,
             vbs: vec![],
             ibs: vec![],
-        }
-    }
-}
-
-impl VertexArrayObject {
-    pub fn new() -> VertexArrayObject {
-        Default::default()
+        })
     }
 
-    pub fn add_vb(&mut self, vb: VertexBuffer) {
+    pub fn add_vb(&mut self, vb: VertexBuffer) -> &mut Self {
         self.vbs.push(vb);
+        self
     }
 
-    pub fn add_ib(&mut self, ib: IndexBuffer) {
+    pub fn add_ib(&mut self, ib: IndexBuffer) -> &mut Self {
         self.ibs.push(ib);
+        self
     }
 }
 

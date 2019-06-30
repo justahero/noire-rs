@@ -91,7 +91,7 @@ fn main() {
 
     // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, Primitive::TriangleStrip);
-    let mut vao = VertexArrayObject::new();
+    let mut vao = VertexArrayObject::new().unwrap();
     vao.add_vb(vb);
 
     let mut last_pos = Pos { x: 0, y: 0 };

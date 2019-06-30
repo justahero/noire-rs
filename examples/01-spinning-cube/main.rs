@@ -42,8 +42,7 @@ fn main() {
     let program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
-    let mesh = Mesh::create(Cube::create(1.0));
-    let vao = mesh.vao;
+    let mesh = Mesh::create_cube(Cube::create(1.0)).unwrap();
 
     let start_time = Instant::now();
 
@@ -84,9 +83,9 @@ fn main() {
         program.uniform("u_normalMatrix", normal_matrix.into());
         program.uniform("u_lightPos", light_pos.into());
 
-        vao.bind();
-        vao.draw();
-        vao.unbind();
+        mesh.vao.bind();
+        mesh.vao.draw();
+        mesh.vao.unbind();
 
         program.unbind();
 
