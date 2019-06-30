@@ -9,6 +9,7 @@ pub trait Bindable {
     fn bound(&self) -> bool;
 }
 
+/// Trait to render something
 pub trait Drawable {
-    fn draw(&self) {}
+    fn draw(&self);
 }

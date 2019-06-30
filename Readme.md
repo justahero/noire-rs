@@ -5,12 +5,17 @@ A minimal 3d rendering library written in Rust, it's mostly a port from existing
 
 # Build
 
-To constantly compile the project on code changes run:
+First install [cargo-watch](https://github.com/passcod/cargo-watch) to constantly compile the project while changing code.
 
 ```shell
-cargo watch -c -x "build"
+cargo install cargo-watch
 ```
 
+Then run the watch task
+
+```shell
+cargo watch -c -x "+nightly build"
+```
 
 # Samples
 

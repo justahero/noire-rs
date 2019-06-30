@@ -1,12 +1,15 @@
 use std::error;
 use std::fmt;
 
+use cgmath::{Deg, Rad};
+
 pub use self::capabilities::Capabilities;
 pub use self::context::Context;
 pub use self::frame_buffer::FrameBuffer;
 pub use self::index_buffer::IndexBuffer;
 pub use self::program::{Program, Uniform};
 pub use self::shader::Shader;
+pub use self::spot_light::Spotlight;
 pub use self::texture::Texture;
 pub use self::traits::*;
 pub use self::vertex::VertexArrayObject;
@@ -22,6 +25,7 @@ pub mod program;
 pub mod shader;
 pub mod texture;
 pub mod traits;
+pub mod spot_light;
 pub mod vertex;
 pub mod vertex_buffer;
 pub mod window;
@@ -233,6 +237,26 @@ impl From<gl::types::GLenum> for CullMode {
             gl::BACK => CullMode::Back,
             gl::FRONT_AND_BACK => CullMode::Both,
             _ => panic!("Unknown cull mode found: {}", cull_mode),
+        }
+    }
+}
+
+/// A Perspective struct, that combines fov, near and far planes
+pub struct Perspective {
+    pub fov: f32,
+    pub aspect: f32,
+    pub near: f32,
+    pub far: f32,
+}
+
+impl Default for Perspective {
+    /// Creates a new Perspective with default values
+    fn default() -> Self {
+        Perspective {
+            fov: Rad::from(Deg(60.0)).0,
+            aspect: 1.0,
+            near: 0.1,
+            far: 100.0,
         }
     }
 }
