@@ -41,16 +41,27 @@ impl IndexBuffer {
 }
 
 impl Bindable for IndexBuffer {
-    fn bind(&self) {
+    fn bind(&self) -> &Self {
         unsafe {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.id);
         }
+        self
     }
 
-    fn unbind(&self) {
+    fn unbind(&self) -> &Self {
         unsafe {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }
+        self
+    }
+
+    fn bound(&self) -> bool {
+        let mut id = 0;
+        unsafe {
+            gl::GetIntegerv(gl::ELEMENT_ARRAY_BUFFER_BINDING, &mut id);
+        }
+
+        self.id == (id as u32)
     }
 }
 

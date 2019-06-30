@@ -42,7 +42,7 @@ impl VertexArrayObject {
 }
 
 impl Bindable for VertexArrayObject {
-    fn bind(&self) {
+    fn bind(&self) -> &Self {
         unsafe {
             gl::BindVertexArray(self.id);
         }
@@ -60,9 +60,10 @@ impl Bindable for VertexArrayObject {
         for ref ib in self.ibs.iter() {
             ib.bind();
         }
+        self
     }
 
-    fn unbind(&self) {
+    fn unbind(&self) -> &Self {
         for (i, ref vb) in self.vbs.iter().enumerate() {
             vb.unbind();
             unsafe {
@@ -72,6 +73,16 @@ impl Bindable for VertexArrayObject {
         unsafe {
             gl::BindVertexArray(0);
         }
+        self
+    }
+
+    fn bound(&self) -> bool {
+        let mut id = 0;
+        unsafe {
+            gl::GetIntegerv(gl::VERTEX_ARRAY_BINDING, &mut id);
+        }
+
+        self.id == (id as u32)
     }
 }
 
