@@ -1,8 +1,6 @@
 #![allow(unused_variables)]
-#![allow(unused_imports)]
 
 use std::cell::Cell;
-use std::ffi::*;
 use std::sync::mpsc::Receiver;
 use std::collections::VecDeque;
 
@@ -11,8 +9,7 @@ use glfw;
 use glfw::{Context, Glfw, Error, WindowEvent};
 
 use input::{Button, Input};
-use input::keyboard::Key;
-use super::{Capability, Size};
+use super::{Capability, CullMode, Point2, Size};
 
 /// Struct to provide coordinates
 pub struct Pos<T> {
@@ -72,6 +69,12 @@ pub trait OpenGLWindow: Window {
     fn enable(&mut self, cap: Capability) -> &Self;
     /// disable specific GL functionality
     fn disable(&mut self, cap: Capability) -> &Self;
+    /// Returns true if the capability is currently enabled
+    fn enabled(&mut self, cap: Capability) -> bool;
+    /// Sets the viewport of the rendering window
+    fn set_viewport(&self, point: &Point2<u32>, size: &Size<u32>) -> &Self;
+    /// Sets the cullmode
+    fn set_cullmode(&self, mode: CullMode) -> &Self;
 }
 
 /// Struct that defines a window to render graphics
@@ -325,6 +328,34 @@ impl OpenGLWindow for RenderWindow {
     fn disable(&mut self, cap: Capability) -> &Self {
         unsafe {
             gl::Disable(cap.into());
+        }
+        self
+    }
+
+    /// Returns true if the capability is currently enabled
+    fn enabled(&mut self, cap: Capability) -> bool {
+        unsafe {
+            return gl::IsEnabled(cap.into()) == gl::TRUE;
+        }
+    }
+
+    /// Sets the viewport of the rendering window
+    fn set_viewport(&self, point: &Point2<u32>, size: &Size<u32>) -> &Self {
+        unsafe {
+            gl::Viewport(
+                point.x as i32,
+                point.y as i32,
+                size.width as i32,
+                size.height as i32,
+            );
+        }
+        self
+    }
+
+    /// Sets the cullmode
+    fn set_cullmode(&self, mode: CullMode) -> &Self {
+        unsafe {
+            gl::CullFace(mode.into());
         }
         self
     }
