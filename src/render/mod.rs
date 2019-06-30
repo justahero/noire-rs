@@ -1,6 +1,17 @@
 use std::error;
 use std::fmt;
 
+pub use self::capabilities::Capabilities;
+pub use self::frame_buffer::FrameBuffer;
+pub use self::index_buffer::IndexBuffer;
+pub use self::program::{Program, Uniform};
+pub use self::shader::Shader;
+pub use self::texture::Texture;
+pub use self::traits::*;
+pub use self::vertex::VertexArrayObject;
+pub use self::vertex_buffer::VertexBuffer;
+pub use self::window::{Fullscreen, Pos, RenderWindow, OpenGLWindow, Window};
+
 pub mod capabilities;
 pub mod context;
 pub mod frame_buffer;

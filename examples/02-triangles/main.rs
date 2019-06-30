@@ -8,14 +8,9 @@ extern crate notify;
 
 use gl::types::*;
 
-use noire::render::Primitive;
-use noire::render::shader::*;
-use noire::render::program::*;
-use noire::render::traits::*;
-use noire::render::vertex::*;
-use noire::render::vertex_buffer::*;
-use noire::render::index_buffer::*;
-use noire::render::window::{OpenGLWindow,RenderWindow,Window};
+use noire::render::{Bindable, Drawable, Primitive, Program, Shader, VertexArrayObject};
+use noire::render::{IndexBuffer, VertexBuffer};
+use noire::render::{OpenGLWindow, RenderWindow, Window};
 
 use notify::*;
 use std::sync::mpsc::channel;
