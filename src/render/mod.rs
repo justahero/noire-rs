@@ -106,6 +106,7 @@ pub enum Format {
     RGB8 = gl::RGB8,
     RGBA = gl::RGBA,
     RGBA8 = gl::RGBA8,
+    DepthComponent = gl::DEPTH_COMPONENT,
 }
 
 impl From<Format> for gl::types::GLenum {
@@ -115,6 +116,7 @@ impl From<Format> for gl::types::GLenum {
             Format::RGB8  => gl::RGB8,
             Format::RGBA  => gl::RGBA,
             Format::RGBA8 => gl::RGBA8,
+            Format::DepthComponent => gl::DEPTH_COMPONENT,
         }
     }
 }
@@ -126,6 +128,7 @@ impl From<gl::types::GLenum> for Format {
             gl::RGB8 => Format::RGB8,
             gl::RGBA => Format::RGBA,
             gl::RGBA8 => Format::RGBA8,
+            gl::DEPTH_COMPONENT => Format::DepthComponent,
             _ => panic!("Unknown format found: {}", format),
         }
     }
