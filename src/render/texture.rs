@@ -1,6 +1,7 @@
 use std::ptr;
 use gl;
 
+use render::opengl::get_render_error;
 use render::{Format, PixelType, RenderError, Size};
 use render::traits::{Bindable};
 
@@ -43,7 +44,7 @@ pub struct Texture {
     pub id: u32,
     /// Target type of the Texture
     pub target: u32,
-    /// Texture format, internal
+    /// Texture internal format
     pub format: Format,
     /// Texture pixel format
     pub pixel_format: PixelFormat,
@@ -117,8 +118,8 @@ impl Texture {
     /// * `size` - the Size of the texture, best to provide a multiple of 2
     ///
     /// Returns either reference to self or an Error message
-    pub fn set_size(&mut self, size: Size<u32>) -> &mut Self {
-        self.size = size;
+    pub fn set_size(&mut self, size: &Size<u32>) -> Result<&mut Self, RenderError> {
+        self.size = *size;
 
         let format: gl::types::GLenum = self.format.into();
 
@@ -138,7 +139,9 @@ impl Texture {
             gl::GenerateMipmap(self.target);
         }
 
-        self
+        get_render_error()?;
+
+        Ok(self)
     }
 
     /// Enable linear interpolation
@@ -201,7 +204,7 @@ impl Bindable for Texture {
             gl::GetIntegerv(gl::TEXTURE_BINDING_2D, &mut id);
         }
 
-        return self.id == (id as u32);
+        self.id == (id as u32)
     }
 }
 
