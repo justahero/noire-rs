@@ -10,23 +10,75 @@ use std::str;
 
 use super::Size;
 use render::shader::Shader;
+use render::texture::Texture;
 use render::traits::Bindable;
 
-#[derive(Debug)]
+/// A shader variable, can be an uniform or attribute
+#[derive(Debug, Clone)]
 pub struct Variable {
+    /// The name of the variable used to address the variable in the shader
     name: String,
+    /// The data type of the variable
     data_type: u32,
+    /// The size of the variable
     size: i32,
+    /// The shader location
     location: i32,
 }
 
+/// A struct to handle a Sample / Texture in the Shader program
+#[derive(Debug, Clone)]
+pub struct Sample {
+    /// The name of the texture variable
+    pub name: String,
+    /// The texture unit assigned in Program
+    pub unit: u32,
+    /// The texture id, NOTE this does not take care of Texture lifetime
+    pub id: u32,
+}
+
+impl Sample {
+    /// Creates a new Sample with all info
+    fn new(name: &str, unit: u32, id: u32) -> Self {
+        Sample {
+            name: name.to_string(),
+            unit,
+            id,
+        }
+    }
+}
+
+impl Bindable for Sample {
+    fn bind(&self) {
+        unsafe {
+            gl::ActiveTexture(gl::TEXTURE0 + self.unit);
+            gl::BindTexture(gl::TEXTURE_2D, self.id);
+        }
+    }
+
+    fn unbind(&self) {
+        unsafe {
+            gl::ActiveTexture(gl::TEXTURE0 + self.unit);
+            gl::BindTexture(gl::TEXTURE_2D, 0);
+        }
+    }
+}
+
+/// The main struct to handle Shaders, variables, uniforms and textures
 #[derive(Debug)]
 pub struct Program {
+    /// The compiled vertex shader
     vertex_shader: Shader,
+    /// The compiled pixel / fragment shader
     pixel_shader: Shader,
+    /// The associated OpenGL id for this program
     pub id: u32,
+    /// The list of collected uniform variables from Shaders
     pub uniforms: Vec<Variable>,
+    /// The list of attributes from Shaders
     pub attributes: Vec<Variable>,
+    /// The list of samples
+    pub samples: Vec<Sample>,
 }
 
 #[derive(Debug)]
@@ -239,6 +291,7 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         id,
         uniforms: find_uniforms(id),
         attributes: find_attributes(id),
+        samples: Vec::new(),
     };
 
     println!("UNIFORMS: {:?}", program.uniforms);
@@ -264,6 +317,11 @@ impl Program {
         link_program(vertex_shader, pixel_shader)
     }
 
+    /// Set Uniform to this Program
+    ///
+    /// ## Arguments
+    ///
+    /// * `uniform` - The Uniform to set
     pub fn uniform(&self, name: &str, uniform: Uniform) -> &Self {
         if let Some(variable) = self.uniform_by_name(name) {
             let location = variable.location;
@@ -280,6 +338,30 @@ impl Program {
                 Uniform::Size(x, y) => Program::uniform2f(location, x, y),
             }
         }
+        self
+    }
+
+    /// Sets a Texture sampler for the shader program
+    ///
+    /// ## Arguments
+    ///
+    /// * `name` - The name associated with the texture in the program
+    /// * `unit` - The unit slot to attach the texture
+    /// * `texture` - The texture reference to use
+    pub fn sampler(&mut self, name: &str, unit: u32, texture: &Texture) -> &mut Self {
+        self.samples
+            .iter()
+            .position(|sample| name == sample.name)
+            .map(|index| {
+                self.samples[index].unbind();
+                self.samples.remove(index);
+            })
+            .is_some();
+
+        let sample = Sample::new(name, unit, texture.id);
+        sample.bind();
+        self.samples.push(sample);
+
         self
     }
 
@@ -358,6 +440,9 @@ impl Bindable for Program {
 impl Drop for Program {
     fn drop(&mut self) {
         unsafe {
+            gl::DetachShader(self.id, self.vertex_shader.id);
+            gl::DetachShader(self.id, self.pixel_shader.id);
+
             gl::DeleteProgram(self.id);
         }
     }
