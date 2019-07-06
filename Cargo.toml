@@ -5,6 +5,12 @@ authors = ["Sebastian Ziebell"]
 keywords = ["noire", "gl", "3d", "graphics"]
 repository = "https://github.com/justahero/noire-rs.git"
 
+[profile.dev]
+opt-level = 0
+debug = true
+lto = false
+debug-assertions = true
+
 [[example]]
 name = "spinningcube"
 path = "examples/01-spinning-cube/main.rs"
