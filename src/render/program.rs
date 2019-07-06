@@ -372,6 +372,8 @@ impl Program {
     /// * `name` - The name of the uniform variable
     /// * `uniform` - The Uniform to set
     pub fn uniform(&mut self, name: &str, uniform: Uniform) -> &mut Self {
+        debug_assert!(self.bound());
+
         if let Some(variable) = self.uniform_by_name(name) {
             let location = variable.location;
             match uniform {

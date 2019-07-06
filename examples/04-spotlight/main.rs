@@ -141,8 +141,6 @@ fn main() {
         let model_view_proj = camera.projection * model_view;
         let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
 
-        plane.draw();
-
         // animate and render plane
         let rotate_x = Matrix4::from_angle_x(Rad::from(Deg(elapsed * 22.5)));
         let rotate_y = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
@@ -162,7 +160,6 @@ fn main() {
         });
 
         scene_program.unbind();
-
 
         //----------------------------------------------------------
         // display everything on screen

@@ -121,6 +121,8 @@ impl Texture {
     ///
     /// Returns either reference to self or an Error message
     pub fn set_size(&mut self, size: &Size<u32>) -> Result<&mut Self, RenderError> {
+        debug_assert!(self.bound());
+
         self.size = *size;
 
         let format: gl::types::GLenum = self.format.into();
