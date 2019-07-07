@@ -35,12 +35,11 @@ fn main() {
     let fragment_file = String::from("./examples/04-spotlight/shaders/light_fragment.glsl");
     let mut light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
-    let light_pos = point3(-2.5, 0.0, 1.0);
-
-    let mut cube = Node::new(Mesh::create_cube(Cube::create(0.75), Color::rgb(1.0, 1.0, 1.0)).unwrap());
+    let mut cube = Node::new(Mesh::create_cube(Cube::create(1.0), Color::rgb(1.0, 2.0, 1.0)).unwrap());
     let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(1.0, 1.0, 1.0)).unwrap());
 
-    plane.translate(Vector3{ x: 0.0, y: -3.0, z: 0.0});
+    cube.translate(vec3(0.0, 2.0, 0.0));
+    plane.translate(Vector3{ x: 0.0, y: -0.0, z: 0.0});
 
     let mut scene = Scene::new();
     scene.add_node(&cube);

@@ -62,7 +62,7 @@ float pcf(sampler2D depthTexture, vec2 size, vec2 uv, float compare) {
 float attenuation(vec3 dir) {
     float dist = length(dir);
     float radiance = 1.0 / (1.0 + pow(dist / 10.0, 2.0));
-    return clamp(radiance * 10.0, 0.0, 1.0);
+    return clamp(radiance * 5.0, 0.0, 1.0);
 }
 
 highp float influence(highp vec3 normal, highp float outerAngle, highp float innerAngle) {
@@ -99,7 +99,7 @@ void main(void) {
     vec3 excident = (
       u_ambientColor.rgb +
       lambert(lightSurfaceNormal, -lightPosNormal) *
-      influence(lightPosNormal, 70.0, 55.0) *
+      influence(lightPosNormal, 75.0, 25.0) *
       attenuation(lightPos) *
       illuminated
     );
