@@ -9,7 +9,7 @@ use std::str;
 use math::color::Color;
 
 use super::Size;
-use render::{Shader, ShaderType, Texture};
+use render::{RenderError, Shader, ShaderType, Texture};
 use render::traits::Bindable;
 
 /// An Error struct for Program errors
@@ -415,6 +415,8 @@ impl Program {
         let sample = Sample::new(name, unit, texture.id);
         sample.bind();
         self.samples.push(sample);
+
+        self.uniform(name, Uniform::Integer(unit as i32));
 
         self
     }
