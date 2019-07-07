@@ -118,7 +118,6 @@ fn main() {
 
         shadow_frame_buffer.unbind();
 
-
         //----------------------------------------------------------
         // Render Scene / Camera
         window.reset_viewport();
@@ -134,20 +133,7 @@ fn main() {
             .uniform("u_lightRot", normal_matrix(&spot_light.view).into())
             .uniform("u_lightProj", spot_light.projection.into())
             .sampler("u_sShadowMap", 0, &shadow_texture)
-            .uniform("u_shadowMapSize", light_texture_size.into());
-
-        // render plane!
-        let model_view = camera.view * plane.model_view;
-        let model_view_proj = camera.projection * model_view;
-        let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
-
-        // animate and render plane
-        let rotate_x = Matrix4::from_angle_x(Rad::from(Deg(elapsed * 22.5)));
-        let rotate_y = Matrix4::from_angle_y(Rad::from(Deg(elapsed * 45.0)));
-
-        let model_view = camera.view * cube.model_view * rotate_y * rotate_x;
-        let model_view_proj = camera.projection * model_view;
-        let normal_matrix: Matrix3<f32> = convert_to_matrix3(&model_view).invert().unwrap().transpose();
+            .uniform("u_shadowMapSize", shadow_texture.size.into());
 
         // render all nodes
         scene.nodes(&mut |node| {
