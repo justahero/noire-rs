@@ -6,9 +6,11 @@ in vec4 vWorldPosLightSpace;
 
 uniform mat4 u_lightView;
 uniform mat3 u_lightRot;
+uniform vec4 u_lightColor;
 uniform mat4 u_model;
 
 uniform vec4 u_ambientColor;
+uniform vec4 u_diffuseColor;
 
 uniform sampler2D u_sShadowMap;
 uniform vec2 u_shadowMapSize;
@@ -96,8 +98,10 @@ void main(void) {
     float lightDepth = clamp(length(lightPos) / 40.0, 0.0, 1.0)  -bias;
     float illuminated = pcfLinear(u_sShadowMap, u_shadowMapSize, lightUV, lightDepth);
 
+    vec4 ambientColor = u_ambientColor * u_diffuseColor;
+
     vec3 excident = (
-      u_ambientColor.rgb +
+      ambientColor.rgb +
       lambert(lightSurfaceNormal, -lightPosNormal) *
       influence(lightPosNormal, 75.0, 25.0) *
       attenuation(lightPos) *

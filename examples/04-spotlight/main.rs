@@ -35,8 +35,8 @@ fn main() {
     let fragment_file = String::from("./examples/04-spotlight/shaders/light_fragment.glsl");
     let mut light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
-    let mut cube = Node::new(Mesh::create_cube(Cube::create(1.0), Color::rgb(1.0, 2.0, 1.0)).unwrap());
-    let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(1.0, 1.0, 1.0)).unwrap());
+    let mut cube = Node::new(Mesh::create_cube(Cube::create(1.4), Color::rgb(0.0, 0.2, 0.8)).unwrap());
+    let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(0.3, 0.3, 1.0)).unwrap());
 
     cube.translate(vec3(0.0, 2.0, 0.0));
     plane.translate(Vector3{ x: 0.0, y: -0.0, z: 0.0});
@@ -54,7 +54,7 @@ fn main() {
             vec3(0.0, 1.0, 0.0)
         );
 
-    let mut spot_light = Spotlight::new();
+    let mut spot_light = Spotlight::new(Color::rgb(0.4, 0.7, 0.2));
     spot_light.set_lookat(
         point3(-0.5, 8.0, 2.0),
         point3(0.5, 0.0, 1.0),
@@ -138,6 +138,7 @@ fn main() {
         scene.nodes(&mut |node| {
             scene_program
                 .uniform("u_ambientColor", Color::rgb(0.1, 0.1, 0.1).into())
+                .uniform("u_diffuseColor", node.mesh.color.into())
                 .uniform("u_model", node.model_view.into())
                 .uniform("u_normalModel", node.normal_view().into());
 
