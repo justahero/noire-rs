@@ -181,7 +181,7 @@ impl Texture {
 
 impl Bindable for Texture {
     fn bind(&self) -> &Self {
-        debug_assert!(!self.bound());
+        // debug_assert!(!self.bound());
 
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0);
@@ -191,7 +191,7 @@ impl Bindable for Texture {
     }
 
     fn unbind(&self) -> &Self {
-        debug_assert!(self.bound());
+        // debug_assert!(self.bound());
 
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0);

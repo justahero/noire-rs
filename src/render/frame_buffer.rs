@@ -5,7 +5,6 @@ use render::texture::Texture;
 /// A general purpose frame buffer to store pixel data into
 pub struct FrameBuffer {
     pub id: u32,
-    pub size: Size<u32>,
 }
 
 /// Checks the status of the Frame Buffer, return error with message or nothing
@@ -44,10 +43,7 @@ impl FrameBuffer {
             gl::GenFramebuffers(1, &mut id);
         }
 
-        Ok(FrameBuffer {
-            id,
-            size: Size::default(),
-        })
+        Ok(FrameBuffer { id })
     }
 
     /// Set Texture to this Frame buffer

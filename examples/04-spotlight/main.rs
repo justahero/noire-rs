@@ -63,12 +63,6 @@ fn main() {
 
     // Textures & Frame Buffers
     let light_texture_size = Size::new(1024, 1024);
-    let mut light_texture = Texture::create2d().unwrap();
-    light_texture.bind();
-    light_texture.set_size(&light_texture_size).unwrap();
-    light_texture.clamp_to_edge();
-    light_texture.nearest();
-    light_texture.unbind();
 
     let mut shadow_texture = Texture::create_depth_texture().unwrap();
     shadow_texture.bind();
@@ -79,7 +73,6 @@ fn main() {
 
     let mut shadow_frame_buffer = FrameBuffer::create().unwrap();
     shadow_frame_buffer.bind();
-    shadow_frame_buffer.set_texture(&light_texture).expect("Set texture failed");
     shadow_frame_buffer.set_depth_buffer(&shadow_texture).expect("Set depth buffer failed");
     shadow_frame_buffer.unbind();
 
@@ -89,10 +82,6 @@ fn main() {
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
-
-        // clear scene
-        window.clear(0.0, 0.0, 0.0, 0.0);
-        window.clear_depth(1.0);
 
         //----------------------------------------------------------
         // render light first
@@ -116,6 +105,7 @@ fn main() {
         });
 
         shadow_frame_buffer.unbind();
+        light_program.unbind();
 
         //----------------------------------------------------------
         // Render Scene / Camera
@@ -146,6 +136,7 @@ fn main() {
         });
 
         scene_program.unbind();
+        // light_texture.unbind();
 
         //----------------------------------------------------------
         // display everything on screen
