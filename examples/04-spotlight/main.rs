@@ -12,7 +12,7 @@ use std::time::Instant;
 use noire::math::*;
 use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
-use noire::render::{FrameBuffer, Program, Spotlight, Texture};
+use noire::render::{FrameBuffer, Program, Spotlight, Texture, Uniform};
 use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
@@ -55,26 +55,25 @@ fn main() {
         );
 
     let mut spot_light = Spotlight::new(Color::rgb(0.4, 0.7, 0.2));
+    spot_light.set_perspective(55.0, 1.0, 0.1, 50.0);
     spot_light.set_lookat(
-        point3(-0.5, 8.0, 2.0),
+        point3(0.5, 8.0, 2.0),
         point3(0.5, 0.0, 1.0),
         vec3(0.0, 1.0, 0.0),
     );
 
     // Textures & Frame Buffers
-    let light_texture_size = Size::new(1024, 1024);
+    let depth_texture_size = Size::new(1024, 1024);
 
     let mut shadow_texture = Texture::create_depth_texture().unwrap();
     shadow_texture.bind();
-    shadow_texture.set_size(&light_texture_size).unwrap();
+    shadow_texture.set_size(&depth_texture_size).unwrap();
     shadow_texture.clamp_to_edge();
     shadow_texture.nearest();
     shadow_texture.unbind();
 
     let mut shadow_frame_buffer = FrameBuffer::create().unwrap();
-    shadow_frame_buffer.bind();
     shadow_frame_buffer.set_depth_buffer(&shadow_texture).expect("Set depth buffer failed");
-    shadow_frame_buffer.unbind();
 
     let start_time = Instant::now();
 
@@ -114,6 +113,7 @@ fn main() {
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
 
+        shadow_texture.bind();
         scene_program.bind();
         scene_program
             .uniform("u_camProj", camera.projection.into())
@@ -121,7 +121,7 @@ fn main() {
             .uniform("u_lightView", spot_light.view.into())
             .uniform("u_lightRot", normal_matrix(&spot_light.view).into())
             .uniform("u_lightProj", spot_light.projection.into())
-            .sampler("u_sShadowMap", 0, &shadow_texture)
+            .uniform("u_sShadowMap", Uniform::Integer(0).into())
             .uniform("u_shadowMapSize", shadow_texture.size.into());
 
         // render all nodes
@@ -136,7 +136,7 @@ fn main() {
         });
 
         scene_program.unbind();
-        // light_texture.unbind();
+        shadow_texture.unbind();
 
         //----------------------------------------------------------
         // display everything on screen

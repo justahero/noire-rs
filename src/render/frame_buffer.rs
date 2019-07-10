@@ -1,4 +1,4 @@
-use render::{RenderError, Size};
+use render::{RenderError};
 use render::traits::{Bindable};
 use render::texture::Texture;
 
@@ -75,7 +75,7 @@ impl FrameBuffer {
     ///
     /// * `texture` - the depth Texture instance
     pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
-        debug_assert!(self.bound());
+        self.bind();
 
         unsafe {
             gl::FramebufferTexture2D(
@@ -88,6 +88,8 @@ impl FrameBuffer {
         }
 
         check_status()?;
+
+        self.unbind();
 
         Ok(self)
     }

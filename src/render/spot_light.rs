@@ -2,7 +2,6 @@ use cgmath::prelude::InnerSpace;
 use cgmath::{Deg, Matrix4, PerspectiveFov, Point3, Rad, Transform, Vector3};
 
 use math::Color;
-use super::Perspective;
 
 pub struct Spotlight {
     pub view: Matrix4<f32>,
@@ -17,12 +16,12 @@ fn get_direction(eye: &Point3<f32>, target: &Point3<f32>) -> Vector3<f32> {
     (eye - target).normalize()
 }
 
-fn get_projection(perspective: Perspective) -> Matrix4<f32> {
+fn get_projection(fov: f32, aspect: f32, znear: f32, zfar: f32) -> Matrix4<f32> {
     Matrix4::from(PerspectiveFov {
-        fovy: Rad::from(Deg(perspective.fov)),
-        aspect: perspective.aspect,
-        near: perspective.near,
-        far: perspective.far,
+        fovy: Rad::from(Deg(fov)),
+        aspect,
+        near: znear,
+        far: zfar,
     })
 }
 
@@ -33,7 +32,7 @@ impl Spotlight {
 
         Spotlight {
             view: Matrix4::one(),
-            projection: get_projection(Perspective::default()),
+            projection: get_projection(60.0, 1.0, 0.1, 50.0),
             pos,
             target,
             direction: get_direction(&pos, &target),
@@ -41,8 +40,8 @@ impl Spotlight {
         }
     }
 
-    pub fn set_perspective(&mut self, perspective: Perspective) -> &mut Self {
-        self.projection = get_projection(perspective);
+    pub fn set_perspective(&mut self, fov: f32, aspect: f32, znear: f32, zfar: f32) -> &mut Self {
+        self.projection = get_projection(fov, aspect, znear, zfar);
         self
     }
 
