@@ -15,7 +15,7 @@ use noire::math::*;
 use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Plane};
 use noire::render::{Bindable, Capability, Drawable, Program, Shader, VertexArrayObject};
-use noire::render::{OpenGLWindow, RenderWindow, Window};
+use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -24,7 +24,8 @@ use std::thread;
 use std::thread::JoinHandle;
 
 fn main() {
-    let mut window = RenderWindow::create(600, 600, "Hello This is window")
+    let window_size = Size::new(600, 600);
+    let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
     window.enable(Capability::DepthTest);

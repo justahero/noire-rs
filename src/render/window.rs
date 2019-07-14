@@ -13,6 +13,12 @@ use input::{Button, Input};
 use super::context;
 use super::{Capability, CullMode, Point2, Size};
 
+/// A generic Render error
+#[derive(Debug, Clone)]
+pub struct WindowError {
+    message: String
+}
+
 /// Struct to provide coordinates
 pub struct Pos<T> {
     /// x coordinate
@@ -140,16 +146,16 @@ pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window, mode: Fullscre
 
 /// Struct to render a window
 impl RenderWindow {
-    pub fn create(width: u32, height: u32, title: &str) -> Result<RenderWindow, String> {
+    pub fn create(size: &Size<u32>, title: &str) -> Result<RenderWindow, WindowError> {
         let mut glfw = match glfw::init(Some(glfw::Callback {
             f: glfw_error_callback as fn(glfw::Error, String, &Cell<usize>),
             data: Cell::new(0),
         })) {
             Ok(glfw) => glfw,
-            Err(_) => return Err("Failed to initialize GLFW".to_string()),
+            Err(_) => return Err(WindowError{ message: "Failed to initialize GLFW".to_string() }),
         };
 
-        glfw.window_hint(glfw::WindowHint::ContextVersion(3, 2));
+        glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
         glfw.window_hint(glfw::WindowHint::Resizable(true));
         glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
         glfw.window_hint(glfw::WindowHint::OpenGlProfile(
@@ -157,9 +163,9 @@ impl RenderWindow {
         ));
 
         let (mut window, events) =
-            match glfw.create_window(width, height, title, glfw::WindowMode::Windowed) {
+            match glfw.create_window(size.width, size.height, title, glfw::WindowMode::Windowed) {
                 Some(result) => result,
-                _ => return Err("Failed to create GLFW Window".to_string()),
+                _ => return Err(WindowError{ message: "Failed to create GLFW Window".to_string() }),
             };
 
         window.set_key_polling(true);

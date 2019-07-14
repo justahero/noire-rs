@@ -68,6 +68,12 @@ impl Default for Size<u32> {
     }
 }
 
+impl<T> Size<T> {
+    pub fn new(width: T, height: T) -> Self {
+        Size{ width, height }
+    }
+}
+
 /// Struct to represent a 2 dimensional point
 #[derive(Debug, Copy, Clone)]
 pub struct Point2<T> {

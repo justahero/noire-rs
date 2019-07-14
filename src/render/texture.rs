@@ -71,7 +71,7 @@ impl Texture {
             target,
             format: Format::RGB,
             pixel_format: PixelFormat::BGRA,
-            size: Size { width: 0, height: 0 },
+            size: Size::default(),
             pixel_type: PixelType::UnsignedByte,
         };
 

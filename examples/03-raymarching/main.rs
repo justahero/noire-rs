@@ -56,7 +56,8 @@ fn from_duration(d: Duration) -> f32 {
 }
 
 fn main() {
-    let mut window = RenderWindow::create(600, 400, "Hello This is window")
+    let window_size = Size::new(600, 400);
+    let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
     println!("Context version: {:?}", window.window.get_context_version());

@@ -18,7 +18,8 @@ use noire::render::{Capability, Point2, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
 
 fn main() {
-    let mut window = RenderWindow::create(1024, 1024, "Hello This is window")
+    let window_size = Size::new(1024, 1024);
+    let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
     window.enable(Capability::DepthTest);
@@ -38,7 +39,6 @@ fn main() {
 
     let cube = Node::new(Mesh::create_cube(Cube::create(0.75), Color::rgb(1.0, 1.0, 1.0)).unwrap());
     let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(1.0, 1.0, 1.0)).unwrap());
-    let mut scene = Scene::new();
 
     plane.translate(Vector3{ x: 0.0, y: -3.0, z: 0.0});
 
@@ -65,7 +65,7 @@ fn main() {
     );
 
     // Textures & Frame Buffers
-    let light_texture_size = Size{ width: 1024, height: 1024 };
+    let light_texture_size = Size::new(1024, 1024);
     let mut light_texture = Texture::create2d().unwrap();
     light_texture.bind();
     light_texture.set_size(&light_texture_size).unwrap();
