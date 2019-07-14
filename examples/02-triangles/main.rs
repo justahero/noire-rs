@@ -10,7 +10,7 @@ use gl::types::*;
 
 use noire::render::{Bindable, Drawable, Primitive, Program, Shader, VertexArrayObject};
 use noire::render::{IndexBuffer, VertexBuffer};
-use noire::render::{OpenGLWindow, RenderWindow, Window};
+use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -22,7 +22,8 @@ static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
 
 fn main() {
-    let mut window = RenderWindow::create(600, 600, "Hello This is window")
+    let window_size = Size::new(600, 600);
+    let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
     // create shader program
