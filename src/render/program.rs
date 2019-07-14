@@ -9,7 +9,7 @@ use std::str;
 use math::color::Color;
 
 use super::Size;
-use render::{RenderError, Shader, ShaderType, Texture};
+use render::{Shader, ShaderType, Texture};
 use render::traits::Bindable;
 
 /// An Error struct for Program errors
@@ -40,17 +40,6 @@ pub struct Sample {
     pub unit: u32,
     /// The texture id, NOTE this does not take care of Texture lifetime
     pub id: u32,
-}
-
-impl Sample {
-    /// Creates a new Sample with all info
-    fn new(name: &str, unit: u32, id: u32) -> Self {
-        Sample {
-            name: name.to_string(),
-            unit,
-            id,
-        }
-    }
 }
 
 impl Bindable for Sample {
@@ -403,6 +392,10 @@ impl Program {
     /// * `unit` - The unit slot to attach the texture
     /// * `texture` - The texture reference to use
     pub fn sampler(&mut self, name: &str, unit: u32, texture: &Texture) -> &mut Self {
+        texture.bind();
+        self.uniform(name, Uniform::Integer(unit as i32));
+
+        /*
         self.samples
             .iter()
             .position(|sample| name == sample.name)
@@ -417,6 +410,7 @@ impl Program {
         self.samples.push(sample);
 
         self.uniform(name, Uniform::Integer(unit as i32));
+        */
 
         self
     }

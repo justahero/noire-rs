@@ -12,7 +12,7 @@ use std::time::Instant;
 use noire::math::*;
 use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
-use noire::render::{FrameBuffer, Program, Spotlight, Texture, Uniform};
+use noire::render::{FrameBuffer, Program, Spotlight, Texture};
 use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
@@ -113,7 +113,6 @@ fn main() {
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
 
-        shadow_texture.bind();
         scene_program.bind();
         scene_program
             .uniform("u_camProj", camera.projection.into())
@@ -121,7 +120,7 @@ fn main() {
             .uniform("u_lightView", spot_light.view.into())
             .uniform("u_lightRot", normal_matrix(&spot_light.view).into())
             .uniform("u_lightProj", spot_light.projection.into())
-            .uniform("u_sShadowMap", Uniform::Integer(0).into())
+            .sampler("u_sShadowMap", 0, &shadow_texture)
             .uniform("u_shadowMapSize", shadow_texture.size.into());
 
         // render all nodes
