@@ -12,7 +12,7 @@ use std::time::Instant;
 use noire::math::*;
 use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
-use noire::render::{FrameBuffer, Program, Spotlight, Texture};
+use noire::render::{FrameBuffer, Program, Spotlight, Texture, Uniform};
 use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
@@ -39,7 +39,7 @@ fn main() {
     let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(0.3, 0.3, 1.0)).unwrap());
 
     cube.translate(vec3(0.0, 2.0, 0.0));
-    plane.translate(Vector3{ x: 0.0, y: -0.0, z: 0.0});
+    plane.translate(vec3(0.0, -1.0, 0.0));
 
     let mut scene = Scene::new();
     scene.add_node(&cube);
@@ -55,10 +55,10 @@ fn main() {
         );
 
     let mut spot_light = Spotlight::new(Color::rgb(0.4, 0.7, 0.2));
-    spot_light.set_perspective(55.0, 1.0, 0.1, 50.0);
+    spot_light.set_perspective(55.0, 1.0, 0.1, 100.0);
     spot_light.set_lookat(
-        point3(0.5, 8.0, 2.0),
-        point3(0.5, 0.0, 1.0),
+        point3(-0.5, 8.0, 2.0),
+        point3(-0.5, 0.0, 1.0),
         vec3(0.0, 1.0, 0.0),
     );
 
@@ -113,6 +113,9 @@ fn main() {
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
 
+        let unit: i32 = 0;
+
+        shadow_texture.bind();
         scene_program.bind();
         scene_program
             .uniform("u_camProj", camera.projection.into())
@@ -120,7 +123,7 @@ fn main() {
             .uniform("u_lightView", spot_light.view.into())
             .uniform("u_lightRot", normal_matrix(&spot_light.view).into())
             .uniform("u_lightProj", spot_light.projection.into())
-            .sampler("u_sShadowMap", 0, &shadow_texture)
+            .uniform("u_sShadowMap", Uniform::Integer(unit).into())
             .uniform("u_shadowMapSize", shadow_texture.size.into());
 
         // render all nodes

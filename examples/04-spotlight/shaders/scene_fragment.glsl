@@ -6,7 +6,6 @@ in vec4 vWorldPosLightSpace;
 
 uniform mat4 u_lightView;
 uniform mat3 u_lightRot;
-uniform vec4 u_lightColor;
 uniform mat4 u_model;
 
 uniform vec4 u_ambientColor;
