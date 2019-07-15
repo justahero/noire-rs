@@ -11,7 +11,7 @@ use std::time::Instant;
 
 use noire::math::*;
 use noire::math::{Camera, Color};
-use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
+use noire::mesh::{Cube, Mesh, Node, Plane, Scene, ScreenRect};
 use noire::render::{FrameBuffer, Program, Spotlight, Texture, Uniform};
 use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Size};
@@ -71,6 +71,8 @@ fn main() {
     shadow_texture.clamp_to_edge();
     shadow_texture.nearest();
     shadow_texture.unbind();
+
+    let screen_rect = ScreenRect::create(&shadow_texture);
 
     let mut shadow_frame_buffer = FrameBuffer::create().unwrap();
     shadow_frame_buffer.set_depth_buffer(&shadow_texture).expect("Set depth buffer failed");
