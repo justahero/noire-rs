@@ -142,6 +142,8 @@ fn main() {
         scene_program.unbind();
         shadow_texture.unbind();
 
+        // screen_rect.render(&window, &Point2::default(), &Size::new(384, 384));
+
         //----------------------------------------------------------
         // display everything on screen
         window.swap_buffers();
