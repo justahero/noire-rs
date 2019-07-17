@@ -94,7 +94,7 @@ void main(void) {
     // float lightDepth1 = texture2D(u_sShadowMap, lightUV).r;
     // float lightDepth2 = clamp(length(lightPos) / 40.0, 0.0, 1.0);
     // float illuminated = step(lightDepth2, lightDepth1 + bias);
-    float lightDepth = clamp(length(lightPos) / 40.0, 0.0, 1.0)  -bias;
+    float lightDepth = clamp(length(lightPos) / 8.0, 0.0, 1.0)  -bias;
     float illuminated = pcfLinear(u_sShadowMap, u_shadowMapSize, lightUV, lightDepth);
 
     vec4 ambientColor = u_ambientColor * u_diffuseColor;

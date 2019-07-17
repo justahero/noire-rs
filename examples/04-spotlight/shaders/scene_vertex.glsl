@@ -4,8 +4,7 @@ out vec3 vWorldNormal;
 out vec4 vWorldPosition;
 out vec4 vWorldPosLightSpace;
 
-uniform mat4 u_camProj;
-uniform mat4 u_camView;
+uniform mat4 u_cameraSpaceMatrix;
 uniform mat4 u_lightView;
 uniform mat4 u_lightProj;
 
@@ -23,5 +22,5 @@ void main(void) {
     // transform position into light space
     vWorldPosLightSpace = u_lightProj * u_lightView * vWorldPosition;
     // transform position to camera space
-    gl_Position = u_camProj * u_camView * vWorldPosition;
+    gl_Position = u_cameraSpaceMatrix * vWorldPosition;
 }

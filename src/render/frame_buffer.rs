@@ -52,7 +52,7 @@ impl FrameBuffer {
     ///
     /// * `texture` - The texture to attach
     pub fn set_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
-        debug_assert!(self.bound());
+        self.bind();
 
         unsafe {
             gl::FramebufferTexture2D(
@@ -65,6 +65,8 @@ impl FrameBuffer {
         }
 
         check_status()?;
+
+        self.unbind();
 
         Ok(self)
     }

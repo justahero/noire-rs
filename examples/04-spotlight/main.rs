@@ -92,10 +92,11 @@ fn main() {
         window.clear_depth(1.0);
         window.set_cullmode(CullMode::Front);
 
+        let light_space_matrix = spot_light.projection * spot_light.view;
+        let camera_space_matrix = camera.projection * camera.view;
+
         light_program.bind();
-        light_program
-            .uniform("u_lightView", spot_light.view.into())
-            .uniform("u_lightProj", spot_light.projection.into());
+        light_program.uniform("u_lightSpaceMatrix", light_space_matrix.into());
 
         // render all nodes
         scene.nodes(&mut |node| {
@@ -120,8 +121,7 @@ fn main() {
         shadow_texture.bind();
         scene_program.bind();
         scene_program
-            .uniform("u_camProj", camera.projection.into())
-            .uniform("u_camView", camera.view.into())
+            .uniform("u_cameraSpaceMatrix", camera_space_matrix.into())
             .uniform("u_lightView", spot_light.view.into())
             .uniform("u_lightRot", normal_matrix(&spot_light.view).into())
             .uniform("u_lightProj", spot_light.projection.into())
