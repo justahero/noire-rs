@@ -160,6 +160,11 @@ fn get_link_error(program: u32) -> String {
     unsafe {
         let mut length: GLint = 0;
         gl::GetShaderiv(program, gl::INFO_LOG_LENGTH, &mut length);
+
+        if length == 0 {
+            return String::new();
+        }
+
         let mut buffer = Vec::with_capacity(length as usize);
         buffer.set_len((length as usize) - 1);
 

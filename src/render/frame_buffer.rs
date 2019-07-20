@@ -1,6 +1,5 @@
 use render::{RenderError, Size};
 use render::traits::{Bindable};
-use render::opengl::get_render_error;
 use render::texture::Texture;
 
 /// A general purpose frame buffer to store pixel data into
@@ -45,8 +44,6 @@ impl FrameBuffer {
             gl::GenFramebuffers(1, &mut id);
         }
 
-        get_render_error()?;
-
         Ok(FrameBuffer {
             id,
             size: Size::default(),
@@ -71,7 +68,6 @@ impl FrameBuffer {
             );
         }
 
-        get_render_error()?;
         check_status()?;
 
         Ok(self)
@@ -95,7 +91,6 @@ impl FrameBuffer {
             );
         }
 
-        get_render_error()?;
         check_status()?;
 
         Ok(self)

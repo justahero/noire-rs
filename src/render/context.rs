@@ -85,16 +85,18 @@ fn init_debug_callback(context: &Context, synchronous: bool) {
     unsafe impl Send for ContextRawPtr {}
     let context_raw_ptr = ContextRawPtr(&*context);
 
-    unsafe {
-        gl::DebugMessageCallback(callback_wrapper, context_raw_ptr.0 as *const _);
-        gl::DebugMessageControl(
-            gl::DONT_CARE,
-            gl::DONT_CARE,
-            gl::DONT_CARE,
-            0,
-            ptr::null(),
-            gl::TRUE,
-        );
+    if context.capabilities.debug {
+        unsafe {
+            gl::DebugMessageCallback(callback_wrapper, context_raw_ptr.0 as *const _);
+            gl::DebugMessageControl(
+                gl::DONT_CARE,
+                gl::DONT_CARE,
+                gl::DONT_CARE,
+                0,
+                ptr::null(),
+                gl::TRUE,
+            );
+        }
     }
 }
 

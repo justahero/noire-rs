@@ -5,7 +5,6 @@ use gl::types::*;
 
 use render::RenderError;
 use render::traits::{Bindable};
-use render::opengl::get_render_error;
 
 pub struct IndexBuffer {
     pub id: u32,
@@ -30,8 +29,6 @@ impl IndexBuffer {
             );
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }
-
-        get_render_error()?;
 
         Ok(IndexBuffer {
             id,
