@@ -1,7 +1,6 @@
 use std::ptr;
 use gl;
 
-use render::opengl::get_render_error;
 use render::{Format, PixelType, RenderError, Size};
 use render::traits::{Bindable};
 
@@ -138,8 +137,6 @@ impl Texture {
 
             gl::GenerateMipmap(self.target);
         }
-
-        get_render_error()?;
 
         Ok(self)
     }
