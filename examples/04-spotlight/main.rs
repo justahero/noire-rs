@@ -14,7 +14,7 @@ use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
 use noire::render::{FrameBuffer, Program, Spotlight, Texture};
 use noire::render::traits::*;
-use noire::render::{Capability, Point2, Size};
+use noire::render::{Capability, CullMode, Point2, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
 
 fn main() {
