@@ -133,8 +133,7 @@ fn main() {
             scene_program
                 .uniform("u_ambientColor", Color::rgb(0.1, 0.1, 0.1).into())
                 .uniform("u_diffuseColor", node.mesh.color.into())
-                .uniform("u_model", node.model_view.into())
-                .uniform("u_normalModel", node.normal_view().into());
+                .uniform("u_model", node.model_view.into());
 
             node.draw();
         });
