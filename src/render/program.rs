@@ -105,6 +105,7 @@ pub enum Uniform {
     Float(f32),
     Float2(f32, f32),
     Float3(f32, f32, f32),
+    Integer(i32),
     Mat3(Matrix3<f32>),
     Mat4(Matrix4<f32>),
     Vec2(Vector2<f32>),
@@ -335,8 +336,14 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         samples: Vec::new(),
     };
 
-    println!("UNIFORMS: {:?}", program.uniforms);
-    println!("ATTRIBUTES: {:?}", program.attributes);
+    println!("UNIFORMS");
+    for uniform in &program.uniforms {
+        println!("  {:?}", uniform);
+    }
+    println!("ATTRIBUTES");
+    for attribute in &program.attributes {
+        println!("  {:?}", attribute);
+    }
 
     Ok(program)
 }
@@ -372,6 +379,7 @@ impl Program {
                 Uniform::Float(v) => Program::uniform1f(location, v),
                 Uniform::Float2(x, y) => Program::uniform2f(location, x, y),
                 Uniform::Float3(x, y, z) => Program::uniform3f(location, x, y, z),
+                Uniform::Integer(i) => Program::uniform1i(location, i),
                 Uniform::Mat3(m) => Program::matrix3(location, &m),
                 Uniform::Mat4(m) => Program::matrix4(location, &m),
                 Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
@@ -379,6 +387,8 @@ impl Program {
                 Uniform::Point3(p) => Program::uniform3f(location, p.x, p.y, p.z),
                 Uniform::Size(x, y) => Program::uniform2f(location, x, y),
             }
+        } else {
+            panic!("Unknown uniform name given: {}", name);
         }
         self
     }
@@ -452,6 +462,12 @@ impl Program {
                 z as GLfloat,
                 w as GLfloat,
             )
+        }
+    }
+
+    pub fn uniform1i(location: i32, value: i32) {
+        unsafe {
+            gl::Uniform1i(location, value);
         }
     }
 

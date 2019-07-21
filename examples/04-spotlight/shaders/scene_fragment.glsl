@@ -6,7 +6,6 @@ in vec4 vWorldPosLightSpace;
 
 uniform mat4 u_lightView;
 uniform mat3 u_lightRot;
-uniform vec3 u_lightPos;
 uniform mat4 u_model;
 
 uniform vec4 u_ambientColor;
@@ -83,8 +82,8 @@ vec3 gamma(vec3 color, float gammaValue) {
 void main(void) {
     vec3 worldNormal = normalize(vWorldNormal);
 
-    vec3 u_lightPos = (u_lightView * vWorldPosition).xyz;
-    vec3 lightPosNormal = normalize(u_lightPos);
+    vec3 lightPos = (u_lightView * vWorldPosition).xyz;
+    vec3 lightPosNormal = normalize(lightPos);
     vec3 lightSurfaceNormal = u_lightRot * worldNormal;
     vec2 lightDeviceNormal = vWorldPosLightSpace.xy / vWorldPosLightSpace.w;
     vec2 lightUV = (lightDeviceNormal * 0.5) + 0.5;
@@ -92,16 +91,16 @@ void main(void) {
     // shadow calculation
     float bias = 0.001;
     // float lightDepth1 = texture2D(u_sShadowMap, lightUV).r;
-    // float lightDepth2 = clamp(length(u_lightPos) / 40.0, 0.0, 1.0);
+    // float lightDepth2 = clamp(length(lightPos) / 40.0, 0.0, 1.0);
     // float illuminated = step(lightDepth2, lightDepth1 + bias);
-    float lightDepth = clamp(length(u_lightPos) / 40.0, 0.0, 1.0)  -bias;
+    float lightDepth = clamp(length(lightPos) / 40.0, 0.0, 1.0)  -bias;
     float illuminated = pcfLinear(u_sShadowMap, u_shadowMapSize, lightUV, lightDepth);
 
     vec3 excident = (
       u_ambientColor.rgb +
       lambert(lightSurfaceNormal, -lightPosNormal) *
       influence(lightPosNormal, 70.0, 55.0) *
-      attenuation(u_lightPos) *
+      attenuation(lightPos) *
       illuminated
     );
 

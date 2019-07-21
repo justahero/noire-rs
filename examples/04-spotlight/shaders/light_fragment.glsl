@@ -2,8 +2,6 @@
 
 in vec4 vWorldPosition;
 
-uniform vec3 u_lightPos;
-
 out vec4 out_color;
 
 void main() {
