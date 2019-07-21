@@ -8,6 +8,7 @@ use render::traits::{Bindable};
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(u32)]
 pub enum PixelFormat {
+    RGB = gl::RGB,
     RGBA = gl::RGBA,
     BGRA = gl::BGRA,
     DepthComponent = gl::DEPTH_COMPONENT,
@@ -17,6 +18,7 @@ pub enum PixelFormat {
 impl From<PixelFormat> for gl::types::GLenum {
     fn from(pixel_format: PixelFormat) -> Self {
         match pixel_format {
+            PixelFormat::RGB => gl::RGB,
             PixelFormat::RGBA => gl::RGBA,
             PixelFormat::BGRA => gl::BGRA,
             PixelFormat::DepthComponent => gl::DEPTH_COMPONENT,
@@ -28,6 +30,7 @@ impl From<PixelFormat> for gl::types::GLenum {
 impl From<gl::types::GLenum> for PixelFormat {
     fn from(pixel_format: gl::types::GLenum) -> Self {
         match pixel_format {
+            gl::RGB => PixelFormat::RGB,
             gl::RGBA => PixelFormat::RGBA,
             gl::BGRA => PixelFormat::BGRA,
             gl::DEPTH_COMPONENT => PixelFormat::DepthComponent,
@@ -69,7 +72,7 @@ impl Texture {
             id,
             target,
             format: Format::RGB,
-            pixel_format: PixelFormat::BGRA,
+            pixel_format: PixelFormat::RGB,
             size: Size::default(),
             pixel_type: PixelType::UnsignedByte,
         };
@@ -96,7 +99,7 @@ impl Texture {
             target,
             format: Format::DepthComponent,
             pixel_format: PixelFormat::DepthComponent,
-            size: Size { width: 0, height: 0 },
+            size: Size::default(),
             pixel_type: PixelType::Float,
         };
 
