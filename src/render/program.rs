@@ -9,7 +9,7 @@ use std::str;
 use math::color::Color;
 
 use super::Size;
-use render::{Shader, Texture};
+use render::{Shader, ShaderType, Texture};
 use render::traits::Bindable;
 
 /// A shader variable, can be an uniform or attribute
@@ -319,11 +319,11 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 
 impl Program {
     pub fn compile_from_files(vertex_file: &str, fragment_file: &str) -> Result<Program, String> {
-        let vertex_shader = match Shader::from_file(vertex_file, gl::VERTEX_SHADER) {
+        let vertex_shader = match Shader::from_file(vertex_file, ShaderType::Vertex) {
             Ok(shader) => shader,
             Err(e) => return Err(e),
         };
-        let fragment_shader = match Shader::from_file(fragment_file, gl::FRAGMENT_SHADER) {
+        let fragment_shader = match Shader::from_file(fragment_file, ShaderType::Fragment) {
             Ok(shader) => shader,
             Err(e) => return Err(e),
         };

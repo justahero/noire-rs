@@ -101,7 +101,7 @@ fn main() {
         // render light first
         light_frame_buffer.bind();
         window.set_viewport(&Point2::default(), &light_depth_texture.size);
-        window.clear(1.0, 1.0, 1.0, 1.0);
+        window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
         // window.set_cullmode(CullMode::Front);
 
