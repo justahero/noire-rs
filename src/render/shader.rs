@@ -102,10 +102,10 @@ fn get_errors(errors: &str, source: &str) -> Vec<String> {
     result
 }
 
-fn compile_shader(source: &str, shader_type: ShaderType) -> Result<u32, String> {
+fn compile_shader(source: &str, shader_type: &ShaderType) -> Result<u32, String> {
     let c_str = CString::new(source.as_bytes()).unwrap();
 
-    let shader_type: gl::types::GLenum = shader_type.into();
+    let shader_type: gl::types::GLenum = (*shader_type).into();
     let shader = unsafe { gl::CreateShader(shader_type as u32) };
 
     unsafe {
@@ -144,7 +144,7 @@ impl Shader {
     }
 
     pub fn create(source: &str, shader_type: ShaderType) -> Result<Self, String> {
-        match compile_shader(source, shader_type) {
+        match compile_shader(source, &shader_type) {
             Ok(id) => Ok(Shader {
                 id,
                 source: String::from(source),

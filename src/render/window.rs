@@ -11,7 +11,7 @@ use glfw::{Context, Glfw, Error, WindowEvent};
 
 use input::{Button, Input};
 use super::context;
-use super::{Capability, CullMode, Point2, Size};
+use super::{Capability, CullMode, DepthFunc, Point2, Size};
 
 /// A generic Render error
 #[derive(Debug, Clone)]
@@ -74,17 +74,19 @@ pub trait OpenGLWindow: Window {
     /// Swaps frame buffer and displays content
     fn swap_buffers(&mut self) -> &Self;
     /// enable specific GL functionality
-    fn enable(&mut self, cap: Capability) -> &Self;
+    fn enable(&self, cap: Capability) -> &Self;
     /// disable specific GL functionality
-    fn disable(&mut self, cap: Capability) -> &Self;
+    fn disable(&self, cap: Capability) -> &Self;
     /// Returns true if the capability is currently enabled
-    fn enabled(&mut self, cap: Capability) -> bool;
+    fn enabled(&self, cap: Capability) -> bool;
     /// Sets the viewport of the rendering window
     fn set_viewport(&self, point: &Point2<u32>, size: &Size<u32>) -> &Self;
     /// Reset the viewport to the window frame buffer size
     fn reset_viewport(&self) -> &Self;
     /// Sets the cullmode
     fn set_cullmode(&self, mode: CullMode) -> &Self;
+    /// Sets the depth func
+    fn set_depth_func(&self, func: DepthFunc) -> &Self;
 }
 
 /// Struct that defines a window to render graphics
@@ -331,7 +333,7 @@ impl OpenGLWindow for RenderWindow {
     }
 
     /// Implements GL specific logic to enable functionality
-    fn enable(&mut self, cap: Capability) -> &Self {
+    fn enable(&self, cap: Capability) -> &Self {
         unsafe {
             gl::Enable(cap.into());
         }
@@ -339,7 +341,7 @@ impl OpenGLWindow for RenderWindow {
     }
 
     /// Implements GL specific logic to disable functionality
-    fn disable(&mut self, cap: Capability) -> &Self {
+    fn disable(&self, cap: Capability) -> &Self {
         unsafe {
             gl::Disable(cap.into());
         }
@@ -347,7 +349,7 @@ impl OpenGLWindow for RenderWindow {
     }
 
     /// Returns true if the capability is currently enabled
-    fn enabled(&mut self, cap: Capability) -> bool {
+    fn enabled(&self, cap: Capability) -> bool {
         unsafe {
             return gl::IsEnabled(cap.into()) == gl::TRUE;
         }
@@ -377,6 +379,15 @@ impl OpenGLWindow for RenderWindow {
         unsafe {
             gl::CullFace(mode.into());
         }
+        self
+    }
+
+    /// Sets the depth func
+    fn set_depth_func(&self, func: DepthFunc) -> &Self {
+        unsafe {
+            gl::DepthFunc(func.into());
+        }
+
         self
     }
 }

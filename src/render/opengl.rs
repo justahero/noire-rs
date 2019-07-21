@@ -177,3 +177,43 @@ fn get_error_msg<'a>(error: u32) -> &'a str {
         _ => "Unknown",
     }
 }
+
+/// An enumeration of all possible Data tpes
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[repr(u32)]
+pub enum DataType {
+    Float = gl::FLOAT,
+    FloatVec2 = gl::FLOAT_VEC2,
+    FloatVec3 = gl::FLOAT_VEC3,
+    FloatVec4 = gl::FLOAT_VEC4,
+    FloatMat2 = gl::FLOAT_MAT2,
+    FloatMat3 = gl::FLOAT_MAT3,
+    FloatMat4 = gl::FLOAT_MAT4,
+    FloatMat2x3 = gl::FLOAT_MAT2x3,
+    FloatMat2x4 = gl::FLOAT_MAT2x4,
+    FloatMat3x2 = gl::FLOAT_MAT3x2,
+    FloatMat3x4 = gl::FLOAT_MAT3x4,
+    FloatMat4x2 = gl::FLOAT_MAT4x2,
+    FloatMat4x3 = gl::FLOAT_MAT4x3,
+    Int = gl::INT,
+    IntVec2 = gl::INT_VEC2,
+    IntVec3 = gl::INT_VEC3,
+    IntVec4 = gl::INT_VEC4,
+    UnsignedInt = gl::UNSIGNED_INT,
+    UnsignedIntVec2 = gl::UNSIGNED_INT_VEC2,
+    UnsignedIntVec3 = gl::UNSIGNED_INT_VEC3,
+    UnsignedIntVec4 = gl::UNSIGNED_INT_VEC4,
+    Double = gl::DOUBLE,
+    DoubleVec2 = gl::DOUBLE_VEC2,
+    DoubleVec3 = gl::DOUBLE_VEC3,
+    DoubleVec4 = gl::DOUBLE_VEC4,
+    DoubleMat2 = gl::DOUBLE_MAT2,
+    DoubleMat3 = gl::DOUBLE_MAT3,
+    Doublemat4 = gl::DOUBLE_MAT4,
+    DoubleMat2x3 = gl::DOUBLE_MAT2x3,
+    DoubleMat2x4 = gl::DOUBLE_MAT2x4,
+    DoubleMat3x2 = gl::DOUBLE_MAT3x2,
+    DoubleMat3x4 = gl::DOUBLE_MAT3x4,
+    DoubleMat4x2 = gl::DOUBLE_MAT4x2,
+    DoubleMat4x3 = gl::DOUBLE_MAT4x3,
+}
