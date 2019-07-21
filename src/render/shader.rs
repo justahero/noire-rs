@@ -10,11 +10,43 @@ use std::io::prelude::*;
 use std::ptr;
 use std::str;
 
+/// Enum to define type of shader
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ShaderType {
+    Vertex,
+    Fragment,
+    Geometry,
+}
+
+impl From<ShaderType> for gl::types::GLenum {
+    fn from(shader_type: ShaderType) -> Self {
+        match shader_type {
+            ShaderType::Vertex   => gl::VERTEX_SHADER,
+            ShaderType::Fragment => gl::FRAGMENT_SHADER,
+            ShaderType::Geometry => gl::GEOMETRY_SHADER,
+        }
+    }
+}
+
+impl From<gl::types::GLenum> for ShaderType {
+    fn from(format: gl::types::GLenum) -> Self {
+        match format {
+            gl::VERTEX_SHADER   => ShaderType::Vertex,
+            gl::FRAGMENT_SHADER => ShaderType::Fragment,
+            gl::GEOMETRY_SHADER => ShaderType::Geometry,
+            _ => panic!("Unknown shader type given: {}", format),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Shader {
+    /// The shader source as a string
     pub source: String,
+    /// The associated OpenGL id / name to this shader
     pub id: u32,
-    pub shader_type: GLenum,
+    /// The type of the shader
+    pub shader_type: ShaderType,
 }
 
 fn get_compile_error(shader: u32) -> String {
@@ -68,10 +100,12 @@ fn get_errors(errors: &str, source: &str) -> Vec<String> {
     result
 }
 
-fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> {
+fn compile_shader(source: &str, shader_type: ShaderType) -> Result<u32, String> {
     let c_str = CString::new(source.as_bytes()).unwrap();
 
-    let shader = unsafe { gl::CreateShader(shader_type) };
+    let shader_type: gl::types::GLenum = shader_type.into();
+    let shader = unsafe { gl::CreateShader(shader_type as u32) };
+
     unsafe {
         gl::ShaderSource(shader, 1, &c_str.as_ptr(), ptr::null());
         gl::CompileShader(shader);
@@ -89,7 +123,7 @@ fn compile_shader(source: &str, shader_type: GLenum) -> Result<u32, String> {
 }
 
 impl Shader {
-    pub fn from_file(file_path: &str, shader_type: GLenum) -> Result<Self, String> {
+    pub fn from_file(file_path: &str, shader_type: ShaderType) -> Result<Self, String> {
         let path = Path::new(file_path);
         let display = path.display();
 
@@ -107,7 +141,7 @@ impl Shader {
         Shader::create(&source, shader_type)
     }
 
-    pub fn create(source: &str, shader_type: GLenum) -> Result<Self, String> {
+    pub fn create(source: &str, shader_type: ShaderType) -> Result<Self, String> {
         match compile_shader(source, shader_type) {
             Ok(id) => Ok(Shader {
                 id,
