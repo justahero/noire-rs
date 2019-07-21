@@ -81,6 +81,8 @@ pub trait OpenGLWindow: Window {
     fn enabled(&mut self, cap: Capability) -> bool;
     /// Sets the viewport of the rendering window
     fn set_viewport(&self, point: &Point2<u32>, size: &Size<u32>) -> &Self;
+    /// Reset the viewport to the window frame buffer size
+    fn reset_viewport(&self) -> &Self;
     /// Sets the cullmode
     fn set_cullmode(&self, mode: CullMode) -> &Self;
 }
@@ -361,6 +363,12 @@ impl OpenGLWindow for RenderWindow {
                 size.height as i32,
             );
         }
+        self
+    }
+
+    /// Reset the viewport to the window frame buffer size
+    fn reset_viewport(&self) -> &Self {
+        self.set_viewport(&Point2::default(), &self.get_framebuffer_size());
         self
     }
 

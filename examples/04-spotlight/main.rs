@@ -126,9 +126,9 @@ fn main() {
 
         //----------------------------------------------------------
         // Render Scene / Camera
-        window.set_viewport(&Point2::ZERO, &window.size());
-        // window.set_cullmode(CullMode::Back);
-        window.clear(0.0, 0.0, 0.0, 0.0);
+        window.reset_viewport();
+        window.set_cullmode(CullMode::Back);
+        window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
 
         display_program.bind();
