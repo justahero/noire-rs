@@ -95,6 +95,8 @@ fn get_errors(errors: &str, source: &str) -> Vec<String> {
             let error = groups.get(3).unwrap().as_str();
             let text = get_source_location(location.parse::<i32>().unwrap(), source);
             result.push(format!("{}: in:\n{}", error, text));
+        } else {
+            result.push(format!("{}", line));
         }
     }
     result
