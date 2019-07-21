@@ -1,5 +1,7 @@
 #version 330
 
+// Mostly based on https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+
 in vec3 vWorldNormal;
 in vec4 vWorldPosition;
 in vec4 vWorldPosLightSpace;
