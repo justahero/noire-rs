@@ -12,6 +12,12 @@ use super::Size;
 use render::{Shader, ShaderType, Texture};
 use render::traits::Bindable;
 
+/// An Error struct for Program errors
+#[derive(Debug, Clone)]
+pub struct ProgramError {
+    message: String
+}
+
 /// A shader variable, can be an uniform or attribute
 #[derive(Debug, Clone)]
 pub struct Variable {
@@ -182,7 +188,7 @@ fn get_link_error(program: u32) -> String {
     log_text
 }
 
-fn find_attributes(program: u32) -> Vec<Variable> {
+fn find_attributes(program: u32) -> Result<Vec<Variable>, ProgramError> {
     let mut result = Vec::new();
     let mut num_attributes = 0;
     let mut max_name_length = 0;
@@ -230,10 +236,10 @@ fn find_attributes(program: u32) -> Vec<Variable> {
         }
     }
 
-    result
+    Ok(result)
 }
 
-fn find_uniforms(program: u32) -> Vec<Variable> {
+fn find_uniforms(program: u32) -> Result<Vec<Variable>, ProgramError> {
     let mut result = Vec::new();
     let mut num_uniforms = 0;
     let mut max_name_length = 0;
@@ -281,10 +287,26 @@ fn find_uniforms(program: u32) -> Vec<Variable> {
         }
     }
 
-    result
+    Ok(result)
 }
 
-pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Program, String> {
+/// Validates the program
+pub fn validate(program: u32) -> Result<(), ProgramError> {
+    let mut params = 0;
+
+    unsafe {
+        gl::ValidateProgram(program);
+        gl::GetProgramiv(program, gl::VALIDATE_STATUS, &mut params);
+    }
+
+    if params != i32::from(gl::TRUE) {
+        return Err(ProgramError{ message: get_link_error(program) });
+    }
+
+    Ok(())
+}
+
+pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Program, ProgramError> {
     let id;
     unsafe {
         id = gl::CreateProgram();
@@ -298,16 +320,18 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         gl::GetProgramiv(id, gl::LINK_STATUS, &mut status);
         if status != i32::from(gl::TRUE) {
             gl::DeleteProgram(id);
-            return Err(get_link_error(id));
+            return Err(ProgramError{ message: get_link_error(id) });
         }
     }
+
+    // validate(id)?;
 
     let program = Program {
         vertex_shader,
         pixel_shader,
         id,
-        uniforms: find_uniforms(id),
-        attributes: find_attributes(id),
+        uniforms: find_uniforms(id)?,
+        attributes: find_attributes(id)?,
         samples: Vec::new(),
     };
 
@@ -318,20 +342,20 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
 }
 
 impl Program {
-    pub fn compile_from_files(vertex_file: &str, fragment_file: &str) -> Result<Program, String> {
+    pub fn compile_from_files(vertex_file: &str, fragment_file: &str) -> Result<Program, ProgramError> {
         let vertex_shader = match Shader::from_file(vertex_file, ShaderType::Vertex) {
             Ok(shader) => shader,
-            Err(e) => return Err(e),
+            Err(e) => return Err(ProgramError{ message: e }),
         };
         let fragment_shader = match Shader::from_file(fragment_file, ShaderType::Fragment) {
             Ok(shader) => shader,
-            Err(e) => return Err(e),
+            Err(e) => return Err(ProgramError{ message: e }),
         };
         Program::create(vertex_shader, fragment_shader)
     }
 
-    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Self, String> {
-        link_program(vertex_shader, pixel_shader)
+    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Self, ProgramError> {
+        Ok(link_program(vertex_shader, pixel_shader)?)
     }
 
     /// Set Uniform to this Program
@@ -438,6 +462,14 @@ impl Program {
             }
         }
         None
+    }
+
+    /// Validates the program
+    pub fn validate(&self) -> Result<&Self, ProgramError> {
+        match validate(self.id) {
+            Ok(_) => Ok(self),
+            Err(err) => Err(err),
+        }
     }
 }
 
