@@ -247,6 +247,34 @@ impl From<gl::types::GLenum> for CullMode {
     }
 }
 
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+#[repr(u32)]
+pub enum DepthFunc {
+    Always = gl::ALWAYS,
+    Never = gl::NEVER,
+    Less = gl::LESS,
+    Equal = gl::EQUAL,
+    LessEqual = gl::LEQUAL,
+    Greater = gl::GREATER,
+    NotEqual = gl::NOTEQUAL,
+    GreaterEqual = gl::GEQUAL,
+}
+
+impl From<DepthFunc> for gl::types::GLenum {
+    fn from(depth_func: DepthFunc) -> Self {
+        match depth_func {
+            DepthFunc::Always       => gl::ALWAYS,
+            DepthFunc::Never        => gl::NEVER,
+            DepthFunc::Less         => gl::LESS,
+            DepthFunc::Equal        => gl::EQUAL,
+            DepthFunc::LessEqual    => gl::LEQUAL,
+            DepthFunc::Greater      => gl::GREATER,
+            DepthFunc::NotEqual     => gl::NOTEQUAL,
+            DepthFunc::GreaterEqual => gl::GEQUAL,
+        }
+    }
+}
+
 /// A Perspective struct, that combines fov, near and far planes
 pub struct Perspective {
     pub fov: f32,

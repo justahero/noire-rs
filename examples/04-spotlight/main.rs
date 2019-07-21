@@ -24,7 +24,7 @@ fn main() {
 
     window.enable(Capability::DepthTest);
     window.disable(Capability::CullFace);
-    // window.set_cullmode(CullMode::Back);
+    window.set_cullmode(CullMode::Back);
 
     // create shader program
     let vertex_file = String::from("./examples/04-spotlight/shaders/scene_vertex.glsl");
@@ -114,7 +114,7 @@ fn main() {
         // render all nodes
         scene.nodes(&mut |node| {
             light_program
-                .uniform("u_ambientColor", Color::rgb(1.0, 1.0, 1.0).into())
+                .uniform("u_ambientColor", Color::rgb(0.1, 0.1, 0.1).into())
                 .uniform("u_model", node.model_view.into())
                 .uniform("u_normalModel", node.normal_view().into());
 
