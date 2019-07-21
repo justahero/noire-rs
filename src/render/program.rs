@@ -15,7 +15,7 @@ use render::traits::Bindable;
 /// An Error struct for Program errors
 #[derive(Debug, Clone)]
 pub struct ProgramError {
-    message: String
+    pub message: String
 }
 
 /// A shader variable, can be an uniform or attribute

@@ -7,7 +7,7 @@ pub use self::capabilities::Capabilities;
 pub use self::context::Context;
 pub use self::frame_buffer::FrameBuffer;
 pub use self::index_buffer::IndexBuffer;
-pub use self::program::{Program, Uniform};
+pub use self::program::{Program, ProgramError, Uniform};
 pub use self::shader::{Shader, ShaderType};
 pub use self::spot_light::Spotlight;
 pub use self::texture::Texture;
@@ -33,7 +33,7 @@ pub mod window;
 /// A generic Render error
 #[derive(Debug, Clone)]
 pub struct RenderError {
-    message: String
+    pub message: String
 }
 
 /// Generates an appropriate error message for Display
