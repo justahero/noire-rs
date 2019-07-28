@@ -85,6 +85,18 @@ vec3 gamma(vec3 color, float gammaValue) {
     return pow(color, vec3(gammaValue));
 }
 
+float calculateShadow(vec4 worldPosLightSpace) {
+    vec3 projCoords = worldPosLightSpace.xyz / worldPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5;
+    float closestDepth = texture(u_sShadowMap, projCoords.xy).r;
+    float currentDepth = projCoords.z;
+
+    float bias = 0.001;
+    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+
+    return shadow;;
+}
+
 void main(void) {
     vec3 worldNormal = normalize(vWorldNormal);
 
@@ -100,22 +112,18 @@ void main(void) {
     vec4 diffuseColor = diff * u_lightColor;
 
     // shadow calculation
-    float bias = 0.001;
-    // float lightDepth1 = texture2D(u_sShadowMap, lightUV).r;
-    // float lightDepth2 = clamp(length(lightPos) / 40.0, 0.0, 1.0);
-    // float illuminated = step(lightDepth2, lightDepth1 + bias);
-    float lightDepth = clamp(length(lightPos) / 8.0, 0.0, 1.0)  -bias;
-    float illuminated = pcfLinear(u_sShadowMap, u_shadowMapSize, lightUV, lightDepth);
-
     vec4 ambientColor = u_ambientColor * diffuseColor;
 
-    vec3 excident = (
+    // calculate lighting
+    float shadow = calculateShadow(vWorldPosLightSpace);
+
+    vec3 lighting = (
       ambientColor.rgb +
       lambert(lightSurfaceNormal, -lightPosNormal) *
       influence(lightPosNormal, 75.0, 25.0) *
       attenuation(lightPos) *
-      illuminated
+      (1.0 - shadow)
     );
 
-    out_color = vec4(gamma(excident, 2.2), 1.0);
+    out_color = vec4(gamma(lighting, 2.2), 1.0);
 }
