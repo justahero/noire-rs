@@ -127,8 +127,7 @@ fn main() {
             .uniform("u_lightProj", spot_light.projection.into())
             .uniform("u_lightPos", spot_light.pos.into())
             .uniform("u_lightColor", spot_light.color.into())
-            .uniform("u_sShadowMap", Uniform::Integer(unit).into())
-            .uniform("u_shadowMapSize", shadow_texture.size.into());
+            .uniform("u_sShadowMap", Uniform::Integer(unit).into());
 
         // render all nodes
         scene.nodes(&mut |node| {

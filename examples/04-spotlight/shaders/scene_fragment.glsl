@@ -17,7 +17,6 @@ uniform vec4 u_ambientColor;
 uniform vec4 u_diffuseColor;
 
 uniform sampler2D u_sShadowMap;
-uniform vec2 u_shadowMapSize;
 
 out vec4 out_color;
 
@@ -43,22 +42,23 @@ float texture2DShadowLerp(sampler2D depthTexture, vec2 size, vec2 uv, float comp
     return c;
 }
 
-float pcfLinear(sampler2D depthTexture, vec2 size, vec2 uv, float compare) {
+float pcfLinear(sampler2D depthTexture, vec2 uv, float compare) {
     float result = 0.0;
+    vec2 size = textureSize(depthTexture, 0);
     for (int x = -1; x <= 1; x++){
         for (int y = -1; y <= 1; y++) {
-            vec2 off = vec2(x,y) / size;
+            vec2 off = vec2(x, y) / size;
             result += texture2DShadowLerp(depthTexture, size, uv + off, compare);
         }
     }
-    return result/9.0;
+    return result / 9.0;
 }
 
 float pcf(sampler2D depthTexture, vec2 size, vec2 uv, float compare) {
     float result = 0.0;
     for (int x = -2; x <= 2; x++) {
         for (int y = -2; y <= 2; y++) {
-            vec2 off = vec2(x,y) / size;
+            vec2 off = vec2(x, y) / size;
             result += textureCompare(depthTexture, uv + off, compare);
         }
     }
@@ -93,6 +93,10 @@ float calculateShadow(vec4 worldPosLightSpace) {
 
     float bias = 0.001;
     float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+
+    if (projCoords.z > 1.0) {
+        shadow = 0.0;
+    }
 
     return shadow;;
 }
