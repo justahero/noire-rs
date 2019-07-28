@@ -94,6 +94,11 @@ void main(void) {
     vec2 lightDeviceNormal = vWorldPosLightSpace.xy / vWorldPosLightSpace.w;
     vec2 lightUV = (lightDeviceNormal * 0.5) + 0.5;
 
+    // diffuse component calculation
+    vec3 lightDir = normalize(u_lightPos - vWorldPosition.xyz);
+    float diff = max(dot(lightDir, worldNormal), 0.0);
+    vec4 diffuseColor = diff * u_lightColor;
+
     // shadow calculation
     float bias = 0.001;
     // float lightDepth1 = texture2D(u_sShadowMap, lightUV).r;
@@ -102,7 +107,7 @@ void main(void) {
     float lightDepth = clamp(length(lightPos) / 8.0, 0.0, 1.0)  -bias;
     float illuminated = pcfLinear(u_sShadowMap, u_shadowMapSize, lightUV, lightDepth);
 
-    vec4 ambientColor = u_ambientColor * u_diffuseColor;
+    vec4 ambientColor = u_ambientColor * diffuseColor;
 
     vec3 excident = (
       ambientColor.rgb +
