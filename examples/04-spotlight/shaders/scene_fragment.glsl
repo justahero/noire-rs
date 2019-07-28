@@ -54,15 +54,16 @@ float pcfLinear(sampler2D depthTexture, vec2 uv, float compare) {
     return result / 9.0;
 }
 
-float pcf(sampler2D depthTexture, vec2 size, vec2 uv, float compare) {
+float pcf(sampler2D shadowMap, vec2 uv, float bias, float currentDepth) {
     float result = 0.0;
-    for (int x = -2; x <= 2; x++) {
-        for (int y = -2; y <= 2; y++) {
-            vec2 off = vec2(x, y) / size;
-            result += textureCompare(depthTexture, uv + off, compare);
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+            float pcf = texture(shadowMap, uv + vec2(x, y) * texelSize).r;
+            result += currentDepth - bias > pcf ? 1.0 : 0.0;
         }
     }
-    return result / 25.0;
+    return result / 9.0;
 }
 
 float attenuation(vec3 dir) {
@@ -85,20 +86,16 @@ vec3 gamma(vec3 color, float gammaValue) {
     return pow(color, vec3(gammaValue));
 }
 
-float calculateShadow(vec4 worldPosLightSpace) {
+float calculateShadow(vec4 worldPosLightSpace, float bias) {
     vec3 projCoords = worldPosLightSpace.xyz / worldPosLightSpace.w;
     projCoords = projCoords * 0.5 + 0.5;
-    float closestDepth = texture(u_sShadowMap, projCoords.xy).r;
     float currentDepth = projCoords.z;
 
-    float bias = 0.001;
-    float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-
     if (projCoords.z > 1.0) {
-        shadow = 0.0;
+        return 0.0;
     }
 
-    return shadow;;
+    return pcf(u_sShadowMap, projCoords.xy, bias, currentDepth);
 }
 
 void main(void) {
@@ -119,7 +116,8 @@ void main(void) {
     vec4 ambientColor = u_ambientColor * diffuseColor;
 
     // calculate lighting
-    float shadow = calculateShadow(vWorldPosLightSpace);
+    float bias = max(0.01 * (1.0 - dot(worldNormal, lightDir)), 0.001);
+    float shadow = calculateShadow(vWorldPosLightSpace, bias);
 
     vec3 lighting = (
       ambientColor.rgb +
