@@ -1,6 +1,8 @@
 #version 330
 
 // Mostly based on https://learnopengl.com/Advanced-Lighting/Shadows/Shadow-Mapping
+// This article highlights soft shadowing techniques: http://codeflow.org/entries/2013/feb/15/soft-shadow-mapping/
+// see https://learnopengl.com/Lighting/Basic-Lighting
 
 in vec3 vWorldNormal;
 in vec4 vWorldPosition;
@@ -112,8 +114,11 @@ void main(void) {
     float diff = max(dot(lightDir, worldNormal), 0.0);
     vec4 diffuseColor = diff * u_lightColor;
 
-    // shadow calculation
-    vec4 ambientColor = u_ambientColor * diffuseColor;
+    // calculate specular component
+    vec3 viewDir = normalize(u_cameraPos - vWorldPosition.xyz);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(worldNormal, halfwayDir), 0.0), 128.0);
+    vec3 specularColor = spec * u_lightColor.rgb;
 
     // calculate lighting
     float bias = max(0.01 * (1.0 - dot(worldNormal, lightDir)), 0.001);
