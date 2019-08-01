@@ -24,38 +24,6 @@ out vec4 out_color;
 
 const float PI = 3.14159265358979323846264;
 
-float textureCompare(sampler2D depthTexture, vec2 uv, float compare) {
-    float depth = texture(depthTexture, uv).r;
-    return step(compare, depth);
-}
-
-float texture2DShadowLerp(sampler2D depthTexture, vec2 size, vec2 uv, float compare) {
-    vec2 texelSize = vec2(1.0) / size;
-    vec2 f = fract(uv * size + 0.5);
-    vec2 centroidUV = floor(uv * size + 0.5) / size;
-
-    float lb = textureCompare(depthTexture, centroidUV+texelSize*vec2(0.0, 0.0), compare);
-    float lt = textureCompare(depthTexture, centroidUV+texelSize*vec2(0.0, 1.0), compare);
-    float rb = textureCompare(depthTexture, centroidUV+texelSize*vec2(1.0, 0.0), compare);
-    float rt = textureCompare(depthTexture, centroidUV+texelSize*vec2(1.0, 1.0), compare);
-    float a = mix(lb, lt, f.y);
-    float b = mix(rb, rt, f.y);
-    float c = mix(a, b, f.x);
-    return c;
-}
-
-float pcfLinear(sampler2D depthTexture, vec2 uv, float compare) {
-    float result = 0.0;
-    vec2 size = textureSize(depthTexture, 0);
-    for (int x = -1; x <= 1; x++){
-        for (int y = -1; y <= 1; y++) {
-            vec2 off = vec2(x, y) / size;
-            result += texture2DShadowLerp(depthTexture, size, uv + off, compare);
-        }
-    }
-    return result / 9.0;
-}
-
 float pcf(sampler2D shadowMap, vec2 uv, float bias, float currentDepth) {
     float result = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
@@ -106,8 +74,6 @@ void main(void) {
     vec3 lightPos = (u_lightView * vWorldPosition).xyz;
     vec3 lightPosNormal = normalize(lightPos);
     vec3 lightSurfaceNormal = u_lightRot * worldNormal;
-    vec2 lightDeviceNormal = vWorldPosLightSpace.xy / vWorldPosLightSpace.w;
-    vec2 lightUV = (lightDeviceNormal * 0.5) + 0.5;
 
     // diffuse component calculation
     vec3 lightDir = normalize(u_lightPos - vWorldPosition.xyz);
