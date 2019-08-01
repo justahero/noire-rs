@@ -35,8 +35,8 @@ fn main() {
     let fragment_file = String::from("./examples/04-spotlight/shaders/light_fragment.glsl");
     let mut light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
-    let mut cube = Node::new(Mesh::create_cube(Cube::create(1.4), Color::rgb(0.0, 0.2, 0.8)).unwrap());
-    let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(0.3, 0.3, 1.0)).unwrap());
+    let mut cube = Node::new(Mesh::create_cube(Cube::create(1.4), Color::rgb(0.15, 0.15, 0.2)).unwrap());
+    let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(0.2, 0.25, 0.25)).unwrap());
 
     cube.translate(vec3(0.0, 2.0, 0.0));
     plane.translate(vec3(0.0, -1.0, 0.0));
@@ -54,7 +54,7 @@ fn main() {
             vec3(0.0, 1.0, 0.0)
         );
 
-    let mut spot_light = Spotlight::new(Color::rgb(0.4, 0.7, 0.2));
+    let mut spot_light = Spotlight::new(Color::rgb(0.65, 0.55, 0.40));
     spot_light.set_perspective(55.0, 1.0, 0.1, 100.0);
     spot_light.set_lookat(
         point3(-0.5, 8.0, 2.0),
@@ -121,6 +121,7 @@ fn main() {
         shadow_texture.bind();
         scene_program.bind();
         scene_program
+            .uniform("u_cameraPos", camera.position.into())
             .uniform("u_cameraSpaceMatrix", camera_space_matrix.into())
             .uniform("u_lightView", spot_light.view.into())
             .uniform("u_lightRot", normal_matrix(&spot_light.view).into())

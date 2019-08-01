@@ -13,6 +13,7 @@ uniform mat3 u_lightRot;
 uniform vec3 u_lightPos;
 uniform vec4 u_lightColor;
 
+uniform vec3 u_cameraPos;
 uniform mat4 u_model;
 
 uniform vec4 u_ambientColor;
@@ -38,7 +39,7 @@ float pcf(sampler2D shadowMap, vec2 uv, float bias, float currentDepth) {
 
 float attenuation(vec3 dir) {
     float dist = length(dir);
-    float radiance = 1.0 / (1.0 + pow(dist / 10.0, 2.0));
+    float radiance = 1.0 / (1.0 + pow(dist / 5.0, 2.0));
     return clamp(radiance * 5.0, 0.0, 1.0);
 }
 
@@ -78,7 +79,7 @@ void main(void) {
     // diffuse component calculation
     vec3 lightDir = normalize(u_lightPos - vWorldPosition.xyz);
     float diff = max(dot(lightDir, worldNormal), 0.0);
-    vec4 diffuseColor = diff * u_lightColor;
+    vec3 diffuseColor = diff * u_diffuseColor.rgb;
 
     // calculate specular component
     vec3 viewDir = normalize(u_cameraPos - vWorldPosition.xyz);
@@ -90,12 +91,13 @@ void main(void) {
     float bias = max(0.01 * (1.0 - dot(worldNormal, lightDir)), 0.001);
     float shadow = calculateShadow(vWorldPosLightSpace, bias);
 
+    vec3 baseColor = u_ambientColor.rgb + (1.0 - shadow) * (u_diffuseColor.rgb + specularColor) * u_lightColor.rgb;
+
     vec3 lighting = (
-      ambientColor.rgb +
-      lambert(lightSurfaceNormal, -lightPosNormal) *
-      influence(lightPosNormal, 75.0, 25.0) *
-      attenuation(lightPos) *
-      (1.0 - shadow)
+        baseColor +
+        lambert(lightSurfaceNormal, -lightPosNormal) *
+        influence(lightPosNormal, 75.0, 5.0) *
+        attenuation(lightPos) * (1.0 - shadow)
     );
 
     out_color = vec4(gamma(lighting, 2.2), 1.0);

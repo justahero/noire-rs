@@ -4,6 +4,7 @@ out vec3 vWorldNormal;
 out vec4 vWorldPosition;
 out vec4 vWorldPosLightSpace;
 
+uniform vec3 u_cameraPos;
 uniform mat4 u_cameraSpaceMatrix;
 uniform mat4 u_lightView;
 uniform mat4 u_lightProj;
