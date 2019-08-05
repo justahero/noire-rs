@@ -31,45 +31,6 @@ pub struct Variable {
     location: i32,
 }
 
-/// A struct to handle a Sample / Texture in the Shader program
-#[derive(Debug, Clone)]
-pub struct Sample {
-    /// The name of the texture variable
-    pub name: String,
-    /// The texture unit assigned in Program
-    pub unit: u32,
-    /// The texture id, NOTE this does not take care of Texture lifetime
-    pub id: u32,
-}
-
-impl Bindable for Sample {
-    fn bind(&mut self) -> &mut Self {
-        unsafe {
-            gl::ActiveTexture(gl::TEXTURE0 + self.unit);
-            gl::BindTexture(gl::TEXTURE_2D, self.id);
-        }
-        self
-    }
-
-    fn unbind(&mut self) -> &mut Self {
-        unsafe {
-            gl::ActiveTexture(gl::TEXTURE0 + self.unit);
-            gl::BindTexture(gl::TEXTURE_2D, 0);
-        }
-        self
-    }
-
-    fn bound(&self) -> bool {
-        let mut id = 0;
-
-        unsafe {
-            gl::GetIntegerv(gl::TEXTURE_BINDING_2D, &mut id);
-        }
-
-        self.id == (id as u32)
-    }
-}
-
 /// The main struct to handle Shaders, variables, uniforms and textures
 #[derive(Debug)]
 pub struct Program {
@@ -83,8 +44,6 @@ pub struct Program {
     pub uniforms: Vec<Variable>,
     /// The list of attributes from Shaders
     pub attributes: Vec<Variable>,
-    /// The list of samples
-    pub samples: Vec<Sample>,
 }
 
 /// An enum to provide a unified interface for all Uniforms
@@ -322,7 +281,6 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         id,
         uniforms: find_uniforms(id)?,
         attributes: find_attributes(id)?,
-        samples: Vec::new(),
     };
 
     println!("UNIFORMS");
@@ -394,24 +352,6 @@ impl Program {
     pub fn sampler(&mut self, name: &str, unit: u32, texture: &mut Texture) -> &mut Self {
         texture.bind();
         self.uniform(name, Uniform::Integer(unit as i32));
-
-        /*
-        self.samples
-            .iter()
-            .position(|sample| name == sample.name)
-            .map(|index| {
-                self.samples[index].unbind();
-                self.samples.remove(index);
-            })
-            .is_some();
-
-        let sample = Sample::new(name, unit, texture.id);
-        sample.bind();
-        self.samples.push(sample);
-
-        self.uniform(name, Uniform::Integer(unit as i32));
-        */
-
         self
     }
 
