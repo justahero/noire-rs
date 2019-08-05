@@ -5,6 +5,7 @@ use gl::types::*;
 
 use std::ptr;
 use std::str;
+use std::time::{SystemTime};
 
 use math::color::Color;
 
@@ -15,7 +16,7 @@ use render::traits::Bindable;
 /// An Error struct for Program errors
 #[derive(Debug, Clone)]
 pub struct ProgramError {
-    pub message: String
+    pub message: String,
 }
 
 /// A shader variable, can be an uniform or attribute
@@ -47,7 +48,7 @@ pub struct Program {
 }
 
 /// An enum to provide a unified interface for all Uniforms
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Uniform {
     Color(Color),
     Float(f32),
@@ -137,7 +138,7 @@ fn get_link_error(program: u32) -> String {
     log_text
 }
 
-fn find_attributes(program: u32) -> Result<Vec<Variable>, ProgramError> {
+fn find_attributes(program: u32) -> std::result::Result<Vec<Variable>, ProgramError> {
     let mut result = Vec::new();
     let mut num_attributes = 0;
     let mut max_name_length = 0;
@@ -188,7 +189,7 @@ fn find_attributes(program: u32) -> Result<Vec<Variable>, ProgramError> {
     Ok(result)
 }
 
-fn find_uniforms(program: u32) -> Result<Vec<Variable>, ProgramError> {
+fn find_uniforms(program: u32) -> std::result::Result<Vec<Variable>, ProgramError> {
     let mut result = Vec::new();
     let mut num_uniforms = 0;
     let mut max_name_length = 0;
@@ -240,7 +241,7 @@ fn find_uniforms(program: u32) -> Result<Vec<Variable>, ProgramError> {
 }
 
 /// Validates the program
-pub fn validate(program: u32) -> Result<(), ProgramError> {
+pub fn validate(program: u32) -> std::result::Result<(), ProgramError> {
     let mut params = 0;
 
     unsafe {
@@ -255,7 +256,9 @@ pub fn validate(program: u32) -> Result<(), ProgramError> {
     Ok(())
 }
 
-pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Program, ProgramError> {
+/// Links a program with vertex and pixel shaders
+///
+pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> std::result::Result<Program, ProgramError> {
     let id;
     unsafe {
         id = gl::CreateProgram();
@@ -283,6 +286,7 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
         attributes: find_attributes(id)?,
     };
 
+    println!("Compile Shader Program: {:?}", SystemTime::now());
     println!("UNIFORMS");
     for uniform in &program.uniforms {
         println!("  {:?}", uniform);
@@ -295,20 +299,29 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> Result<Progr
     Ok(program)
 }
 
+fn compile_from_files(vertex_file: &str, fragment_file: &str) -> std::result::Result<Program, ProgramError> {
+    let vertex_shader = match Shader::from_file(vertex_file, ShaderType::Vertex) {
+        Ok(shader) => shader,
+        Err(e) => return Err(ProgramError{ message: e }),
+    };
+    let fragment_shader = match Shader::from_file(fragment_file, ShaderType::Fragment) {
+        Ok(shader) => shader,
+        Err(e) => return Err(ProgramError{ message: e }),
+    };
+    Program::create(vertex_shader, fragment_shader)
+}
+
 impl Program {
-    pub fn compile_from_files(vertex_file: &str, fragment_file: &str) -> Result<Program, ProgramError> {
-        let vertex_shader = match Shader::from_file(vertex_file, ShaderType::Vertex) {
-            Ok(shader) => shader,
-            Err(e) => return Err(ProgramError{ message: e }),
-        };
-        let fragment_shader = match Shader::from_file(fragment_file, ShaderType::Fragment) {
-            Ok(shader) => shader,
-            Err(e) => return Err(ProgramError{ message: e }),
-        };
-        Program::create(vertex_shader, fragment_shader)
+    /// Compile program from vertex and fragment shader source files
+    ///
+    /// `vertex_file` - The file path of the vertex shader source
+    /// `fragment_file` - The file path of the fragment shader source
+    pub fn compile_from_files(vertex_file: &str, fragment_file: &str) -> std::result::Result<Program, ProgramError> {
+        compile_from_files(vertex_file, fragment_file)
     }
 
-    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> Result<Self, ProgramError> {
+    /// Createa a new Program with given pixel and fragment shaders
+    pub fn create(vertex_shader: Shader, pixel_shader: Shader) -> std::result::Result<Self, ProgramError> {
         Ok(link_program(vertex_shader, pixel_shader)?)
     }
 
@@ -337,7 +350,7 @@ impl Program {
                 Uniform::Size(x, y) => Program::uniform2f(location, x, y),
             }
         } else {
-            panic!("Unknown uniform name given: {}", name);
+            // panic!("Unknown uniform name given: {}", name);
         }
         self
     }
@@ -419,7 +432,7 @@ impl Program {
     }
 
     /// Validates the program
-    pub fn validate(&self) -> Result<&Self, ProgramError> {
+    pub fn validate(&self) -> std::result::Result<&Self, ProgramError> {
         match validate(self.id) {
             Ok(_) => Ok(self),
             Err(err) => Err(err),
