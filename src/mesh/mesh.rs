@@ -20,7 +20,7 @@ impl Mesh {
 
         vao.add_vb(VertexBuffer::create(&cube.vertices, 3, Primitive::Triangles));
         vao.add_vb(VertexBuffer::create(&cube.normals, 3, Primitive::Triangles));
-        vao.add_vb(VertexBuffer::create(&cube.texcoords, 2, Primitive::Triangles));
+        // vao.add_vb(VertexBuffer::create(&cube.texcoords, 2, Primitive::Triangles));
         vao.add_ib(IndexBuffer::create(&cube.indices)?);
 
         Ok(Mesh {
@@ -35,7 +35,7 @@ impl Mesh {
 
         vao.add_vb(VertexBuffer::create(&plane.vertices, 3, Primitive::Triangles));
         vao.add_vb(VertexBuffer::create(&plane.normals, 3, Primitive::Triangles));
-        vao.add_vb(VertexBuffer::create(&plane.texcoords, 2, Primitive::Triangles));
+        // vao.add_vb(VertexBuffer::create(&plane.texcoords, 2, Primitive::Triangles));
         vao.add_ib(IndexBuffer::create(&plane.indices)?);
 
         Ok(Mesh {

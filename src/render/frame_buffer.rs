@@ -1,11 +1,10 @@
-use render::{RenderError, Size};
+use render::{RenderError};
 use render::traits::{Bindable};
 use render::texture::Texture;
 
 /// A general purpose frame buffer to store pixel data into
 pub struct FrameBuffer {
     pub id: u32,
-    pub size: Size<u32>,
 }
 
 /// Checks the status of the Frame Buffer, return error with message or nothing
@@ -44,10 +43,7 @@ impl FrameBuffer {
             gl::GenFramebuffers(1, &mut id);
         }
 
-        Ok(FrameBuffer {
-            id,
-            size: Size::default(),
-        })
+        Ok(FrameBuffer { id })
     }
 
     /// Set Texture to this Frame buffer
@@ -56,7 +52,7 @@ impl FrameBuffer {
     ///
     /// * `texture` - The texture to attach
     pub fn set_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
-        debug_assert!(self.bound());
+        self.bind();
 
         unsafe {
             gl::FramebufferTexture2D(
@@ -70,6 +66,8 @@ impl FrameBuffer {
 
         check_status()?;
 
+        self.unbind();
+
         Ok(self)
     }
 
@@ -79,7 +77,7 @@ impl FrameBuffer {
     ///
     /// * `texture` - the depth Texture instance
     pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
-        debug_assert!(self.bound());
+        self.bind();
 
         unsafe {
             gl::FramebufferTexture2D(
@@ -92,6 +90,8 @@ impl FrameBuffer {
         }
 
         check_status()?;
+
+        self.unbind();
 
         Ok(self)
     }

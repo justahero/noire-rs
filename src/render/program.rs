@@ -42,17 +42,6 @@ pub struct Sample {
     pub id: u32,
 }
 
-impl Sample {
-    /// Creates a new Sample with all info
-    fn new(name: &str, unit: u32, id: u32) -> Self {
-        Sample {
-            name: name.to_string(),
-            unit,
-            id,
-        }
-    }
-}
-
 impl Bindable for Sample {
     fn bind(&self) -> &Self {
         unsafe {
@@ -372,6 +361,8 @@ impl Program {
     /// * `name` - The name of the uniform variable
     /// * `uniform` - The Uniform to set
     pub fn uniform(&mut self, name: &str, uniform: Uniform) -> &mut Self {
+        debug_assert!(self.bound());
+
         if let Some(variable) = self.uniform_by_name(name) {
             let location = variable.location;
             match uniform {
@@ -401,6 +392,10 @@ impl Program {
     /// * `unit` - The unit slot to attach the texture
     /// * `texture` - The texture reference to use
     pub fn sampler(&mut self, name: &str, unit: u32, texture: &Texture) -> &mut Self {
+        texture.bind();
+        self.uniform(name, Uniform::Integer(unit as i32));
+
+        /*
         self.samples
             .iter()
             .position(|sample| name == sample.name)
@@ -413,6 +408,9 @@ impl Program {
         let sample = Sample::new(name, unit, texture.id);
         sample.bind();
         self.samples.push(sample);
+
+        self.uniform(name, Uniform::Integer(unit as i32));
+        */
 
         self
     }

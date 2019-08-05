@@ -121,6 +121,8 @@ impl Texture {
     ///
     /// Returns either reference to self or an Error message
     pub fn set_size(&mut self, size: &Size<u32>) -> Result<&mut Self, RenderError> {
+        // debug_assert!(self.bound());
+
         self.size = *size;
 
         let format: gl::types::GLenum = self.format.into();
@@ -179,7 +181,7 @@ impl Texture {
 
 impl Bindable for Texture {
     fn bind(&self) -> &Self {
-        debug_assert!(!self.bound());
+        // debug_assert!(!self.bound());
 
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0);
@@ -189,10 +191,10 @@ impl Bindable for Texture {
     }
 
     fn unbind(&self) -> &Self {
-        debug_assert!(self.bound());
+        // debug_assert!(self.bound());
 
         unsafe {
-            gl::ActiveTexture(gl::TEXTURE0);
+            // gl::ActiveTexture(gl::TEXTURE0);
             gl::BindTexture(self.target, 0);
         }
         self

@@ -159,7 +159,7 @@ impl RenderWindow {
             Err(_) => return Err(WindowError{ message: "Failed to initialize GLFW".to_string() }),
         };
 
-        glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
+        glfw.window_hint(glfw::WindowHint::ContextVersion(4, 1));
         glfw.window_hint(glfw::WindowHint::Resizable(true));
         glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
         glfw.window_hint(glfw::WindowHint::OpenGlProfile(
