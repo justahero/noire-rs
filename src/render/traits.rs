@@ -2,14 +2,14 @@
 /// they can be used.
 pub trait Bindable {
     /// Binds the instance, should map the associated OpenGL bind function
-    fn bind(&self) -> &Self;
+    fn bind(&mut self) -> &mut Self;
     /// Unbinds the instance, release the resource
-    fn unbind(&self) -> &Self;
+    fn unbind(&mut self) -> &mut Self;
     /// Checks if the resource is bound
     fn bound(&self) -> bool;
 }
 
 /// Trait to render something
 pub trait Drawable {
-    fn draw(&self);
+    fn draw(&mut self);
 }

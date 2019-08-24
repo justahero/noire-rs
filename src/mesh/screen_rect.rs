@@ -3,13 +3,11 @@ use render::{Point2, Primitive, RenderError, Size};
 use render::{Program, ProgramError, Shader, ShaderType, Texture, Uniform};
 use render::{Bindable, Capability, RenderWindow, OpenGLWindow};
 
-pub struct ScreenRect<'a> {
+pub struct ScreenRect {
     /// holds all vertex information
     pub vao: VertexArrayObject,
     /// the program to render the Quad with
     pub program: Program,
-    /// The texture reference to render
-    pub texture: &'a Texture,
 }
 
 fn create_vertex_shader() -> Shader {
@@ -78,8 +76,8 @@ fn create_texcoords() -> Vec<f32> {
     ]
 }
 
-impl<'a> ScreenRect<'a> {
-    pub fn create(texture: &'a Texture) -> Result<Self, RenderError> {
+impl ScreenRect {
+    pub fn new() -> Result<Self, RenderError> {
         let mut vao = VertexArrayObject::new()?;
 
         vao.add_vb(VertexBuffer::create(&create_vertices(), 2, Primitive::Triangles));
@@ -93,12 +91,12 @@ impl<'a> ScreenRect<'a> {
         Ok(ScreenRect {
             vao,
             program,
-            texture,
         })
     }
 
     /// Renders the screen rect
-    pub fn render(&mut self, window: &RenderWindow, point: &Point2<u32>, size: &Size<u32>) -> &mut Self {
+    pub fn render(&mut self, window: &RenderWindow, point: &Point2<u32>, size: &Size<u32>, texture: &mut Texture) -> &mut Self {
+        texture.bind();
         self.bind();
         window.set_viewport(&point, &size);
         window.disable(Capability::DepthTest);
@@ -111,23 +109,22 @@ impl<'a> ScreenRect<'a> {
         window.enable(Capability::DepthTest);
         window.reset_viewport();
         self.unbind();
+        texture.unbind();
 
         self
     }
 }
 
-impl<'a> Bindable for ScreenRect<'a> {
-    fn bind(&self) -> &Self {
-        self.texture.bind();
+impl Bindable for ScreenRect {
+    fn bind(&mut self) -> &mut Self {
         self.program.bind();
         self.vao.bind();
         self
     }
 
-    fn unbind(&self) -> &Self {
+    fn unbind(&mut self) -> &mut Self {
         self.vao.unbind();
         self.program.unbind();
-        self.texture.unbind();
         self
     }
 

@@ -45,13 +45,14 @@ impl VertexArrayObject {
 }
 
 impl Bindable for VertexArrayObject {
-    fn bind(&self) -> &Self {
+    /// Binds the resource
+    fn bind(&mut self) -> &mut Self {
         unsafe {
             gl::BindVertexArray(self.id);
         }
 
         let mut stride = 0;
-        for (i, ref vb) in self.vbs.iter().enumerate() {
+        for (i, vb) in self.vbs.iter_mut().enumerate() {
             vb.bind();
             unsafe {
                 gl::VertexAttribPointer(
@@ -67,14 +68,15 @@ impl Bindable for VertexArrayObject {
             stride += vb.component_size();
         }
 
-        for ref ib in self.ibs.iter() {
+        for ib in self.ibs.iter_mut() {
             ib.bind();
         }
         self
     }
 
-    fn unbind(&self) -> &Self {
-        for (i, ref vb) in self.vbs.iter().enumerate() {
+    /// Unbinds / frees the resource
+    fn unbind(&mut self) -> &mut Self {
+        for (i, vb) in self.vbs.iter_mut().enumerate() {
             vb.unbind();
             unsafe {
                 gl::DisableVertexAttribArray(i as u32);
@@ -82,6 +84,10 @@ impl Bindable for VertexArrayObject {
         }
         unsafe {
             gl::BindVertexArray(0);
+        }
+
+        for ib in self.ibs.iter_mut() {
+            ib.unbind();
         }
         self
     }
@@ -98,7 +104,7 @@ impl Bindable for VertexArrayObject {
 
 impl Drawable for VertexArrayObject {
     /// Render the VertexArrayObject
-    fn draw(&self) {
+    fn draw(&mut self) {
         let vb = &self.vbs[0];
         if self.ibs.is_empty() {
             unsafe {

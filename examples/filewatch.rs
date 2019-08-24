@@ -10,10 +10,10 @@ use std::time::Duration;
 fn watch_files(files: &Vec<String>) -> notify::Result<()> {
     let (tx, rx) = channel();
 
-    let mut watcher: RecommendedWatcher = try!(Watcher::new(tx, Duration::from_millis(125)));
+    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(125))?;
 
     for file in files {
-        try!(watcher.watch(&file, RecursiveMode::NonRecursive));
+        watcher.watch(&file, RecursiveMode::NonRecursive)?;
     }
 
     loop {

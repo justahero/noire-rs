@@ -35,7 +35,7 @@ impl Node {
 }
 
 impl Drawable for Node {
-    fn draw(&self) {
+    fn draw(&mut self) {
         self.mesh.vao.bind();
         self.mesh.vao.draw();
         self.mesh.vao.unbind();

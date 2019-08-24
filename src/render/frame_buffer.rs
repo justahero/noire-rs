@@ -98,14 +98,14 @@ impl FrameBuffer {
 }
 
 impl Bindable for FrameBuffer {
-    fn bind(&self) -> &Self {
+    fn bind(&mut self) -> &mut Self {
         unsafe {
             gl::BindFramebuffer(gl::FRAMEBUFFER, self.id);
         }
         self
     }
 
-    fn unbind(&self) -> &Self {
+    fn unbind(&mut self) -> &mut Self {
         unsafe {
             gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
         }

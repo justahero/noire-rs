@@ -58,14 +58,14 @@ impl VertexBuffer {
 }
 
 impl Bindable for VertexBuffer {
-    fn bind(&self) -> &Self {
+    fn bind(&mut self) -> &mut Self {
         unsafe {
             gl::BindBuffer(gl::ARRAY_BUFFER, self.id);
         }
         self
     }
 
-    fn unbind(&self) -> &Self {
+    fn unbind(&mut self) -> &mut Self {
         unsafe {
             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
         }
