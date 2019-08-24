@@ -42,14 +42,14 @@ impl IndexBuffer {
 }
 
 impl Bindable for IndexBuffer {
-    fn bind(&self) -> &Self {
+    fn bind(&mut self) -> &mut Self {
         unsafe {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.id);
         }
         self
     }
 
-    fn unbind(&self) -> &Self {
+    fn unbind(&mut self) -> &mut Self {
         unsafe {
             gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, 0);
         }

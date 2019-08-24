@@ -36,7 +36,7 @@ fn main() {
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
-    let mesh = Mesh::create_cube(Cube::create(1.0), Color::rgb(1.0, 1.0, 1.0)).unwrap();
+    let mut mesh = Mesh::create_cube(Cube::create(1.0), Color::rgb(1.0, 1.0, 1.0)).unwrap();
 
     let start_time = Instant::now();
 

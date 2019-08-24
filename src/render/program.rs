@@ -43,7 +43,7 @@ pub struct Sample {
 }
 
 impl Bindable for Sample {
-    fn bind(&self) -> &Self {
+    fn bind(&mut self) -> &mut Self {
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0 + self.unit);
             gl::BindTexture(gl::TEXTURE_2D, self.id);
@@ -51,7 +51,7 @@ impl Bindable for Sample {
         self
     }
 
-    fn unbind(&self) -> &Self {
+    fn unbind(&mut self) -> &mut Self {
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0 + self.unit);
             gl::BindTexture(gl::TEXTURE_2D, 0);
@@ -391,7 +391,7 @@ impl Program {
     /// * `name` - The name associated with the texture in the program
     /// * `unit` - The unit slot to attach the texture
     /// * `texture` - The texture reference to use
-    pub fn sampler(&mut self, name: &str, unit: u32, texture: &Texture) -> &mut Self {
+    pub fn sampler(&mut self, name: &str, unit: u32, texture: &mut Texture) -> &mut Self {
         texture.bind();
         self.uniform(name, Uniform::Integer(unit as i32));
 
@@ -488,14 +488,14 @@ impl Program {
 }
 
 impl Bindable for Program {
-    fn bind(&self) -> &Self {
+    fn bind(&mut self) -> &mut Self {
         unsafe {
             gl::UseProgram(self.id);
         }
         self
     }
 
-    fn unbind(&self) -> &Self {
+    fn unbind(&mut self) -> &mut Self {
         unsafe {
             gl::UseProgram(0);
         }

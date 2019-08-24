@@ -7,7 +7,8 @@ extern crate noire;
 extern crate notify;
 
 use cgmath::*;
-use std::time::Instant;
+use std::error::Error;
+use std::time::{Instant};
 
 use noire::math::*;
 use noire::math::{Camera, Color};
@@ -17,7 +18,7 @@ use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Size};
 use noire::render::{OpenGLWindow, RenderWindow, Window};
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let window_size = Size::new(1024, 1024);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
@@ -42,8 +43,8 @@ fn main() {
     plane.translate(vec3(0.0, -1.0, 0.0));
 
     let mut scene = Scene::new();
-    scene.add_node(&cube);
-    scene.add_node(&plane);
+    scene.add_node(&mut cube);
+    scene.add_node(&mut plane);
 
     let mut camera = Camera::new();
     camera
@@ -72,7 +73,7 @@ fn main() {
     shadow_texture.nearest();
     shadow_texture.unbind();
 
-    let screen_rect = ScreenRect::create(&shadow_texture);
+    // let mut screen_rect = ScreenRect::new().unwrap();
 
     let mut shadow_frame_buffer = FrameBuffer::create().unwrap();
     shadow_frame_buffer.set_depth_buffer(&shadow_texture).expect("Set depth buffer failed");
@@ -143,7 +144,7 @@ fn main() {
         scene_program.unbind();
         shadow_texture.unbind();
 
-        // screen_rect.render(&window, &Point2::default(), &Size::new(384, 384));
+        // screen_rect.render(&window, &Point2::default(), &Size::new(384, 384), &mut shadow_texture);
 
         //----------------------------------------------------------
         // display everything on screen
@@ -152,7 +153,7 @@ fn main() {
         // handle events
         window.poll_events();
         if window.should_close() {
-            return;
+            return Ok(());
         }
     }
 }

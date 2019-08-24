@@ -180,7 +180,7 @@ impl Texture {
 }
 
 impl Bindable for Texture {
-    fn bind(&self) -> &Self {
+    fn bind(&mut self) -> &mut Self {
         // debug_assert!(!self.bound());
 
         unsafe {
@@ -190,7 +190,7 @@ impl Bindable for Texture {
         self
     }
 
-    fn unbind(&self) -> &Self {
+    fn unbind(&mut self) -> &mut Self {
         // debug_assert!(self.bound());
 
         unsafe {
