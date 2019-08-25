@@ -27,14 +27,14 @@ fn main() -> Result<(), Box<dyn Error>> {
     window.enable(Capability::CullFace);
     window.set_cullmode(CullMode::Back);
 
+    let vertex_file = String::from("./examples/04-spotlight/shaders/light_vertex.glsl");
+    let fragment_file = String::from("./examples/04-spotlight/shaders/light_fragment.glsl");
+    let mut light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
+
     // create shader program
     let vertex_file = String::from("./examples/04-spotlight/shaders/scene_vertex.glsl");
     let fragment_file = String::from("./examples/04-spotlight/shaders/scene_fragment.glsl");
     let mut scene_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
-
-    let vertex_file = String::from("./examples/04-spotlight/shaders/light_vertex.glsl");
-    let fragment_file = String::from("./examples/04-spotlight/shaders/light_fragment.glsl");
-    let mut light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     let mut cube = Node::new(Mesh::create_cube(Cube::create(1.4), Color::rgb(0.15, 0.15, 0.2)).unwrap());
     let mut plane = Node::new(Mesh::create_plane(Plane::create(10.0, 10.0), Color::rgb(0.2, 0.25, 0.25)).unwrap());
