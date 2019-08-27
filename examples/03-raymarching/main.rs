@@ -23,33 +23,12 @@ use noire::math::*;
 use noire::input::*;
 use noire::input::keyboard::*;
 
-use notify::*;
-use std::sync::mpsc::channel;
-use std::sync::mpsc::Receiver;
 use std::time::{Duration, Instant};
-use std::thread;
-use std::thread::JoinHandle;
 use std::collections::VecDeque;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 
 const MAX_FPS_COUNT: u32 = 50;
-
-fn watch_program(
-    rx: &Receiver<notify::DebouncedEvent>,
-    vertex_file: &str,
-    fragment_file: &str,
-) -> std::option::Option<Program> {
-    match rx.try_recv() {
-        Ok(DebouncedEvent::Write(path)) => {
-            if let Ok(program) = Program::compile_from_files(&vertex_file, &fragment_file) {
-                return Some(program);
-            }
-        }
-        _ => (),
-    }
-    None
-}
 
 fn from_duration(d: Duration) -> f32 {
     (d.as_secs() as f64 + d.subsec_nanos() as f64 * 1e-9) as f32
@@ -66,14 +45,6 @@ fn main() {
     let vertex_file = String::from("./examples/03-raymarching/shaders/vertex.glsl");
     let fragment_file = String::from("./examples/03-raymarching/shaders/fragment.glsl");
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
-
-    // enable file watching
-    let files = vec![&vertex_file, &fragment_file];
-    let (tx, rx) = channel();
-    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(125)).unwrap();
-    for file in &files {
-        watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
-    }
 
     let mut camera = Camera::new();
     camera
@@ -101,10 +72,6 @@ fn main() {
     let mut list_frames = VecDeque::new();
 
     loop {
-        if let Some(new_program) = watch_program(&rx, &vertex_file, &fragment_file) {
-            program = new_program;
-        }
-
         let now = Instant::now();
         let elapsed = from_duration(now.duration_since(start_time));
         let frame_elapsed = from_duration(now.duration_since(last_time));

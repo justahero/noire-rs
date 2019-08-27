@@ -12,11 +12,7 @@ use noire::render::{Bindable, Drawable, Primitive, Program, Shader, VertexArrayO
 use noire::render::{IndexBuffer, VertexBuffer};
 use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
 
-use notify::*;
-use std::sync::mpsc::channel;
 use std::time::{Duration, Instant};
-use std::thread;
-use std::thread::JoinHandle;
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
@@ -31,14 +27,6 @@ fn main() {
     let fragment_file = String::from("./examples/02-triangles/shaders/fragment.glsl");
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
-    // enable file watching
-    let files = vec![&vertex_file, &fragment_file];
-    let (tx, rx) = channel();
-    let mut watcher: RecommendedWatcher = Watcher::new(tx, Duration::from_millis(125)).unwrap();
-    for file in &files {
-        watcher.watch(&file, RecursiveMode::NonRecursive).unwrap();
-    }
-
     // create vertex data
     let vb = VertexBuffer::create(&VERTICES, 2, Primitive::TriangleStrip);
     let ib = IndexBuffer::create(&INDICES).unwrap();
@@ -50,19 +38,6 @@ fn main() {
     let start_time = Instant::now();
 
     loop {
-        // check if there is a file system event
-        match rx.try_recv() {
-            Ok(DebouncedEvent::Write(path)) => {
-                match Program::compile_from_files(&vertex_file, &fragment_file) {
-                    Ok(new_program) => {
-                        program = new_program;
-                    }
-                    Err(e) => println!("Failed to set new program: {:?}", e),
-                }
-            }
-            _ => (),
-        }
-
         let now = Instant::now();
         let elapsed = now.duration_since(start_time);
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
