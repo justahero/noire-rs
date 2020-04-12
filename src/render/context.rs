@@ -87,7 +87,7 @@ fn init_debug_callback(context: &Context, synchronous: bool) {
 
     if context.capabilities.debug {
         unsafe {
-            gl::DebugMessageCallback(callback_wrapper, context_raw_ptr.0 as *const _);
+            gl::DebugMessageCallback(Some(callback_wrapper), context_raw_ptr.0 as *const _);
             gl::DebugMessageControl(
                 gl::DONT_CARE,
                 gl::DONT_CARE,
