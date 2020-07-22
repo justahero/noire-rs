@@ -1,8 +1,35 @@
 use std::ffi::CStr;
 use std::fmt;
-use std::fmt::Display;
+use std::{string::FromUtf8Error, fmt::Display};
 
 use gl;
+
+#[derive(Debug)]
+pub struct CapabilityError {
+    /// The error message
+    pub error: String,
+}
+
+impl CapabilityError {
+    /// Construct a new error
+    pub fn new(error: &str) -> Self {
+        CapabilityError {
+            error: error.to_string()
+        }
+    }
+}
+
+impl fmt::Display for CapabilityError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Capability error: {}", self.error)
+    }
+}
+
+impl From<FromUtf8Error> for CapabilityError {
+    fn from(_: FromUtf8Error) -> Self {
+        CapabilityError::new("Failed to get string")
+    }
+}
 
 /// A struct representing OpenGL capabilities and properties
 pub struct Capabilities {
@@ -21,19 +48,15 @@ pub struct Capabilities {
 }
 
 /// Fetches the Vendor string from OpenGL
-unsafe fn get_vendor() -> String {
+unsafe fn get_vendor() -> Result<String, CapabilityError> {
     let s = gl::GetString(gl::VENDOR);
-    String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())
-        .ok()
-        .expect("Get Vendor failed")
+    Ok(String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())?)
 }
 
 /// Fetches the Renderer String from OpenGL
-unsafe fn get_renderer() -> String {
+unsafe fn get_renderer() -> Result<String, CapabilityError> {
     let s = gl::GetString(gl::RENDERER);
-    String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())
-        .ok()
-        .expect("Get Renderer failed")
+    Ok(String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())?)
 }
 
 /// Returns Context flags
@@ -47,38 +70,34 @@ unsafe fn get_context_flags() -> (bool, bool) {
 }
 
 /// Returns the current set OpenGL version
-unsafe fn get_version() -> String {
+unsafe fn get_version() -> Result<String, CapabilityError> {
     let s = gl::GetString(gl::VERSION);
-    String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())
-        .ok()
-        .expect("Get Version failed")
+    Ok(String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())?)
 }
 
 /// Returns the GLSL Shader Version
-unsafe fn get_shader_version() -> String {
+unsafe fn get_shader_version() -> Result<String, CapabilityError> {
     let s = gl::GetString(gl::SHADING_LANGUAGE_VERSION);
-    String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())
-        .ok()
-        .expect("Get Shader Version failed")
+    Ok(String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())?)
 }
 
 impl Capabilities {
     /// enumerate some of the OpenGL capabilities
-    pub fn enumerate() -> Self {
-        let vendor = unsafe { get_vendor() };
-        let renderer = unsafe { get_renderer() };
-        let version = unsafe { get_version() };
-        let shader_version = unsafe { get_shader_version() };
+    pub fn enumerate() -> Result<Self, CapabilityError> {
+        let vendor = unsafe { get_vendor()? };
+        let renderer = unsafe { get_renderer()? };
+        let version = unsafe { get_version()? };
+        let shader_version = unsafe { get_shader_version()? };
         let (debug, forward_compatible) = unsafe { get_context_flags() };
 
-        Capabilities {
+        Ok(Capabilities {
             vendor,
             renderer,
             version,
             shader_version,
             debug,
             forward_compatible,
-        }
+        })
     }
 }
 

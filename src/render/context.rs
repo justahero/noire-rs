@@ -163,7 +163,7 @@ pub struct Context {
 impl Context {
     /// Create a new Context
     pub fn new(debug: bool) -> Result<Rc<Context>, OpenGLError> {
-        let capabilities = Capabilities::enumerate();
+        let capabilities = Capabilities::enumerate().map_err(|e| OpenGLError(e.to_string()))?;
 
         let debug_callback = if debug && capabilities.debug {
             Some(Box::new(default_debug_callback) as DebugCallback)
