@@ -2,6 +2,7 @@ use gl;
 use gl::types::*;
 use regex::Regex;
 
+use std::fmt;
 use std::fs::File;
 use std::path::Path;
 use std::cmp;
@@ -9,6 +10,24 @@ use std::ffi::CString;
 use std::io::prelude::*;
 use std::ptr;
 use std::str;
+
+#[derive(Debug)]
+pub enum ShaderError {
+    CompileFailed(String),
+    ReadFromFileFailed(String),
+    OpenFileFailed(String),
+}
+
+impl fmt::Display for ShaderError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            ShaderError::CompileFailed(s) => format!("Failed to compile shader: {}", s),
+            ShaderError::ReadFromFileFailed(s) => format!("Failed to read from file: {}", s),
+            ShaderError::OpenFileFailed(s) => format!("Failed to open file: {}", s),
+        };
+        write!(f, "{}", s)
+    }
+}
 
 /// Enum to define type of shader
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -102,7 +121,7 @@ fn get_errors(errors: &str, source: &str) -> Vec<String> {
     result
 }
 
-fn compile_shader(source: &str, shader_type: &ShaderType) -> Result<u32, String> {
+fn compile_shader(source: &str, shader_type: &ShaderType) -> Result<u32, ShaderError> {
     let c_str = CString::new(source.as_bytes()).unwrap();
 
     let shader_type: gl::types::GLenum = (*shader_type).into();
@@ -118,32 +137,26 @@ fn compile_shader(source: &str, shader_type: &ShaderType) -> Result<u32, String>
         if status != i32::from(gl::TRUE) {
             let log_text = get_compile_error(shader);
             let error_msg = get_errors(&log_text, source).join("\n");
-            return Err(error_msg);
+            return Err(ShaderError::CompileFailed(error_msg));
         }
     }
     Ok(shader)
 }
 
 impl Shader {
-    pub fn from_file(file_path: &str, shader_type: ShaderType) -> Result<Self, String> {
+    pub fn from_file(file_path: &str, shader_type: ShaderType) -> Result<Self, ShaderError> {
         let path = Path::new(file_path);
         let display = path.display();
-
-        let mut file = match File::open(&path) {
-            Ok(file) => file,
-            Err(_) => return Err(format!("Failed to open file {}", display)),
-        };
-
         let mut source = String::new();
-        let source = match file.read_to_string(&mut source) {
-            Ok(_) => source,
-            Err(_) => return Err(format!("Could not read content from file {}", display)),
-        };
+
+        let mut file = File::open(&path).map_err(|_| ShaderError::OpenFileFailed(format!("{}", display)))?;
+
+        file.read_to_string(&mut source).map_err(|_| ShaderError::ReadFromFileFailed(format!("{}", display)))?;
 
         Shader::create(&source, shader_type)
     }
 
-    pub fn create(source: &str, shader_type: ShaderType) -> Result<Self, String> {
+    pub fn create(source: &str, shader_type: ShaderType) -> Result<Self, ShaderError> {
         match compile_shader(source, &shader_type) {
             Ok(id) => Ok(Shader {
                 id,

@@ -83,10 +83,7 @@ impl ScreenRect {
         vao.add_vb(VertexBuffer::create(&create_vertices(), 2, Primitive::Triangles));
         vao.add_vb(VertexBuffer::create(&create_texcoords(), 2, Primitive::Triangles));
 
-        let program = match create_program() {
-            Ok(program) => program,
-            Err(err) => return Err(RenderError{ message: err.message }),
-        };
+        let program = create_program()?;
 
         Ok(ScreenRect {
             vao,
