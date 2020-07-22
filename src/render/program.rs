@@ -3,6 +3,7 @@ use cgmath::{Matrix, Matrix3, Matrix4, Point3, Vector2, Vector3};
 use gl;
 use gl::types::*;
 
+use std::fmt;
 use std::ptr;
 use std::str;
 use std::time::{SystemTime};
@@ -20,7 +21,7 @@ pub struct ProgramError {
 }
 
 /// A shader variable, can be an uniform or attribute
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Variable {
     /// The name of the variable used to address the variable in the shader
     name: String,
@@ -30,6 +31,39 @@ pub struct Variable {
     size: i32,
     /// The shader location
     location: i32,
+}
+
+impl Variable {
+    /// Returns a string representation of the data type
+    pub fn gl_type(&self) -> String {
+        let s = match self.data_type {
+            gl::INT => "i32",
+            gl::INT_VEC2 => "Vector2<i32>",
+            gl::INT_VEC3 => "Vector3<i32>",
+            gl::SAMPLER_2D => "Sampler2D",
+            gl::FLOAT => "f32",
+            gl::FLOAT_VEC2 => "Vector2<f32>",
+            gl::FLOAT_VEC3 => "Vector3<f32>",
+            gl::FLOAT_VEC4 => "Vector4<f32>",
+            gl::FLOAT_MAT2 => "Matrix22<f32>",
+            gl::FLOAT_MAT3 => "Matrix33<f32>",
+            gl::FLOAT_MAT4 => "Matrix44<f32>",
+            _ => "Unknown",
+        };
+        s.to_string()
+    }
+}
+
+impl fmt::Debug for Variable {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f, "Variable {{ name: {}, data_type: {}, size: {}, location: {} }}",
+            self.name,
+            self.gl_type(),
+            self.size,
+            self.location
+        )
+    }
 }
 
 /// The main struct to handle Shaders, variables, uniforms and textures

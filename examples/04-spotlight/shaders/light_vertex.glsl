@@ -2,7 +2,7 @@
 
 out vec4 vWorldPosition;
 
-uniform mat4 u_lightSpaceMatrix ;
+uniform mat4 u_lightSpaceMatrix;
 uniform mat4 u_model;
 
 layout(location = 0) in vec3 position;
