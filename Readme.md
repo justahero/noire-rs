@@ -1,7 +1,7 @@
 noire-rs
 --------
 
-A minimal 3d rendering library written in Rust, it's mostly a port from existing code. It is mostly written to play with GL shaders.
+A minimal 3d rendering library written in Rust, it's mostly a port from existing code. It is first and foremost designed to experiment with Open GL shaders.
 
 # Build
 
@@ -17,15 +17,17 @@ Then run the watch task
 cargo watch -c -x "+nightly build"
 ```
 
-# Samples
+# Examples
 
-Currently there are only two samples, to run them:
+There are a number of example applications using this library, found in the [examples](./examples) folder. Run
 
 ```shell
-cargo run --example raymarching
+cargo run --example
 ```
 
-or
+to list the examples.
+
+To run one example. e.g. `triangles` run
 
 ```shell
 cargo run --example triangles
