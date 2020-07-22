@@ -4,6 +4,27 @@ use std::fmt::Display;
 
 use gl;
 
+#[derive(Debug)]
+pub struct CapabilityError {
+    /// The error message
+    pub error: String,
+}
+
+impl CapabilityError {
+    /// Construct a new error
+    pub fn new(error: &str) -> Self {
+        CapabilityError {
+            error: error.to_string()
+        }
+    }
+}
+
+impl fmt::Display for CapabilityError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Capability error: {}", self.error)
+    }
+}
+
 /// A struct representing OpenGL capabilities and properties
 pub struct Capabilities {
     /// The OpenGL Vendor string
