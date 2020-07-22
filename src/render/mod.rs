@@ -43,6 +43,12 @@ impl fmt::Display for RenderError {
     }
 }
 
+impl From<ProgramError> for RenderError {
+    fn from(error: ProgramError) -> Self {
+        RenderError{ message: error.to_string() }
+    }
+}
+
 /// This allows other error types to wrap this one
 impl error::Error for RenderError {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {

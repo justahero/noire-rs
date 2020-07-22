@@ -10,14 +10,33 @@ use std::time::{SystemTime};
 
 use math::color::Color;
 
-use super::Size;
+use super::{shader::ShaderError, Size};
 use render::{Shader, ShaderType, Texture};
 use render::traits::Bindable;
 
 /// An Error struct for Program errors
 #[derive(Debug, Clone)]
-pub struct ProgramError {
-    pub message: String,
+pub enum ProgramError {
+    Linker(String),
+    ShaderFailed(String),
+    ValidationFailed(String),
+}
+
+impl From<ShaderError> for ProgramError {
+    fn from(error: ShaderError) -> Self {
+        ProgramError::ShaderFailed(error.to_string())
+    }
+}
+
+impl fmt::Display for ProgramError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            ProgramError::ShaderFailed(s) => format!("Shader failed - {}", s),
+            ProgramError::Linker(s) => format!("Linker failed: {}", s),
+            ProgramError::ValidationFailed(s) => format!("Validation failed: {}", s),
+        };
+        write!(f, "{}", s)
+    }
 }
 
 /// A shader variable, can be an uniform or attribute
@@ -284,7 +303,7 @@ pub fn validate(program: u32) -> std::result::Result<(), ProgramError> {
     }
 
     if params != i32::from(gl::TRUE) {
-        return Err(ProgramError{ message: get_link_error(program) });
+        return Err(ProgramError::ValidationFailed(get_link_error(program)));
     }
 
     Ok(())
@@ -306,11 +325,11 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> std::result:
         gl::GetProgramiv(id, gl::LINK_STATUS, &mut status);
         if status != i32::from(gl::TRUE) {
             gl::DeleteProgram(id);
-            return Err(ProgramError{ message: get_link_error(id) });
+            return Err(ProgramError::Linker(get_link_error(id)));
         }
     }
 
-    // validate(id)?;
+    validate(id)?;
 
     let program = Program {
         vertex_shader,
@@ -334,14 +353,9 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> std::result:
 }
 
 fn compile_from_files(vertex_file: &str, fragment_file: &str) -> std::result::Result<Program, ProgramError> {
-    let vertex_shader = match Shader::from_file(vertex_file, ShaderType::Vertex) {
-        Ok(shader) => shader,
-        Err(e) => return Err(ProgramError{ message: e }),
-    };
-    let fragment_shader = match Shader::from_file(fragment_file, ShaderType::Fragment) {
-        Ok(shader) => shader,
-        Err(e) => return Err(ProgramError{ message: e }),
-    };
+    let vertex_shader = Shader::from_file(vertex_file, ShaderType::Vertex)?;
+    let fragment_shader = Shader::from_file(fragment_file, ShaderType::Fragment)?;
+
     Program::create(vertex_shader, fragment_shader)
 }
 
