@@ -28,6 +28,10 @@ name = "spotlight"
 path = "examples/04-spotlight/main.rs"
 
 [[example]]
+name = "marching-cubes"
+path = "examples/05-marching-cubes/main.rs"
+
+[[example]]
 name = "filewatch"
 
 [dependencies]

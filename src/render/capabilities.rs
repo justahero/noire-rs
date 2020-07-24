@@ -3,6 +3,7 @@ use std::fmt;
 use std::{string::FromUtf8Error, fmt::Display};
 
 use gl;
+use super::Size;
 
 #[derive(Debug)]
 pub struct CapabilityError {
@@ -45,12 +46,21 @@ pub struct Capabilities {
     pub debug: bool,
     /// When true the Context can be in Forward Compatible mode
     pub forward_compatible: bool,
+    /// Maximum texture size
+    pub max_texture_size: Size<usize>,
 }
 
 /// Fetches the Vendor string from OpenGL
 unsafe fn get_vendor() -> Result<String, CapabilityError> {
     let s = gl::GetString(gl::VENDOR);
     Ok(String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())?)
+}
+
+/// Fetches the max texture size from OpenGL
+unsafe fn get_max_texture_size() -> Size<usize> {
+    let mut size = 0;
+    gl::GetIntegerv(gl::MAX_TEXTURE_SIZE, &mut size);
+    Size::new(size as usize, size as usize)
 }
 
 /// Fetches the Renderer String from OpenGL
@@ -89,6 +99,7 @@ impl Capabilities {
         let version = unsafe { get_version()? };
         let shader_version = unsafe { get_shader_version()? };
         let (debug, forward_compatible) = unsafe { get_context_flags() };
+        let max_texture_size = unsafe { get_max_texture_size() };
 
         Ok(Capabilities {
             vendor,
@@ -97,6 +108,7 @@ impl Capabilities {
             shader_version,
             debug,
             forward_compatible,
+            max_texture_size,
         })
     }
 }
