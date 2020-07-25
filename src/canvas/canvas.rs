@@ -1,11 +1,13 @@
-use std::cell::RefCell;
+use std::{rc::Rc, cell::RefCell};
 
-use math::{Color, Rect, Vector2};
+use math::{Color, Rect};
 use render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
-use crate::render::{Bindable, Drawable};
+use crate::render::{Bindable, Drawable, Size, Uniform};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
+
+uniform vec2 u_resolution;
 
 in vec2 position;
 
@@ -85,7 +87,7 @@ impl Canvas2D {
     }
 
     /// Renders the content of the canvas.
-    pub fn render(&mut self) {
+    pub fn render(&mut self, screen_size: &Size<u32>) {
         let lines = self.line_vertices.borrow();
 
         if !lines.is_empty() {
@@ -96,6 +98,7 @@ impl Canvas2D {
 
             // bind resources, uniforms, attributes
             self.program.bind();
+            self.program.uniform("u_size", Uniform::Float2(screen_size.width as f32, screen_size.height as f32));
 
             vao.bind();
             vao.draw();

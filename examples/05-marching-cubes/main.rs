@@ -30,8 +30,8 @@ fn main() {
         window.clear(0.3, 0.3, 0.3, 1.0);
 
         canvas.clear(0.0, 0.0, 0.0, 0.0);
-        canvas.draw_line(0, 0, 50, 50);
-        canvas.render();
+        canvas.draw_line(0, 0, 1, 1);
+        canvas.render(&window.get_size());
 
         window.swap_buffers();
 

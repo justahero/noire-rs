@@ -217,6 +217,12 @@ impl RenderWindow {
         })
     }
 
+    /// Returns the current window size
+    pub fn get_size(&self) -> Size<u32> {
+        let (width, height) = self.window.get_size();
+        Size{ width: width as u32, height: height as u32 }
+    }
+
     pub fn aspect(&self) -> f32 {
         let (width, height) = self.window.get_size();
         width as f32 / height as f32
