@@ -9,12 +9,16 @@ static VERTEX_SHADER: &str = r#"
 
 uniform vec2 u_resolution;
 
-in vec2 position;
+layout(location = 0) in vec2 position;
+layout(location = 1) in vec3 color;
+
+out vec3 vColor;
 
 void main() {
     float x = (-1.0) + 2.0 * (position.x / u_resolution.x);
     float y = (-1.0) + 2.0 * (position.y / u_resolution.y);
 
+    vColor = color;
     gl_Position = vec4(x, y, 0.0, 1.0);
 }
 "#;
@@ -22,11 +26,11 @@ void main() {
 static FRAGMENT_SHADER: &str = r#"
 #version 330
 
-in vec4 in_color;
+in vec3 vColor;
 out vec4 out_color;
 
 void main() {
-    out_color = vec4(1.0, 0.0, 0.0, 1.0);
+    out_color = vec4(vColor, 1.0);
 }
 "#;
 
@@ -37,6 +41,8 @@ pub struct Canvas2D {
     draw_color: Color,
     /// store all line coordinates
     line_vertices: RefCell<Box<Vec<f32>>>,
+    /// store all line colors
+    line_colors: RefCell<Box<Vec<f32>>>,
 }
 
 /// Compiles the used shader program
@@ -56,6 +62,7 @@ impl Canvas2D {
             program,
             draw_color: Color::BLACK,
             line_vertices: RefCell::new(Box::new(Vec::new())),
+            line_colors: RefCell::new(Box::new(Vec::new())),
         }
     }
 
@@ -77,10 +84,17 @@ impl Canvas2D {
     /// Draws a line
     pub fn draw_line(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> &Self {
         let mut lines = self.line_vertices.borrow_mut();
+        let mut colors = self.line_colors.borrow_mut();
         lines.push(start_x as f32);
         lines.push(start_y as f32);
         lines.push(end_x as f32);
         lines.push(end_y as f32);
+        colors.push(self.draw_color.red);
+        colors.push(self.draw_color.green);
+        colors.push(self.draw_color.blue);
+        colors.push(self.draw_color.red);
+        colors.push(self.draw_color.green);
+        colors.push(self.draw_color.blue);
         self
     }
 
@@ -92,12 +106,15 @@ impl Canvas2D {
     /// Renders the content of the canvas.
     pub fn render(&mut self, size: &Size<u32>) {
         let mut lines = self.line_vertices.borrow_mut();
+        let mut colors = self.line_colors.borrow_mut();
 
         if !lines.is_empty() {
             // create buffers
             let vb = VertexBuffer::create(&lines[..], 2, Primitive::Lines);
+            let vb_colors = VertexBuffer::create(&colors[..], 3, Primitive::Lines);
             let mut vao = VertexArrayObject::new().unwrap();
             vao.add_vb(vb);
+            vao.add_vb(vb_colors);
 
             // bind resources, uniforms, attributes
             self.program.bind();
@@ -111,6 +128,7 @@ impl Canvas2D {
             self.program.unbind();
 
             lines.clear();
+            colors.clear();
         }
     }
 }

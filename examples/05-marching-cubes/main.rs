@@ -5,14 +5,12 @@
 extern crate gl;
 extern crate noire;
 extern crate notify;
-extern crate rand;
 
 use gl::types::*;
 
 use noire::canvas::Canvas2D;
-use noire::math::Rect;
+use noire::math::{Color, Rect};
 use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
-use rand::prelude::*;
 use std::time::{Duration, Instant};
 
 fn main() {
@@ -21,7 +19,6 @@ fn main() {
         .expect("Failed to create Render Window");
 
     let mut canvas = Canvas2D::new();
-    let mut rng = rand::thread_rng();
 
     let start_time = Instant::now();
 
@@ -36,6 +33,7 @@ fn main() {
         window.reset_viewport();
         window.clear(0.3, 0.3, 0.3, 1.0);
 
+        canvas.set_color(Color::new(0.0, 1.0, 0.0, 1.0));
         canvas.draw_line(0, 0, 300, 300);
 
         canvas.render(&framebuffer_size);
