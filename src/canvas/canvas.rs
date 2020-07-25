@@ -1,13 +1,16 @@
 use std::cell::RefCell;
 
 use math::{Color, Rect, Vector2};
-use render::{Program, Shader};
+use render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
+use crate::render::{Bindable, Drawable};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
 
+in vec2 position;
+
 void main() {
-    gl_Position = vec4(0.0, 0.0, 0.0, 0.1);
+    gl_Position = vec4(position, 0.0, 1.0);
 }
 "#;
 
@@ -18,7 +21,7 @@ in vec4 in_color;
 out vec4 out_color;
 
 void main() {
-    out_color = in_color;
+    out_color = vec4(1.0, 0.0, 0.0, 1.0);
 }
 "#;
 
@@ -28,16 +31,21 @@ pub struct Canvas2D {
     /// color to render the next primitive with
     draw_color: Color,
     /// store all line coordinates
-    line_vertices: RefCell<Box<Vec<Vector2<f32>>>>,
+    line_vertices: RefCell<Box<Vec<f32>>>,
+}
+
+/// Compiles the used shader program
+fn compile_program() -> Program {
+    let vertex_shader = Shader::create_vertex(&VERTEX_SHADER).unwrap();
+    let fragment_shader = Shader::create_fragment(&FRAGMENT_SHADER).unwrap();
+
+    Program::create(vertex_shader, fragment_shader).unwrap()
 }
 
 impl Canvas2D {
     /// Create a new instance of the canvas
     pub fn new() -> Self {
-        let vertex_shader = Shader::create_vertex(&VERTEX_SHADER).unwrap();
-        let fragment_shader = Shader::create_fragment(&FRAGMENT_SHADER).unwrap();
-
-        let program = Program::create(vertex_shader, fragment_shader).unwrap();
+        let program = compile_program();
 
         Canvas2D {
             program,
@@ -62,10 +70,12 @@ impl Canvas2D {
     }
 
     /// Draws a line
-    pub fn draw_line(&self, start_x: f32, start_y: f32, end_x: f32, end_y: f32) -> &Self {
+    pub fn draw_line(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> &Self {
         let mut lines = self.line_vertices.borrow_mut();
-        lines.push(Vector2::<f32>{ x: start_x, y: start_y });
-        lines.push(Vector2::<f32>{ x: end_x, y: end_y });
+        lines.push(start_x as f32);
+        lines.push(start_y as f32);
+        lines.push(end_x as f32);
+        lines.push(end_y as f32);
         self
     }
 
@@ -75,7 +85,24 @@ impl Canvas2D {
     }
 
     /// Renders the content of the canvas.
-    pub fn render(&self) {
-        let mut lines = self.line_vertices.borrow_mut();
+    pub fn render(&mut self) {
+        let lines = self.line_vertices.borrow();
+
+        if !lines.is_empty() {
+            // create buffers
+            let vb = VertexBuffer::create(&lines[..], 2, Primitive::Lines);
+            let mut vao = VertexArrayObject::new().unwrap();
+            vao.add_vb(vb);
+
+            // bind resources, uniforms, attributes
+            self.program.bind();
+
+            vao.bind();
+            vao.draw();
+            vao.unbind();
+
+            // unbind resources
+            self.program.unbind();
+        }
     }
 }

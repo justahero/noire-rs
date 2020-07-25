@@ -109,6 +109,8 @@ impl Bindable for VertexArrayObject {
 impl Drawable for VertexArrayObject {
     /// Render the VertexArrayObject
     fn draw(&mut self) {
+        assert!(self.vbs.len() > 0);
+
         let vb = &self.vbs[0];
         if self.ibs.is_empty() {
             unsafe {

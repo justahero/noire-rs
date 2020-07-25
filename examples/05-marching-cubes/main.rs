@@ -30,10 +30,9 @@ fn main() {
         window.clear(0.3, 0.3, 0.3, 1.0);
 
         canvas.clear(0.0, 0.0, 0.0, 0.0);
-
-        canvas.draw_rect(&Rect::new(0, 0, 100, 100));
-
+        canvas.draw_line(0, 0, 50, 50);
         canvas.render();
+
         window.swap_buffers();
 
         window.poll_events();
