@@ -110,9 +110,9 @@ impl Canvas2D {
 
         if !lines.is_empty() {
             // create buffers
-            let vb = VertexBuffer::create(&lines[..], 2, Primitive::Lines);
-            let vb_colors = VertexBuffer::create(&colors[..], 3, Primitive::Lines);
-            let mut vao = VertexArrayObject::new().unwrap();
+            let vb = VertexBuffer::create(&lines[..], 2);
+            let vb_colors = VertexBuffer::create(&colors[..], 3);
+            let mut vao = VertexArrayObject::new(Primitive::Lines).unwrap();
             vao.add_vb(vb);
             vao.add_vb(vb_colors);
 

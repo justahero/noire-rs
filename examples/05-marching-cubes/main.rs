@@ -33,8 +33,11 @@ fn main() {
         window.reset_viewport();
         window.clear(0.3, 0.3, 0.3, 1.0);
 
-        canvas.set_color(Color::new(0.0, 1.0, 0.0, 1.0));
+        canvas.set_color(Color::rgb(1.0, 0.0, 0.0));
         canvas.draw_line(0, 0, 300, 300);
+        canvas.draw_line(0, 50, 350, 350);
+        canvas.draw_line(0, 100, 400, 400);
+        canvas.draw_line(0, 150, 450, 450);
 
         canvas.render(&framebuffer_size);
 

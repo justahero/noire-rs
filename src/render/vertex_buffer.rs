@@ -3,7 +3,6 @@ use std::mem;
 use gl;
 use gl::types::*;
 
-use render::Primitive;
 use render::traits::Bindable;
 
 #[derive(Debug)]
@@ -38,6 +37,7 @@ impl From<VertexType> for gl::types::GLenum {
     }
 }
 
+#[derive(Debug)]
 pub struct VertexBuffer {
     /// Id reference to Open GL allocated buffer
     pub id: u32,
@@ -86,7 +86,7 @@ impl VertexBuffer {
     }
 
     pub fn component_size(&self) -> i32 {
-        self.num_components * 4
+        self.num_components * (mem::size_of::<f32>()) as i32
     }
 }
 
