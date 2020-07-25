@@ -13,10 +13,18 @@ use noire::math::Rect;
 use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
 use std::time::{Duration, Instant};
 
+fn framebuffer_resized(width: u32, height: u32) {
+    println!("Framebuffer resized: {}x{}", width, height);
+}
+
 fn main() {
-    let window_size = Size::new(600, 600);
+    let window_size = Size::new(1000, 600);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
+
+    window.framebuffer_resize_callback(framebuffer_resized);
+
+    println!("Window size: {:?}", window.get_size());
 
     let mut canvas = Canvas2D::new();
 
@@ -30,8 +38,9 @@ fn main() {
         window.clear(0.3, 0.3, 0.3, 1.0);
 
         canvas.clear(0.0, 0.0, 0.0, 0.0);
-        canvas.draw_line(0, 0, 1, 1);
-        canvas.render(&window.get_size());
+        canvas.draw_line(0, 0, 300, 300);
+        canvas.draw_line(100, 200, 240, 300);
+        canvas.render(&window.get_framebuffer_size());
 
         window.swap_buffers();
 

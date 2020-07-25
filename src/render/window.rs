@@ -13,6 +13,8 @@ use input::{Button, Input};
 use super::context;
 use super::{Capability, CullMode, DepthFunc, Point2, Size};
 
+type ResizeCallback = fn(u32, u32);
+
 /// A generic Render error
 #[derive(Debug, Clone)]
 pub struct WindowError {
@@ -109,6 +111,10 @@ pub struct RenderWindow {
     input_events: VecDeque<Input>,
     /// vector of pressed keys / buttons
     pressed_buttons: VecDeque<(Button, u32)>,
+    /// if set is called when window is reszied
+    window_resize_callback: Option<ResizeCallback>,
+    /// if set is called when the frame buffer is resized
+    framebuffer_resize_callback: Option<ResizeCallback>,
 }
 
 /// callback function to report error
@@ -214,6 +220,8 @@ impl RenderWindow {
             context,
             input_events: VecDeque::new(),
             pressed_buttons: VecDeque::new(),
+            window_resize_callback: None,
+            framebuffer_resize_callback: None,
         })
     }
 
@@ -226,6 +234,18 @@ impl RenderWindow {
     pub fn aspect(&self) -> f32 {
         let (width, height) = self.window.get_size();
         width as f32 / height as f32
+    }
+
+    /// Register a callback function that is processed when the Window resizes
+    pub fn window_resize_callback(&mut self, callback: ResizeCallback) {
+        self.window.set_size_polling(true);
+        self.window_resize_callback = Some(callback);
+    }
+
+    /// Register callback function that is executed when the frame buffer resizes
+    pub fn framebuffer_resize_callback(&mut self, callback: ResizeCallback) {
+        self.window.set_framebuffer_size_polling(true);
+        self.framebuffer_resize_callback = Some(callback);
     }
 
     /// Poll all events from glfw instance
@@ -241,6 +261,16 @@ impl RenderWindow {
                     let button = Button::Keyboard(key.into());
                     if let Some(index) = self.pressed_buttons.iter().position(|&(b, _)| b == button) {
                         self.pressed_buttons.remove(index);
+                    }
+                }
+                WindowEvent::Size(width, height) => {
+                    if let Some(callback) = self.window_resize_callback {
+                        callback(width as u32, height as u32);
+                    }
+                }
+                WindowEvent::FramebufferSize(width, height) => {
+                    if let Some(callback) = self.framebuffer_resize_callback {
+                        callback(width as u32, height as u32);
                     }
                 }
                 _ => (),

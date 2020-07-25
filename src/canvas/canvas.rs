@@ -12,7 +12,12 @@ uniform vec2 u_resolution;
 in vec2 position;
 
 void main() {
-    gl_Position = vec4(position, 0.0, 1.0);
+    float aspect_x = u_resolution.y / u_resolution.x;
+    float aspect_y = 1.0 / aspect_x;
+    float x = (-1.0) + position.x / (u_resolution.y / 2.0) * aspect_x;
+    float y = (-1.0) + position.y / (u_resolution.x / 2.0) * aspect_y;
+
+    gl_Position = vec4(x, y, 0.0, 1.0);
 }
 "#;
 
@@ -87,7 +92,7 @@ impl Canvas2D {
     }
 
     /// Renders the content of the canvas.
-    pub fn render(&mut self, screen_size: &Size<u32>) {
+    pub fn render(&mut self, size: &Size<u32>) {
         let lines = self.line_vertices.borrow();
 
         if !lines.is_empty() {
@@ -98,7 +103,7 @@ impl Canvas2D {
 
             // bind resources, uniforms, attributes
             self.program.bind();
-            self.program.uniform("u_size", Uniform::Float2(screen_size.width as f32, screen_size.height as f32));
+            self.program.uniform("u_resolution", Uniform::Float2(size.width as f32, size.height as f32));
 
             vao.bind();
             vao.draw();
