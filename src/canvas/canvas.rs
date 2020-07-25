@@ -1,4 +1,4 @@
-use std::{rc::Rc, cell::RefCell};
+use std::cell::RefCell;
 
 use math::{Color, Rect};
 use render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
@@ -12,10 +12,8 @@ uniform vec2 u_resolution;
 in vec2 position;
 
 void main() {
-    float aspect_x = u_resolution.y / u_resolution.x;
-    float aspect_y = 1.0 / aspect_x;
-    float x = (-1.0) + position.x / (u_resolution.y / 2.0) * aspect_x;
-    float y = (-1.0) + position.y / (u_resolution.x / 2.0) * aspect_y;
+    float x = (-1.0) + 2.0 * (position.x / u_resolution.x);
+    float y = (-1.0) + 2.0 * (position.y / u_resolution.y);
 
     gl_Position = vec4(x, y, 0.0, 1.0);
 }
@@ -62,7 +60,7 @@ impl Canvas2D {
     }
 
     /// Clears the canvas, sets it to given colors
-    pub fn clear(&self, r: f32, g: f32, b: f32, a: f32) -> &Self {
+    pub fn clear(&self, _r: f32, _g: f32, _b: f32, _a: f32) -> &Self {
         self
     }
 
@@ -93,7 +91,7 @@ impl Canvas2D {
 
     /// Renders the content of the canvas.
     pub fn render(&mut self, size: &Size<u32>) {
-        let lines = self.line_vertices.borrow();
+        let mut lines = self.line_vertices.borrow_mut();
 
         if !lines.is_empty() {
             // create buffers
@@ -111,6 +109,8 @@ impl Canvas2D {
 
             // unbind resources
             self.program.unbind();
+
+            lines.clear();
         }
     }
 }

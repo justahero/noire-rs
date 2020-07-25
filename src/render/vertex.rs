@@ -134,6 +134,7 @@ impl Drop for VertexArrayObject {
     fn drop(&mut self) {
         unsafe {
             gl::DeleteVertexArrays(1, &self.id);
+            self.id = 0;
         }
     }
 }
