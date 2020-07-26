@@ -39,6 +39,10 @@ fn main() {
         canvas.draw_line(0, 100, 400, 400);
         canvas.draw_line(0, 150, 450, 450);
 
+        canvas.set_color(Color::rgb(0.0, 1.0, 0.2));
+        canvas.draw_rect(100, 350, 200, 500);
+        canvas.draw_rect(250, 400, 350, 550);
+
         canvas.render(&framebuffer_size);
 
         window.swap_buffers();

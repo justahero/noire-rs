@@ -4,7 +4,7 @@ use gl;
 
 use render::{IndexBuffer, RenderError, VertexBuffer};
 use render::traits::{Bindable, Drawable};
-use super::{vertex_buffer::VertexTypeSize, Primitive};
+use super::Primitive;
 
 /// A struct to represent a OpenGL vertex array object (VAO)
 pub struct VertexArrayObject {

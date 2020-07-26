@@ -39,8 +39,10 @@ pub struct Canvas2D {
     program: Program,
     /// color to render the next primitive with
     draw_color: Color,
-    /// store all line coordinates with colors with components: (x,y,r,g,b)
+    /// store all line coordinates with colors, components: (x,y,r,g,b)
     line_vertices: RefCell<Box<Vec<f32>>>,
+    /// store all rect coordinates with colors, components: (x,y,r,g,b)
+    rect_vertices: RefCell<Box<Vec<f32>>>,
 }
 
 /// Compiles the used shader program
@@ -60,6 +62,7 @@ impl Canvas2D {
             program,
             draw_color: Color::BLACK,
             line_vertices: RefCell::new(Box::new(Vec::new())),
+            rect_vertices: RefCell::new(Box::new(Vec::new())),
         }
     }
 
@@ -94,13 +97,50 @@ impl Canvas2D {
         self
     }
 
-    /// Draw a rect
-    pub fn draw_rect(&self, _rect: &Rect) -> &Self {
+    /// Pushes the geometry for a rect, to be rendered
+    pub fn draw_rect(&self, left: i32, top: i32, right: i32, bottom: i32) -> &Self {
+        let mut rects = self.rect_vertices.borrow_mut();
+        rects.push(left as f32);
+        rects.push(top as f32);
+        rects.push(self.draw_color.red);
+        rects.push(self.draw_color.green);
+        rects.push(self.draw_color.blue);
+        rects.push(right as f32);
+        rects.push(top as f32);
+        rects.push(self.draw_color.red);
+        rects.push(self.draw_color.green);
+        rects.push(self.draw_color.blue);
+        rects.push(right as f32);
+        rects.push(bottom as f32);
+        rects.push(self.draw_color.red);
+        rects.push(self.draw_color.green);
+        rects.push(self.draw_color.blue);
+        rects.push(right as f32);
+        rects.push(bottom as f32);
+        rects.push(self.draw_color.red);
+        rects.push(self.draw_color.green);
+        rects.push(self.draw_color.blue);
+        rects.push(left as f32);
+        rects.push(bottom as f32);
+        rects.push(self.draw_color.red);
+        rects.push(self.draw_color.green);
+        rects.push(self.draw_color.blue);
+        rects.push(left as f32);
+        rects.push(top as f32);
+        rects.push(self.draw_color.red);
+        rects.push(self.draw_color.green);
+        rects.push(self.draw_color.blue);
         self
     }
 
     /// Renders the content of the canvas.
-    pub fn render(&mut self, size: &Size<u32>) {
+    pub fn render(&mut self, framebuffer_size: &Size<u32>) {
+        self.render_lines(framebuffer_size);
+        self.render_rects(framebuffer_size);
+    }
+
+    /// Renders all lines using VertexBuffer and VAO
+    fn render_lines(&mut self, size: &Size<u32>) {
         let mut lines = self.line_vertices.borrow_mut();
 
         if !lines.is_empty() {
@@ -123,6 +163,33 @@ impl Canvas2D {
             self.program.unbind();
 
             lines.clear();
+        }
+    }
+
+    /// Renders all rects using VertexBuffer and VAO
+    fn render_rects(&mut self, size: &Size<u32>) {
+        let mut rects = self.rect_vertices.borrow_mut();
+
+        if !rects.is_empty() {
+            let vertex_data = VertexData::new(&rects[..], &[2, 3], VertexType::Float);
+            let vb = VertexBuffer::new(&vertex_data);
+
+            // create buffers
+            let mut vao = VertexArrayObject::new(Primitive::Triangles).unwrap();
+            vao.add_vb(vb);
+
+            // bind resources, uniforms, attributes
+            self.program.bind();
+            self.program.uniform("u_resolution", Uniform::Float2(size.width as f32, size.height as f32));
+
+            vao.bind();
+            vao.draw();
+            vao.unbind();
+
+            // unbind resources
+            self.program.unbind();
+
+            rects.clear();
         }
     }
 }
