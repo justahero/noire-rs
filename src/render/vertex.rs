@@ -58,7 +58,7 @@ impl Bindable for VertexArrayObject {
                 gl::VertexAttribPointer(
                     i as u32,
                     vb.num_components(),
-                    gl::FLOAT,
+                    vb.gl_type().into(),
                     gl::FALSE,
                     stride,
                     ptr::null(),

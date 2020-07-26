@@ -3,13 +3,49 @@ use std::mem;
 use gl;
 use gl::types::*;
 
-use render::*;
-use render::traits::{Bindable};
+use render::Primitive;
+use render::traits::Bindable;
+
+#[derive(Debug)]
+#[repr(u32)]
+pub enum VertexType {
+    Byte,
+    UnsignedByte,
+    Short,
+    UnsignedShort,
+    Int,
+    UnsignedInt,
+    Float,
+    HalfFloat,
+    Double,
+    Fixed,
+}
+
+impl From<VertexType> for gl::types::GLenum {
+    fn from(vertex_type: VertexType) -> Self {
+        match vertex_type {
+            VertexType::Byte => gl::BYTE,
+            VertexType::UnsignedByte => gl::UNSIGNED_BYTE,
+            VertexType::Short => gl::SHORT,
+            VertexType::UnsignedShort => gl::UNSIGNED_SHORT,
+            VertexType::Int => gl::INT,
+            VertexType::UnsignedInt => gl::UNSIGNED_INT,
+            VertexType::Float => gl::FLOAT,
+            VertexType::HalfFloat => gl::HALF_FLOAT,
+            VertexType::Double => gl::DOUBLE,
+            VertexType::Fixed => gl::FIXED,
+        }
+    }
+}
 
 pub struct VertexBuffer {
+    /// Id reference to Open GL allocated buffer
     pub id: u32,
+    /// Number of vertex data
     pub count: usize,
+    /// Number of components per vertex
     num_components: i32,
+    // TODO maybe remove from here?
     pub render_type: Primitive,
 }
 
@@ -46,6 +82,10 @@ impl VertexBuffer {
 
     pub fn num_components(&self) -> i32 {
         self.num_components
+    }
+
+    pub fn gl_type(&self) -> VertexType {
+        VertexType::Float
     }
 
     pub fn component_size(&self) -> i32 {
