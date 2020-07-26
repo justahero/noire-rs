@@ -55,19 +55,27 @@ impl Bindable for VertexArrayObject {
             gl::BindVertexArray(self.id);
         }
 
-        for (index, vb) in self.vbs.iter_mut().enumerate() {
+        let mut index = 0;
+        for vb in self.vbs.iter_mut() {
             vb.bind();
 
-            unsafe {
-                gl::VertexAttribPointer(
-                    index as u32,
-                    vb.num_components(),
-                    vb.gl_type().into(),
-                    gl::FALSE,
-                    0,
-                    ptr::null(),
-                );
-                gl::EnableVertexAttribArray(index as u32);
+            let mut stride = 0;
+            for num_components in &vb.components {
+                unsafe {
+                    gl::VertexAttribPointer(
+                        index as u32,
+                        *num_components as i32,
+                        vb.gl_type().into(),
+                        gl::FALSE,
+                        0,
+                        ptr::null(),
+                    );
+
+                    gl::EnableVertexAttribArray(index as u32);
+                }
+
+                stride += num_components;
+                index += 1;
             }
         }
 
