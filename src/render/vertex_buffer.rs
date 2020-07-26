@@ -49,7 +49,7 @@ pub struct VertexBuffer {
 
 impl VertexBuffer {
     pub fn create(vertex_data: &[f32], num_components: u32) -> VertexBuffer {
-        let total_size = vertex_data.len() * mem::size_of::<GLfloat>();
+        let total_size = vertex_data.len() * mem::size_of::<f32>();
 
         let mut id = 0;
 
