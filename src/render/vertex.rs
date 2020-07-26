@@ -4,7 +4,7 @@ use gl;
 
 use render::{IndexBuffer, RenderError, VertexBuffer};
 use render::traits::{Bindable, Drawable};
-use super::Primitive;
+use super::{vertex_buffer::VertexTypeSize, Primitive};
 
 /// A struct to represent a OpenGL vertex array object (VAO)
 pub struct VertexArrayObject {
@@ -59,12 +59,11 @@ impl Bindable for VertexArrayObject {
         for vb in self.vbs.iter_mut() {
             vb.bind();
 
-            let mut stride = 0;
-            for num_components in &vb.components {
+            for &num_components in &vb.components {
                 unsafe {
                     gl::VertexAttribPointer(
                         index as u32,
-                        *num_components as i32,
+                        num_components as i32,
                         vb.gl_type().into(),
                         gl::FALSE,
                         0,
@@ -74,7 +73,6 @@ impl Bindable for VertexArrayObject {
                     gl::EnableVertexAttribArray(index as u32);
                 }
 
-                stride += num_components;
                 index += 1;
             }
         }

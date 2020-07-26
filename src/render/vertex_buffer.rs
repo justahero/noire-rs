@@ -5,7 +5,7 @@ use gl::types::*;
 
 use render::traits::Bindable;
 
-trait VertexTypeSize {
+pub trait VertexTypeSize {
     /// Returns the size of the vertex type in bytes
     fn size(&self) -> u32;
     /// Returns the Open GL enum value of the vertex type
@@ -68,6 +68,7 @@ impl VertexTypeSize for VertexType {
     }
 }
 
+#[derive(Debug)]
 pub struct VertexData<'a> {
     /// Holds the list of vertex data
     pub data: &'a [f32],
@@ -102,7 +103,7 @@ impl <'a> VertexData<'a> {
 pub struct VertexBuffer {
     /// Id reference to Open GL allocated buffer
     pub id: u32,
-    /// Number of vertices, e.g. (x,y,z,rg,b)
+    /// Number of vertices, e.g. [(x,y,z,rg,b), (), ...]
     pub count: usize,
     /// Number of components per vertex, e.g. (x,y,z),(r,g,b)
     pub components: Vec<u32>,
@@ -137,18 +138,18 @@ impl VertexBuffer {
         VertexBuffer {
             id,
             count: vertex_data.count(),
-            components: Vec::new(),
+            components: vertex_data.components.clone(),
             vertex_type: vertex_data.vertex_type,
         }
     }
 
     /// Creates a new VertexBuffer from a float array
-    pub fn create(vertex_data: &[f32], num_components: usize) -> Self {
-        let id = unsafe { generate_buffer(vertex_data) };
+    pub fn create(data: &[f32], num_components: usize) -> Self {
+        let id = unsafe { generate_buffer(data) };
 
         VertexBuffer {
             id,
-            count: vertex_data.len() / num_components,
+            count: data.len() / num_components,
             components: vec![num_components as u32],
             vertex_type: VertexType::Float,
         }
@@ -170,7 +171,7 @@ impl VertexBuffer {
         self.vertex_type
     }
 
-    /// Returns the size in bytes of all vertex components, e.g. (x,y,z,nx,ny) = 5
+    /// Returns the size in bytes of all vertex components, e.g. (x,y,z,nx,ny) = 5 * 4
     pub fn component_size(&self) -> i32 {
         (self.num_components() as usize * (mem::size_of::<f32>())) as i32
     }
