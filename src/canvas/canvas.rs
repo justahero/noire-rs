@@ -99,7 +99,7 @@ impl Canvas2D {
     }
 
     /// Draw a rect
-    pub fn draw_rect(&self, rect: &Rect) -> &Self {
+    pub fn draw_rect(&self, _rect: &Rect) -> &Self {
         self
     }
 
