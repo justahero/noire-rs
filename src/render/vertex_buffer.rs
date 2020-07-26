@@ -167,8 +167,13 @@ impl VertexBuffer {
         &self.components
     }
 
-    pub fn gl_type(&self) -> VertexType {
+    pub fn vertex_type(&self) -> VertexType {
         self.vertex_type
+    }
+
+    /// Returns the stride of full vertex, number of bytes of all components
+    pub fn stride(&self) -> u32 {
+        self.num_components() * self.vertex_type.size()
     }
 
     /// Returns the size in bytes of all vertex components, e.g. (x,y,z,nx,ny) = 5 * 4
