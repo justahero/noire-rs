@@ -27,9 +27,33 @@ pub enum VertexType {
     Fixed,
 }
 
-impl From<VertexType> for gl::types::GLenum {
+impl From<VertexType> for u32 {
     fn from(vertex_type: VertexType) -> Self {
-        match vertex_type {
+        vertex_type.gl_type()
+    }
+}
+
+impl VertexTypeSize for VertexType {
+    /// Returns the size of the data type, see
+    /// https://www.khronos.org/opengl/wiki/OpenGL_Type
+    fn size(&self) -> u32 {
+        match self {
+            VertexType::Byte => 1,
+            VertexType::UnsignedByte => 1,
+            VertexType::Short => 2,
+            VertexType::UnsignedShort => 2,
+            VertexType::Int => 4,
+            VertexType::UnsignedInt => 4,
+            VertexType::Float => 4,
+            VertexType::HalfFloat => 2,
+            VertexType::Double => 8,
+            VertexType::Fixed => 4,
+        }
+    }
+
+    /// Returns the Open GL enum type
+    fn gl_type(&self) -> u32 {
+        match self {
             VertexType::Byte => gl::BYTE,
             VertexType::UnsignedByte => gl::UNSIGNED_BYTE,
             VertexType::Short => gl::SHORT,
@@ -41,16 +65,6 @@ impl From<VertexType> for gl::types::GLenum {
             VertexType::Double => gl::DOUBLE,
             VertexType::Fixed => gl::FIXED,
         }
-    }
-}
-
-impl VertexTypeSize for VertexType {
-    fn size(&self) -> u32 {
-        todo!()
-    }
-
-    fn gl_type(&self) -> gl::types::GLenum {
-        todo!()
     }
 }
 
@@ -124,7 +138,7 @@ impl VertexBuffer {
         VertexBuffer {
             id,
             count: vertex_data.len() / (num_components as usize),
-            num_components: num_components,
+            num_components,
         }
     }
 
