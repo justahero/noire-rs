@@ -64,22 +64,22 @@ impl Bindable for VertexArrayObject {
             vb.bind();
 
             let mut offset = 0;
-            for &num_components in &vb.components {
+            for &component in &vb.components {
                 unsafe {
                     gl::VertexAttribPointer(
                         index as u32,
-                        num_components as i32,
+                        component as i32,
                         vb.vertex_type().into(),
                         gl::FALSE,
                         vb.stride() as i32,
                         offset as *const gl::types::GLvoid,
                     );
 
-                    gl::EnableVertexAttribArray(index as u32);
+                    gl::EnableVertexAttribArray(index);
                 }
 
                 index += 1;
-                offset += num_components as usize * std::mem::size_of::<f32>();
+                offset += component as usize * std::mem::size_of::<f32>();
             }
         }
 

@@ -39,10 +39,8 @@ pub struct Canvas2D {
     program: Program,
     /// color to render the next primitive with
     draw_color: Color,
-    /// store all line coordinates
+    /// store all line coordinates with colors with components: (x,y,r,g,b)
     line_vertices: RefCell<Box<Vec<f32>>>,
-    /// store all line colors
-    line_colors: RefCell<Box<Vec<f32>>>,
 }
 
 /// Compiles the used shader program
@@ -62,7 +60,6 @@ impl Canvas2D {
             program,
             draw_color: Color::BLACK,
             line_vertices: RefCell::new(Box::new(Vec::new())),
-            line_colors: RefCell::new(Box::new(Vec::new())),
         }
     }
 
@@ -84,17 +81,16 @@ impl Canvas2D {
     /// Draws a line
     pub fn draw_line(&self, start_x: i32, start_y: i32, end_x: i32, end_y: i32) -> &Self {
         let mut lines = self.line_vertices.borrow_mut();
-        let mut colors = self.line_colors.borrow_mut();
         lines.push(start_x as f32);
         lines.push(start_y as f32);
+        lines.push(self.draw_color.red);
+        lines.push(self.draw_color.green);
+        lines.push(self.draw_color.blue);
         lines.push(end_x as f32);
         lines.push(end_y as f32);
-        colors.push(self.draw_color.red);
-        colors.push(self.draw_color.green);
-        colors.push(self.draw_color.blue);
-        colors.push(self.draw_color.red);
-        colors.push(self.draw_color.green);
-        colors.push(self.draw_color.blue);
+        lines.push(self.draw_color.red);
+        lines.push(self.draw_color.green);
+        lines.push(self.draw_color.blue);
         self
     }
 
@@ -106,15 +102,14 @@ impl Canvas2D {
     /// Renders the content of the canvas.
     pub fn render(&mut self, size: &Size<u32>) {
         let mut lines = self.line_vertices.borrow_mut();
-        let mut colors = self.line_colors.borrow_mut();
 
         if !lines.is_empty() {
+            let vertex_data = VertexData::new(&lines[..], &[2, 3], VertexType::Float);
+            let vb = VertexBuffer::new(&vertex_data);
+
             // create buffers
-            let vb = VertexBuffer::create(&lines[..], 2);
-            let vb_colors = VertexBuffer::create(&colors[..], 3);
             let mut vao = VertexArrayObject::new(Primitive::Lines).unwrap();
             vao.add_vb(vb);
-            vao.add_vb(vb_colors);
 
             // bind resources, uniforms, attributes
             self.program.bind();
@@ -128,7 +123,6 @@ impl Canvas2D {
             self.program.unbind();
 
             lines.clear();
-            colors.clear();
         }
     }
 }
