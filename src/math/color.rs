@@ -44,6 +44,11 @@ impl Color {
         [self.red, self.green, self.blue, self.alpha]
     }
 
+    /// Returns the rgb values as vec
+    pub fn rgb_vec(&self) -> Vec<f32> {
+        vec![self.red, self.green, self.blue]
+    }
+
     /// Returns color as array with RGB components
     pub fn rgb_array(&self) -> [f32; 3] {
         [self.red, self.green, self.blue]

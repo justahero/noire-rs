@@ -86,14 +86,10 @@ impl Canvas2D {
         let mut lines = self.line_vertices.borrow_mut();
         lines.push(start_x as f32);
         lines.push(start_y as f32);
-        lines.push(self.draw_color.red);
-        lines.push(self.draw_color.green);
-        lines.push(self.draw_color.blue);
+        lines.append(&mut self.draw_color.rgb_vec());
         lines.push(end_x as f32);
         lines.push(end_y as f32);
-        lines.push(self.draw_color.red);
-        lines.push(self.draw_color.green);
-        lines.push(self.draw_color.blue);
+        lines.append(&mut self.draw_color.rgb_vec());
         self
     }
 
@@ -102,34 +98,22 @@ impl Canvas2D {
         let mut rects = self.rect_vertices.borrow_mut();
         rects.push(left as f32);
         rects.push(top as f32);
-        rects.push(self.draw_color.red);
-        rects.push(self.draw_color.green);
-        rects.push(self.draw_color.blue);
+        rects.append(&mut self.draw_color.rgb_vec());
         rects.push(right as f32);
         rects.push(top as f32);
-        rects.push(self.draw_color.red);
-        rects.push(self.draw_color.green);
-        rects.push(self.draw_color.blue);
+        rects.append(&mut self.draw_color.rgb_vec());
         rects.push(right as f32);
         rects.push(bottom as f32);
-        rects.push(self.draw_color.red);
-        rects.push(self.draw_color.green);
-        rects.push(self.draw_color.blue);
+        rects.append(&mut self.draw_color.rgb_vec());
         rects.push(right as f32);
         rects.push(bottom as f32);
-        rects.push(self.draw_color.red);
-        rects.push(self.draw_color.green);
-        rects.push(self.draw_color.blue);
+        rects.append(&mut self.draw_color.rgb_vec());
         rects.push(left as f32);
         rects.push(bottom as f32);
-        rects.push(self.draw_color.red);
-        rects.push(self.draw_color.green);
-        rects.push(self.draw_color.blue);
+        rects.append(&mut self.draw_color.rgb_vec());
         rects.push(left as f32);
         rects.push(top as f32);
-        rects.push(self.draw_color.red);
-        rects.push(self.draw_color.green);
-        rects.push(self.draw_color.blue);
+        rects.append(&mut self.draw_color.rgb_vec());
         self
     }
 
