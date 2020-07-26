@@ -50,6 +50,10 @@ impl VertexArrayObject {
 
 impl Bindable for VertexArrayObject {
     /// Binds the resource
+    ///
+    /// References
+    /// * https://stackoverflow.com/questions/16380005/opengl-3-4-glvertexattribpointer-stride-and-offset-miscalculation
+    /// * https://learnopengl.com/Getting-started/Shaders
     fn bind(&mut self) -> &mut Self {
         unsafe {
             gl::BindVertexArray(self.id);
