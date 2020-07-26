@@ -37,6 +37,31 @@ impl From<VertexType> for gl::types::GLenum {
     }
 }
 
+impl VertexType {
+    pub fn size(&self) -> u32 {
+        0
+    }
+}
+
+pub struct VertexData<'a> {
+    /// Holds the list of vertex data
+    pub data: &'a [f32],
+    /// The vertex data type
+    pub vertex_type: VertexType,
+    /// The number of components, e.g. 3 for x,y,z
+    pub components: Vec<u32>,
+}
+
+impl <'a> VertexData<'a> {
+    pub fn new(data: &'a [f32], components: &[u32], vertex_type: VertexType) -> Self {
+        VertexData {
+            data,
+            vertex_type,
+            components: Vec::from(components),
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct VertexBuffer {
     /// Id reference to Open GL allocated buffer
@@ -47,24 +72,38 @@ pub struct VertexBuffer {
     num_components: i32,
 }
 
+/// Generates a new Array Buffer and returns the associated id
+unsafe fn generate_buffer(data: &[f32]) -> u32 {
+    let total_size = data.len() * mem::size_of::<f32>();
+
+    let mut id = 0;
+    gl::GenBuffers(1, &mut id);
+
+    gl::BindBuffer(gl::ARRAY_BUFFER, id);
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        total_size as GLsizeiptr,
+        mem::transmute(&data[0]),
+        gl::STATIC_DRAW,
+    );
+    gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+
+    id
+}
+
 impl VertexBuffer {
-    pub fn create(vertex_data: &[f32], num_components: u32) -> VertexBuffer {
-        let total_size = vertex_data.len() * mem::size_of::<f32>();
-
-        let mut id = 0;
-
-        unsafe {
-            gl::GenBuffers(1, &mut id);
-
-            gl::BindBuffer(gl::ARRAY_BUFFER, id);
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                total_size as GLsizeiptr,
-                mem::transmute(&vertex_data[0]),
-                gl::STATIC_DRAW,
-            );
-            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+    /// Constructs a new Vertex Buffer from Vertex Data
+    pub fn new(vertex_data: &VertexData) -> Self {
+        VertexBuffer {
+            id: 0,
+            count: 0,
+            num_components: 0
         }
+    }
+
+    /// Creates a new VertexBuffer from a float array
+    pub fn create(vertex_data: &[f32], num_components: u32) -> Self {
+        let id = unsafe { generate_buffer(vertex_data) };
 
         VertexBuffer {
             id,

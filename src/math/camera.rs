@@ -1,4 +1,4 @@
-use cgmath::{Deg, EuclideanSpace, Euler, InnerSpace, Matrix4, PerspectiveFov, Point3, Rad,
+use cgmath::{Deg, EuclideanSpace, Euler, InnerSpace, Matrix4, PerspectiveFov, Point3,
              Rotation, SquareMatrix, Vector3, Quaternion};
 use cgmath::vec3;
 use cgmath::One;
