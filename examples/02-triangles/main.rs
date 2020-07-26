@@ -28,10 +28,10 @@ fn main() {
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
-    let vb = VertexBuffer::create(&VERTICES, 2, Primitive::TriangleStrip);
+    let vb = VertexBuffer::create(&VERTICES, 2);
     let ib = IndexBuffer::create(&INDICES).unwrap();
 
-    let mut vao = VertexArrayObject::new().unwrap();
+    let mut vao = VertexArrayObject::new(Primitive::TriangleStrip).unwrap();
     vao.add_vb(vb);
     vao.add_ib(ib);
 

@@ -4,11 +4,14 @@ use gl;
 
 use render::{IndexBuffer, RenderError, VertexBuffer};
 use render::traits::{Bindable, Drawable};
+use super::Primitive;
 
 /// A struct to represent a OpenGL vertex array object (VAO)
 pub struct VertexArrayObject {
     /// the OpenGL instance id
     id: u32,
+    /// The used render type
+    primitive_type: Primitive,
     /// The list of Vertex Buffers
     vbs: Vec<VertexBuffer>,
     /// The list of Index Buffers,
@@ -17,7 +20,7 @@ pub struct VertexArrayObject {
 
 impl VertexArrayObject {
     /// Create a new instance of a VertexArrayObject
-    pub fn new() -> Result<VertexArrayObject, RenderError> {
+    pub fn new(primitive_type: Primitive) -> Result<VertexArrayObject, RenderError> {
         let mut id = 0;
 
         unsafe {
@@ -26,6 +29,7 @@ impl VertexArrayObject {
 
         Ok(VertexArrayObject {
             id,
+            primitive_type,
             vbs: vec![],
             ibs: vec![],
         })
@@ -108,7 +112,7 @@ impl Drawable for VertexArrayObject {
         let vb = &self.vbs[0];
         if self.ibs.is_empty() {
             unsafe {
-                gl::DrawArrays(vb.render_type.into(), 0, vb.size() as i32);
+                gl::DrawArrays(self.primitive_type.into(), 0, vb.size() as i32);
             }
         } else {
             let ib = &self.ibs[0];
