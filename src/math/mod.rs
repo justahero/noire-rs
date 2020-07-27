@@ -2,9 +2,11 @@
 
 pub use self::camera::Camera;
 pub use self::color::Color;
+pub use self::rect::Rect;
 
 pub mod camera;
 pub mod color;
+pub mod rect;
 
 use cgmath::{Matrix, Matrix3, Matrix4, Point3, Quaternion, SquareMatrix};
 
