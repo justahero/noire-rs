@@ -57,8 +57,8 @@ fn main() {
         .set_position(point3(0.0, 2.0, 20.0));
 
     // create vertex data
-    let vb = VertexBuffer::create(&VERTICES, 2, Primitive::TriangleStrip);
-    let mut vao = VertexArrayObject::new().unwrap();
+    let vb = VertexBuffer::create(&VERTICES, 2);
+    let mut vao = VertexArrayObject::new(Primitive::TriangleStrip).unwrap();
     vao.add_vb(vb);
 
     let mut last_pos = Pos { x: 0, y: 0 };

@@ -78,10 +78,10 @@ fn create_texcoords() -> Vec<f32> {
 
 impl ScreenRect {
     pub fn new() -> Result<Self, RenderError> {
-        let mut vao = VertexArrayObject::new()?;
+        let mut vao = VertexArrayObject::new(Primitive::Triangles)?;
 
-        vao.add_vb(VertexBuffer::create(&create_vertices(), 2, Primitive::Triangles));
-        vao.add_vb(VertexBuffer::create(&create_texcoords(), 2, Primitive::Triangles));
+        vao.add_vb(VertexBuffer::create(&create_vertices(), 2));
+        vao.add_vb(VertexBuffer::create(&create_texcoords(), 2));
 
         let program = create_program()?;
 

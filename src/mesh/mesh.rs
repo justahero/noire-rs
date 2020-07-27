@@ -16,11 +16,10 @@ pub struct Mesh {
 impl Mesh {
     /// Creates a Mesh object from a Cube
     pub fn create_cube(cube: Cube, color: Color) -> Result<Mesh, RenderError> {
-        let mut vao = VertexArrayObject::new()?;
+        let mut vao = VertexArrayObject::new(Primitive::Triangles)?;
 
-        vao.add_vb(VertexBuffer::create(&cube.vertices, 3, Primitive::Triangles));
-        vao.add_vb(VertexBuffer::create(&cube.normals, 3, Primitive::Triangles));
-        // vao.add_vb(VertexBuffer::create(&cube.texcoords, 2, Primitive::Triangles));
+        vao.add_vb(VertexBuffer::create(&cube.vertices, 3));
+        vao.add_vb(VertexBuffer::create(&cube.normals, 3));
         vao.add_ib(IndexBuffer::create(&cube.indices)?);
 
         Ok(Mesh {
@@ -31,11 +30,10 @@ impl Mesh {
 
     /// Creates a Mesh object from a Plane
     pub fn create_plane(plane: Plane, color: Color) -> Result<Mesh, RenderError> {
-        let mut vao = VertexArrayObject::new()?;
+        let mut vao = VertexArrayObject::new(Primitive::Triangles)?;
 
-        vao.add_vb(VertexBuffer::create(&plane.vertices, 3, Primitive::Triangles));
-        vao.add_vb(VertexBuffer::create(&plane.normals, 3, Primitive::Triangles));
-        // vao.add_vb(VertexBuffer::create(&plane.texcoords, 2, Primitive::Triangles));
+        vao.add_vb(VertexBuffer::create(&plane.vertices, 3));
+        vao.add_vb(VertexBuffer::create(&plane.normals, 3));
         vao.add_ib(IndexBuffer::create(&plane.indices)?);
 
         Ok(Mesh {
