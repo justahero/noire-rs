@@ -144,6 +144,7 @@ fn compile_shader(source: &str, shader_type: &ShaderType) -> Result<u32, ShaderE
 }
 
 impl Shader {
+    /// Creates and compiles a shader from file
     pub fn from_file(file_path: &str, shader_type: ShaderType) -> Result<Self, ShaderError> {
         let path = Path::new(file_path);
         let display = path.display();
@@ -156,15 +157,9 @@ impl Shader {
         Shader::create(&source, shader_type)
     }
 
+    /// Creates and compiles a shader from source
     pub fn create(source: &str, shader_type: ShaderType) -> Result<Self, ShaderError> {
-        match compile_shader(source, &shader_type) {
-            Ok(id) => Ok(Shader {
-                id,
-                source: String::from(source),
-                shader_type,
-            }),
-            Err(message) => Err(message),
-        }
+        compile_shader(source, &shader_type).map(|id| Shader{ id, source: source.into(), shader_type} )
     }
 }
 
