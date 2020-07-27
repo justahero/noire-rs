@@ -8,6 +8,7 @@ extern crate glfw;
 extern crate notify;
 extern crate regex;
 
+pub mod canvas;
 pub mod input;
 pub mod math;
 pub mod mesh;

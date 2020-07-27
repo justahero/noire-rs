@@ -50,26 +50,37 @@ impl VertexArrayObject {
 
 impl Bindable for VertexArrayObject {
     /// Binds the resource
+    ///
+    /// References
+    /// * https://stackoverflow.com/questions/16380005/opengl-3-4-glvertexattribpointer-stride-and-offset-miscalculation
+    /// * https://learnopengl.com/Getting-started/Shaders
     fn bind(&mut self) -> &mut Self {
         unsafe {
             gl::BindVertexArray(self.id);
         }
 
-        let mut stride = 0;
-        for (i, vb) in self.vbs.iter_mut().enumerate() {
+        let mut index = 0;
+        for vb in self.vbs.iter_mut() {
             vb.bind();
-            unsafe {
-                gl::VertexAttribPointer(
-                    i as u32,
-                    vb.num_components(),
-                    vb.gl_type().into(),
-                    gl::FALSE,
-                    stride,
-                    ptr::null(),
-                );
-                gl::EnableVertexAttribArray(i as u32);
+
+            let mut offset = 0;
+            for &component in &vb.components {
+                unsafe {
+                    gl::VertexAttribPointer(
+                        index as u32,
+                        component as i32,
+                        vb.vertex_type().into(),
+                        gl::FALSE,
+                        vb.stride() as i32,
+                        offset as *const gl::types::GLvoid,
+                    );
+
+                    gl::EnableVertexAttribArray(index);
+                }
+
+                index += 1;
+                offset += component as usize * std::mem::size_of::<f32>();
             }
-            stride += vb.component_size();
         }
 
         for ib in self.ibs.iter_mut() {
@@ -109,6 +120,8 @@ impl Bindable for VertexArrayObject {
 impl Drawable for VertexArrayObject {
     /// Render the VertexArrayObject
     fn draw(&mut self) {
+        assert!(self.vbs.len() > 0);
+
         let vb = &self.vbs[0];
         if self.ibs.is_empty() {
             unsafe {
@@ -132,6 +145,7 @@ impl Drop for VertexArrayObject {
     fn drop(&mut self) {
         unsafe {
             gl::DeleteVertexArrays(1, &self.id);
+            self.id = 0;
         }
     }
 }
