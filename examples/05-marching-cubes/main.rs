@@ -9,18 +9,19 @@ extern crate notify;
 use gl::types::*;
 
 use noire::canvas::Canvas2D;
-use noire::math::{Color, Rect};
+use noire::math::{Color, PerlinNoise, Rect};
 use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability};
 use std::time::{Duration, Instant};
 
 fn main() {
-    let window_size = Size::new(1000, 600);
+    let window_size = Size::new(900, 600);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
     window.enable(Capability::ProgramPointSize);
 
     let mut canvas = Canvas2D::new();
+    let perlin = PerlinNoise::new(10);
 
     let start_time = Instant::now();
 
@@ -35,20 +36,12 @@ fn main() {
         window.reset_viewport();
         window.clear(0.3, 0.3, 0.3, 1.0);
 
-        canvas.set_color(Color::rgb(1.0, 0.0, 0.0));
-        canvas.draw_line(0, 0, 300, 300);
-        canvas.draw_line(0, 50, 350, 350);
-        canvas.draw_line(0, 100, 400, 400);
-        canvas.draw_line(0, 150, 450, 450);
+        for x in 0..framebuffer_size.width {
+            let xoff = (x as f64) * 0.01;
+            let y = 100.0 + 50.0 * perlin.gen(xoff, 42.3, 3.1);
 
-        canvas.set_color(Color::rgb(0.0, 1.0, 0.2));
-        canvas.draw_rect(100, 350, 200, 500);
-        canvas.draw_rect(250, 400, 350, 550);
-
-        canvas.set_color(Color::rgb(1.0, 1.0, 0.0));
-        canvas.set_pointsize(5.0);
-        canvas.draw_point(400, 250);
-        canvas.draw_point(400, 300);
+            canvas.draw_point(x as i32, y as i32);
+        }
 
         canvas.render(&framebuffer_size);
 
