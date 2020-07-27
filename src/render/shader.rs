@@ -157,6 +157,16 @@ impl Shader {
         Shader::create(&source, shader_type)
     }
 
+    /// Creates a new vertex shader
+    pub fn create_vertex(source: &str) -> Result<Self, ShaderError> {
+        Shader::create(source, ShaderType::Vertex)
+    }
+
+    /// Creates a new fragment shader
+    pub fn create_fragment(source: &str) -> Result<Self, ShaderError> {
+        Shader::create(source, ShaderType::Fragment)
+    }
+
     /// Creates and compiles a shader from source
     pub fn create(source: &str, shader_type: ShaderType) -> Result<Self, ShaderError> {
         compile_shader(source, &shader_type).map(|id| Shader{ id, source: source.into(), shader_type} )

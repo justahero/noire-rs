@@ -111,6 +111,10 @@ impl Point2<u32> {
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(u32)]
 pub enum Primitive {
+    /// used to render lines
+    Lines = gl::LINES,
+    /// used to render points
+    Points = gl::POINTS,
     /// used to render separate triangles
     Triangles = gl::TRIANGLES,
     /// used to render connected triangle strips
@@ -120,6 +124,8 @@ pub enum Primitive {
 impl From<Primitive> for gl::types::GLenum {
     fn from(primitive: Primitive) -> Self {
         match primitive {
+            Primitive::Lines => gl::LINES,
+            Primitive::Points => gl::POINTS,
             Primitive::Triangles => gl::TRIANGLES,
             Primitive::TriangleStrip => gl::TRIANGLE_STRIP,
         }
@@ -195,10 +201,12 @@ impl From<PixelType> for gl::types::GLenum {
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u32)]
 pub enum Capability {
-    /// enable or disable depth tests
+    /// Enable or disable depth tests
     DepthTest = gl::DEPTH_TEST,
-    /// back side culling faces / polygons
+    /// Back side culling faces / polygons
     CullFace = gl::CULL_FACE,
+    /// Enables to set gl_PointSize in shader
+    ProgramPointSize = gl::PROGRAM_POINT_SIZE,
 }
 
 impl From<gl::types::GLenum> for Capability {
@@ -206,6 +214,7 @@ impl From<gl::types::GLenum> for Capability {
         match value {
             gl::DEPTH_TEST => Capability::DepthTest,
             gl::CULL_FACE => Capability::CullFace,
+            gl::PROGRAM_POINT_SIZE => Capability::ProgramPointSize,
             _ => panic!("Unknown capability found: {}", value),
         }
     }
@@ -216,6 +225,7 @@ impl From<Capability> for gl::types::GLenum {
         match cap {
             Capability::DepthTest => gl::DEPTH_TEST,
             Capability::CullFace => gl::CULL_FACE,
+            Capability::ProgramPointSize => gl::PROGRAM_POINT_SIZE,
         }
     }
 }
