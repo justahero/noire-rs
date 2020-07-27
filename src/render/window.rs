@@ -19,6 +19,12 @@ pub struct WindowError {
     message: String
 }
 
+impl WindowError {
+    pub fn new(message: &str) -> Self {
+        WindowError { message: message.into() }
+    }
+}
+
 /// Struct to provide coordinates
 pub struct Pos<T> {
     /// x coordinate
@@ -148,23 +154,39 @@ pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window, mode: Fullscre
     });
 }
 
+/// Initializes GLFW and returns it
+fn init_glfw() -> Result<Glfw, WindowError> {
+    let callback = glfw::Callback {
+        f: glfw_error_callback as fn(glfw::Error, String, &Cell<usize>),
+        data: Cell::new(0),
+    };
+
+    let mut glfw = glfw::init(Some(callback))
+        .map_err(|e| WindowError::new("Failed to initialize GLFW"))?;
+
+    glfw.window_hint(glfw::WindowHint::ContextVersion(4, 1));
+    glfw.window_hint(glfw::WindowHint::Resizable(true));
+    glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
+    glfw.window_hint(glfw::WindowHint::OpenGlProfile(
+        glfw::OpenGlProfileHint::Core,
+    ));
+
+    Ok(glfw)
+}
+
 /// Struct to render a window
 impl RenderWindow {
-    pub fn create(size: &Size<u32>, title: &str) -> Result<RenderWindow, WindowError> {
-        let mut glfw = match glfw::init(Some(glfw::Callback {
-            f: glfw_error_callback as fn(glfw::Error, String, &Cell<usize>),
-            data: Cell::new(0),
-        })) {
-            Ok(glfw) => glfw,
-            Err(_) => return Err(WindowError{ message: "Failed to initialize GLFW".to_string() }),
-        };
+    /// Creates a new RenderWindow with fullscreen resolution of the current display
+    pub fn create_fullscreen(title: &str) -> Result<RenderWindow, WindowError> {
+        let size = Size{ width: 600, height: 400 };
+        let mut render_window = RenderWindow::create(&size, &title)?;
+        render_window.set_fullscreen(Fullscreen::Current);
+        Ok(render_window)
+    }
 
-        glfw.window_hint(glfw::WindowHint::ContextVersion(4, 1));
-        glfw.window_hint(glfw::WindowHint::Resizable(true));
-        glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
-        glfw.window_hint(glfw::WindowHint::OpenGlProfile(
-            glfw::OpenGlProfileHint::Core,
-        ));
+    /// Creates a windowed RenderWindow with given size
+    pub fn create(size: &Size<u32>, title: &str) -> Result<RenderWindow, WindowError> {
+        let mut glfw = init_glfw()?;
 
         let (mut window, events) =
             match glfw.create_window(size.width, size.height, title, glfw::WindowMode::Windowed) {
@@ -189,7 +211,7 @@ impl RenderWindow {
             glfw,
             window,
             events,
-            context: context,
+            context,
             input_events: VecDeque::new(),
             pressed_buttons: VecDeque::new(),
         })
