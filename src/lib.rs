@@ -6,6 +6,8 @@ extern crate cgmath;
 extern crate gl;
 extern crate glfw;
 extern crate notify;
+extern crate rand;
+extern crate rand_chacha;
 extern crate regex;
 
 pub mod canvas;
