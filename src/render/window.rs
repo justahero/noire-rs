@@ -296,10 +296,12 @@ impl OpenGLWindow for RenderWindow {
     fn is_current(&self) -> bool {
         self.window.is_current()
     }
+
     /// Sets the window as current
     fn make_current(&mut self) {
         self.window.make_current()
     }
+
     /// Returns true if Window is running in fullscreen
     fn is_fullscreen(&self) -> bool {
         self.window.with_window_mode(|mode| match mode {
@@ -307,11 +309,13 @@ impl OpenGLWindow for RenderWindow {
             glfw::WindowMode::FullScreen(_) => true,
         })
     }
+
     /// Set the Window into fullscreen mode
     fn set_fullscreen(&mut self, mode: Fullscreen) {
         self.glfw.set_swap_interval(glfw::SwapInterval::Sync(0));
         set_fullscreen(&mut self.glfw, &mut self.window, mode);
     }
+
     /// Set the Window into Windowed mode
     fn set_windowed(&mut self, pos: &Pos<i32>, size: &Size<u32>) {
         self.glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
@@ -324,14 +328,13 @@ impl OpenGLWindow for RenderWindow {
             None,
         );
     }
+
     /// Return the size of the frame buffer
     fn get_framebuffer_size(&self) -> Size<u32> {
         let (width, height) = self.window.get_framebuffer_size();
-        Size {
-            width: width as u32,
-            height: height as u32,
-        }
+        Size::new(width as u32, height as u32)
     }
+
     /// Clear the frame buffer of the window to a color
     fn clear(&self, r: f32, g: f32, b: f32, a: f32) -> &Self {
         unsafe {
@@ -340,6 +343,7 @@ impl OpenGLWindow for RenderWindow {
         }
         self
     }
+
     /// Clear the depth buffer to a value
     fn clear_depth(&self, value: f32) -> &Self {
         unsafe {
@@ -348,6 +352,7 @@ impl OpenGLWindow for RenderWindow {
         }
         self
     }
+
     /// Swap frame buffer, update with content
     fn swap_buffers(&mut self) -> &Self {
         self.window.swap_buffers();
