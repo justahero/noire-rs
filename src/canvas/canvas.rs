@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use math::{Color, Rect};
+use math::Color;
 use render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
 use crate::render::{Bindable, Drawable, Size, Uniform, vertex_buffer::{VertexType, VertexData}};
 
