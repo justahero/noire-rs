@@ -45,6 +45,8 @@ pub struct PerlinNoise {
     pub seed: u64,
     /// A table of randomly generated values
     table: Vec<i32>,
+    /// The range of random values
+    size: i32,
     /// If set, defines repetition of Perlin Noise pattern
     repeat: Option<u32>,
     /// The number of octaves to smooth noise functions
@@ -77,16 +79,36 @@ fn generate_table(rng: &mut ChaCha8Rng, size: usize) -> Vec<i32> {
 impl PerlinNoise {
     /// Generates a new Perlin Noise set from given seed
     pub fn new(seed: u64) -> Self {
+        let size = 512;
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
-        let table = generate_table(&mut rng, 256);
+        let table = generate_table(&mut rng, size as usize);
 
         PerlinNoise {
             seed,
             table,
+            size,
             repeat: None,
             octaves: 4,
             ampl_falloff: 0.5,
         }
+    }
+
+    /// Sets the number of octaves, defaults to 4
+    pub fn octaves(&mut self, octaves: u16) -> &Self {
+        self.octaves = octaves;
+        self
+    }
+
+    /// Sets the amplitude falloff, defaults to 0.5
+    pub fn ampl_falloff(&mut self, falloff: f64) -> &Self {
+        self.ampl_falloff = falloff;
+        self
+    }
+
+    /// Sets the repeat pattern
+    pub fn repeat(&mut self, repeat: u32) -> &Self {
+        self.repeat = Some(repeat);
+        self
     }
 
     /// Generates a 1-dimensional random number
@@ -127,15 +149,29 @@ impl PerlinNoise {
     }
 
     fn inc(&self, num: i32) -> i32 {
-        num + 1
+        let mut result = num + 1;
+        if let Some(repeat) = self.repeat {
+            result %= repeat as i32;
+        }
+        result
     }
 
     /// The function to calculate a noise value
     /// Returns a value between -1..+1
     fn perlin(&self, x: f64, y: f64, z: f64) -> f64 {
-        let xi = (x.floor() as i32) & 255;
-        let yi = (y.floor() as i32) & 255;
-        let zi = (z.floor() as i32) & 255;
+        let mut x = x;
+        let mut y = y;
+        let mut z = z;
+
+        if let Some(repeat) = self.repeat {
+            x = x.rem_euclid(repeat as f64);
+            y = y.rem_euclid(repeat as f64);
+            z = z.rem_euclid(repeat as f64);
+        }
+
+        let xi = (x.floor() as i32) & (self.size - 1);
+        let yi = (y.floor() as i32) & (self.size - 1);
+        let zi = (z.floor() as i32) & (self.size - 1);
 
         let aaa: i32 = self.p(self.p(self.p(    xi ) +               yi ) +               zi );
         let aba: i32 = self.p(self.p(self.p(    xi ) + self.inc(yi)) +               zi );
