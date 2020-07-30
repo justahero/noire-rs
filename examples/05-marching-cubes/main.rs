@@ -14,7 +14,7 @@ use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability};
 use std::time::{Duration, Instant};
 
 fn main() {
-    let window_size = Size::new(900, 600);
+    let window_size = Size::new(640, 640);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
@@ -39,16 +39,25 @@ fn main() {
 
         let height: f64  = size.height as f64;
         let mut xoff = 0.0;
-        let mut last_y = 0.0;
 
-        for x in 1..size.width {
-            let y = height / 2.0 + height / 2.0 * perlin.gen1(xoff);
+        // Render 4x4 pixel rects to create less geometry
+        for x in 0..size.width / 4 {
+            for y in 0..size.height / 4 {
+                let index = x + y * size.width;
 
-            // canvas.draw_point(x as i32, y as i32);
-            canvas.draw_line((x - 1) as i32, last_y as i32, x as i32, y as i32);
+                let r = perlin.gen1(xoff) as f32;
 
-            xoff += increment;
-            last_y = y;
+                canvas.set_color(Color::rgb(r, r, r));
+
+                canvas.draw_rect(
+                    (x * 4) as i32,
+                    (y * 4) as i32,
+                    ((x + 1) * 4) as i32,
+                    ((y + 1) * 4) as i32
+                );
+
+                xoff += 0.01;
+            }
         }
 
         canvas.render(&size);
