@@ -1,14 +1,16 @@
 #![allow(unused_variables)]
 
-pub use self::camera::Camera;
-pub use self::color::Color;
-pub use self::rect::Rect;
-pub use self::vector2::Vector2;
-
 pub mod camera;
 pub mod color;
+pub mod perlin_noise;
 pub mod rect;
 pub mod vector2;
+
+pub use self::camera::Camera;
+pub use self::color::Color;
+pub use self::perlin_noise::PerlinNoise;
+pub use self::rect::Rect;
+pub use self::vector2::Vector2;
 
 use cgmath::{Matrix, Matrix3, Matrix4, Point3, Quaternion, SquareMatrix};
 
