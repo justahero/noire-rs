@@ -2,6 +2,7 @@
 #![allow(unused_imports)]
 #![allow(unused_variables)]
 
+extern crate cgmath;
 extern crate gl;
 extern crate noire;
 extern crate notify;
@@ -9,20 +10,31 @@ extern crate notify;
 use gl::types::*;
 
 use noire::canvas::Canvas2D;
-use noire::math::{Color, PerlinNoise, Rect};
-use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability};
-use std::time::{Duration, Instant};
+use noire::math::{Color, PerlinNoise, random_f32, Rect};
+use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable};
+use std::time::Instant;
+use cgmath::Vector2;
 
 fn main() {
     let window_size = Size::new(800, 800);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
-    let mut canvas = Canvas2D::new();
-    let perlin = PerlinNoise::new(10);
+    // create shader program
+    let vertex_file = String::from("./examples/05-marching-cubes/shaders/vertex.glsl");
+    let fragment_file = String::from("./examples/05-marching-cubes/shaders/fragment.glsl");
+    let mut program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
+
+    // create vertex data
+    let mut vao = VertexArrayObject::screen_rect();
 
     let start_time = Instant::now();
-    let increment = 0.01;
+
+    // randomly generate feature points
+    let num_points = 10;
+    let points: Vec<Vector2<f32>> = (0..num_points).into_iter().map( |_| {
+        Vector2::new(random_f32(200.0), random_f32(200.0))
+    }).collect();
 
     loop {
         let now = Instant::now();
@@ -30,41 +42,21 @@ fn main() {
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
         let size = window.get_framebuffer_size();
-
         window.reset_viewport();
         window.clear(0.3, 0.3, 0.3, 1.0);
-        canvas.set_color(Color::rgb(1.0, 0.0, 0.0));
 
-        let increment = 0.04;
-        let mut yoff = 0.5;
+        program.bind();
+        program.uniform("u_resolution", size.into());
+        program.uniform("u_time", elapsed.into());
+        program.uniform("u_featurePoints", points.clone().into());
 
-        // Render 4x4 pixel rects to create less geometry
-        for y in 0..size.height / 4 {
-            let mut xoff = 0.0;
+        vao.bind();
+        vao.draw();
+        vao.unbind();
 
-            for x in 0..size.width / 4 {
-                let index = x + y * size.width;
-
-                let r = perlin.gen2(xoff, yoff) as f32;
-
-                canvas.set_color(Color::rgb(r, r, r));
-
-                canvas.draw_rect(
-                    (x * 4) as i32,
-                    (y * 4) as i32,
-                    ((x + 1) * 4) as i32,
-                    ((y + 1) * 4) as i32
-                );
-
-                xoff += increment;
-            }
-            yoff += increment;
-        }
-
-        canvas.render(&size);
+        program.unbind();
 
         window.swap_buffers();
-
         window.poll_events();
         if window.should_close() {
             return;
