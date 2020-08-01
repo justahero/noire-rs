@@ -12,7 +12,7 @@ use std::time::{Instant};
 
 use noire::math::*;
 use noire::math::{Camera, Color};
-use noire::mesh::{Cube, Mesh, Node, Plane, Scene, ScreenRect};
+use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
 use noire::render::{FrameBuffer, Program, Spotlight, Texture, Uniform};
 use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Size};
