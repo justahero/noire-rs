@@ -31,7 +31,7 @@ fn main() {
     let vb = VertexBuffer::create(&VERTICES, 2);
     let ib = IndexBuffer::create(&INDICES).unwrap();
 
-    let mut vao = VertexArrayObject::new(Primitive::TriangleStrip).unwrap();
+    let mut vao = VertexArrayObject::new(Primitive::TriangleStrip);
     vao.add_vb(vb);
     vao.add_ib(ib);
 

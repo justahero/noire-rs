@@ -16,7 +16,7 @@ pub struct Mesh {
 impl Mesh {
     /// Creates a Mesh object from a Cube
     pub fn create_cube(cube: Cube, color: Color) -> Result<Mesh, RenderError> {
-        let mut vao = VertexArrayObject::new(Primitive::Triangles)?;
+        let mut vao = VertexArrayObject::new(Primitive::Triangles);
 
         vao.add_vb(VertexBuffer::create(&cube.vertices, 3));
         vao.add_vb(VertexBuffer::create(&cube.normals, 3));
@@ -30,7 +30,7 @@ impl Mesh {
 
     /// Creates a Mesh object from a Plane
     pub fn create_plane(plane: Plane, color: Color) -> Result<Mesh, RenderError> {
-        let mut vao = VertexArrayObject::new(Primitive::Triangles)?;
+        let mut vao = VertexArrayObject::new(Primitive::Triangles);
 
         vao.add_vb(VertexBuffer::create(&plane.vertices, 3));
         vao.add_vb(VertexBuffer::create(&plane.normals, 3));
