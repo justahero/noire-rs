@@ -111,7 +111,9 @@ pub enum Uniform {
     Mat3(Matrix3<f32>),
     Mat4(Matrix4<f32>),
     Vec2(Vector2<f32>),
+    Vec2Array(Vec<Vector2<f32>>),
     Vec3(Vector3<f32>),
+    Vec3Array(Vec<Vector3<f32>>),
     Point3(Point3<f32>),
     Size(f32, f32),
 }
@@ -146,9 +148,27 @@ impl From<Color> for Uniform {
     }
 }
 
+impl From<Vector2<f32>> for Uniform {
+    fn from(v: Vector2<f32>) -> Self {
+        Uniform::Vec2(v)
+    }
+}
+
+impl From<Vec<Vector2<f32>>> for Uniform {
+    fn from(vertices: Vec<Vector2<f32>>) -> Self {
+        Uniform::Vec2Array(vertices)
+    }
+}
+
 impl From<Vector3<f32>> for Uniform {
     fn from(v: Vector3<f32>) -> Self {
         Uniform::Vec3(v)
+    }
+}
+
+impl From<Vec<Vector3<f32>>> for Uniform {
+    fn from(vertices: Vec<Vector3<f32>>) -> Self {
+        Uniform::Vec3Array(vertices)
     }
 }
 
@@ -393,7 +413,9 @@ impl Program {
                 Uniform::Mat3(m) => Program::matrix3(location, &m),
                 Uniform::Mat4(m) => Program::matrix4(location, &m),
                 Uniform::Vec2(v) => Program::uniform2f(location, v.x, v.y),
+                Uniform::Vec2Array(ref verts) => Program::uniform2fv(location, verts),
                 Uniform::Vec3(v) => Program::uniform3f(location, v.x, v.y, v.z),
+                Uniform::Vec3Array(ref verts) => Program::uniform3fv(location, verts),
                 Uniform::Point3(p) => Program::uniform3f(location, p.x, p.y, p.z),
                 Uniform::Size(x, y) => Program::uniform2f(location, x, y),
             }
@@ -446,9 +468,21 @@ impl Program {
         }
     }
 
+    pub fn uniform2fv(location: i32, vertices: &Vec<Vector2<f32>>) {
+        unsafe {
+            gl::Uniform2fv(location, vertices.len() as i32, vertices.as_ptr() as *const _);
+        }
+    }
+
     pub fn uniform3f(location: i32, x: f32, y: f32, z: f32) {
         unsafe {
             gl::Uniform3f(location, x as GLfloat, y as GLfloat, z as GLfloat);
+        }
+    }
+
+    pub fn uniform3fv(location: i32, vertices: &Vec<Vector3<f32>>) {
+        unsafe {
+            gl::Uniform3fv(location, vertices.len() as i32, vertices.as_ptr() as *const _);
         }
     }
 
@@ -470,13 +504,9 @@ impl Program {
         }
     }
 
+    /// Find uniform by name
     pub fn uniform_by_name(&self, name: &str) -> Option<&Variable> {
-        for uniform in &self.uniforms {
-            if uniform.name == name {
-                return Some(uniform);
-            }
-        }
-        None
+        self.uniforms.iter().find(|&u| u.name == name)
     }
 
     /// Validates the program

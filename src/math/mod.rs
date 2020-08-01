@@ -13,6 +13,22 @@ pub use self::rect::Rect;
 pub use self::vector2::Vector2;
 
 use cgmath::{Matrix, Matrix3, Matrix4, Point3, Quaternion, SquareMatrix};
+use rand::{thread_rng, Rng};
+
+/// Maps the given value to be between min..max range and maps to min_out..max_out
+pub fn map(value: f32, min: f32, max: f32, out_min: f32, out_max: f32) -> f32 {
+    out_min + (out_max - out_min) * (clamp(value, min, max) - min) / (max - min)
+}
+
+/// Clamps the given value between range min..max
+pub fn clamp(value: f32, min: f32, max: f32) -> f32 {
+    min.max(value.min(max))
+}
+
+/// Generates an unsigned int between 0 and given max value
+pub fn random_f32(max_value: f32) -> f32 {
+    thread_rng().gen_range(0.0, max_value)
+}
 
 #[macro_export]
 macro_rules! color {
@@ -80,4 +96,24 @@ pub fn convert_to_matrix3(mat: &Matrix4<f32>) -> Matrix3<f32> {
 /// Creates a normal matrix from a Matrix4, returning a Matrix3
 pub fn normal_matrix(mat: &Matrix4<f32>) -> Matrix3<f32> {
     convert_to_matrix3(&mat.transpose().invert().unwrap())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{clamp, map};
+
+    #[test]
+    fn map_returns_result() {
+        assert_eq!(map(0.0, 1.0, 4.0, 1.0, 4.0), 1.0);
+        assert_eq!(map(2.0, 0.0, 4.0, 0.0, 4.0), 2.0);
+        assert_eq!(map(5.0, 1.0, 4.0, 1.0, 4.0), 4.0);
+    }
+
+    #[test]
+    fn clamp_returns() {
+        assert_eq!(clamp(2.0, 0.0, 4.0), 2.0);
+        assert_eq!(clamp(0.0, 1.0, 5.0), 1.0);
+        assert_eq!(clamp(3.0, 1.0, 5.0), 3.0);
+        assert_eq!(clamp(8.0, 1.0, 5.0), 5.0);
+    }
 }
