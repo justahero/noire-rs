@@ -28,8 +28,8 @@ name = "spotlight"
 path = "examples/04-spotlight/main.rs"
 
 [[example]]
-name = "marching-cubes"
-path = "examples/05-marching-cubes/main.rs"
+name = "worley-noise"
+path = "examples/05-worley-noise/main.rs"
 
 [[example]]
 name = "filewatch"

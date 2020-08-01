@@ -21,8 +21,8 @@ fn main() {
         .expect("Failed to create Render Window");
 
     // create shader program
-    let vertex_file = String::from("./examples/05-marching-cubes/shaders/vertex.glsl");
-    let fragment_file = String::from("./examples/05-marching-cubes/shaders/fragment.glsl");
+    let vertex_file = String::from("./examples/05-worley-noise/shaders/vertex.glsl");
+    let fragment_file = String::from("./examples/05-worley-noise/shaders/fragment.glsl");
     let mut program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data

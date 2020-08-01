@@ -31,9 +31,9 @@ void main() {
     float b = map(min_distance, 0.02, 0.15 + cos(u_time * 0.25) * 0.05, 0.0, 1.0);
 
     vec3 color = vec3(
-        clamp(r, 0.0, 1.0),
-        clamp(g, 0.0, 1.0),
-        clamp(b, 0.0, 1.0),
+        clamp(r * abs(sin(u_time * 0.125) * 1.25), 0.0, 1.0),
+        clamp(g * cos(u_time * 0.125), 0.0, 1.0),
+        clamp(b * sin(u_time * 0.5) * cos(u_time * 0.125) * 2.0, 0.0, 1.0)
     );
 
     out_color = vec4(color, 1.0);
