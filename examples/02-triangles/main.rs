@@ -14,9 +14,6 @@ use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
 
 use std::time::{Duration, Instant};
 
-static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
-static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
-
 fn main() {
     let window_size = Size::new(600, 600);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
@@ -28,12 +25,7 @@ fn main() {
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
-    let vb = VertexBuffer::create(&VERTICES, 2);
-    let ib = IndexBuffer::create(&INDICES).unwrap();
-
-    let mut vao = VertexArrayObject::new(Primitive::TriangleStrip);
-    vao.add_vb(vb);
-    vao.add_ib(ib);
+    let mut vao = VertexArrayObject::screen_rect();
 
     let start_time = Instant::now();
 

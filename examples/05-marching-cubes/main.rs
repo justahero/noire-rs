@@ -18,8 +18,6 @@ fn main() {
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
-    window.enable(Capability::ProgramPointSize);
-
     let mut canvas = Canvas2D::new();
     let perlin = PerlinNoise::new(10);
 
