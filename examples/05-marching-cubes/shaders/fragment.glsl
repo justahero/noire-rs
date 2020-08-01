@@ -4,8 +4,8 @@
 #define MAX_POINTS 10
 
 uniform vec2 u_resolution;
-// uniform float u_time;
-uniform vec2 u_featurePoints[20];
+uniform float u_depth;
+uniform vec3 u_featurePoints[50];
 
 out vec4 out_color;
 
@@ -21,11 +21,15 @@ void main() {
 
     float min_distance = 1.0;
     for (int i = 0; i < u_featurePoints.length(); i ++) {
-        float dist = distance(st, u_featurePoints[i]);
+        float dist = distance(vec3(st, u_depth), u_featurePoints[i]);
         min_distance = min(min_distance, dist);
     }
 
-    vec3 color = vec3(min_distance * 2.0);
+    float r = map(min_distance, 0.00, 0.50, 0.0, 1.0);
+    float g = map(min_distance, 0.05 + sin(u_time * 2.0) * 0.05, 0.25, 0.0, 1.0 - cos(u_time * 0.125) * 0.2);
+    float b = map(min_distance, 0.02, 0.15 + cos(u_time * 0.25) * 0.05, 0.0, 1.0);
+
+    vec3 color = vec3(r, g, b);
 
     out_color = vec4(color, 1.0);
 }
