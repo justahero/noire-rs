@@ -26,8 +26,6 @@ use noire::input::keyboard::*;
 use std::time::{Duration, Instant};
 use std::collections::VecDeque;
 
-static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
-
 const MAX_FPS_COUNT: u32 = 50;
 
 fn from_duration(d: Duration) -> f32 {
@@ -57,9 +55,7 @@ fn main() {
         .set_position(point3(0.0, 2.0, 20.0));
 
     // create vertex data
-    let vb = VertexBuffer::create(&VERTICES, 2);
-    let mut vao = VertexArrayObject::new(Primitive::TriangleStrip);
-    vao.add_vb(vb);
+    let mut vao = VertexArrayObject::screen_rect();
 
     let mut last_pos = Pos { x: 0, y: 0 };
     let mut last_size = Size {

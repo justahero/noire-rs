@@ -1,10 +1,14 @@
 use std::ptr;
 
 use gl;
+use gl::types::*;
 
 use render::{IndexBuffer, VertexBuffer};
 use render::traits::{Bindable, Drawable};
 use super::Primitive;
+
+static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
+static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
 
 /// A struct to represent a OpenGL vertex array object (VAO)
 pub struct VertexArrayObject {
@@ -33,6 +37,18 @@ impl VertexArrayObject {
             vbs: vec![],
             ibs: vec![],
         }
+    }
+
+    /// Create a 2-dimensional rect, in range between -1..+1
+    pub fn screen_rect() -> Self {
+        let vb = VertexBuffer::create(&VERTICES, 2);
+        let ib = IndexBuffer::create(&INDICES).unwrap();
+
+        let mut vao = VertexArrayObject::new(Primitive::TriangleStrip);
+        vao.add_vb(vb);
+        vao.add_ib(ib);
+
+        vao
     }
 
     /// Add a vertex buffer to use
