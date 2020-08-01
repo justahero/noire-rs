@@ -11,7 +11,7 @@ use gl::types::*;
 
 use noire::canvas::Canvas2D;
 use noire::math::{Color, PerlinNoise, random_f32, Rect};
-use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable};
+use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform};
 use std::time::Instant;
 use cgmath::Vector2;
 
@@ -31,9 +31,9 @@ fn main() {
     let start_time = Instant::now();
 
     // randomly generate feature points
-    let num_points = 10;
+    let num_points = 20;
     let points: Vec<Vector2<f32>> = (0..num_points).into_iter().map( |_| {
-        Vector2::new(random_f32(200.0), random_f32(200.0))
+        Vector2::new(random_f32(1.0), random_f32(1.0))
     }).collect();
 
     loop {
@@ -47,8 +47,8 @@ fn main() {
 
         program.bind();
         program.uniform("u_resolution", size.into());
-        program.uniform("u_time", elapsed.into());
-        program.uniform("u_featurePoints", points.clone().into());
+        // program.uniform("u_time", elapsed.into());
+        program.uniform("u_featurePoints[0]", Uniform::Vec2Array(points.clone()));
 
         vao.bind();
         vao.draw();

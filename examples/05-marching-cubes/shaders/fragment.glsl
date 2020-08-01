@@ -1,11 +1,11 @@
-#version 330
+#version 410
 
 #define PI 3.14159265359
 #define MAX_POINTS 10
 
 uniform vec2 u_resolution;
-uniform float u_time;
-uniform vec2 u_featurePoints[MAX_POINTS];
+// uniform float u_time;
+uniform vec2 u_featurePoints[20];
 
 out vec4 out_color;
 
@@ -16,15 +16,16 @@ float map(float value, float min, float max, float out_min, float out_max) {
 
 void main() {
     // maybe this works?
-    vec2 center = u_resolution.xy / 2.0;
-    vec2 xy = gl_FragCoord.xy - center;
+    vec2 st = gl_FragCoord.xy / u_resolution.xy;
+    st.x *= u_resolution.x / u_resolution.y;
 
-    float[MAX_POINTS] distances;
-    for (int i = 0; i < u_featurePoints.length(); i += 1) {
-        distances[i] = distance(xy, u_featurePoints[i]);
+    float min_distance = 1.0;
+    for (int i = 0; i < u_featurePoints.length(); i ++) {
+        float dist = distance(st, u_featurePoints[i]);
+        min_distance = min(min_distance, dist);
     }
 
-    float r = clamp(distances[0] / u_resolution.y, 0.0, 1.0);
+    vec3 color = vec3(min_distance * 2.0);
 
-    out_color = vec4(r, 0.0, 0.0, 1.0);
+    out_color = vec4(color, 1.0);
 }
