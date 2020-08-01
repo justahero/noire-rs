@@ -152,7 +152,7 @@ impl Canvas2D {
             let vb = VertexBuffer::new(&vertex_data);
 
             // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Points).unwrap();
+            let mut vao = VertexArrayObject::new(Primitive::Points);
             vao.add_vb(vb);
 
             // bind resources, uniforms, attributes
@@ -180,7 +180,7 @@ impl Canvas2D {
             let vb = VertexBuffer::new(&vertex_data);
 
             // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Lines).unwrap();
+            let mut vao = VertexArrayObject::new(Primitive::Lines);
             vao.add_vb(vb);
 
             // bind resources, uniforms, attributes
@@ -207,7 +207,7 @@ impl Canvas2D {
             let vb = VertexBuffer::new(&vertex_data);
 
             // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Triangles).unwrap();
+            let mut vao = VertexArrayObject::new(Primitive::Triangles);
             vao.add_vb(vb);
 
             // bind resources, uniforms, attributes

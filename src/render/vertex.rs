@@ -2,7 +2,7 @@ use std::ptr;
 
 use gl;
 
-use render::{IndexBuffer, RenderError, VertexBuffer};
+use render::{IndexBuffer, VertexBuffer};
 use render::traits::{Bindable, Drawable};
 use super::Primitive;
 
@@ -20,19 +20,19 @@ pub struct VertexArrayObject {
 
 impl VertexArrayObject {
     /// Create a new instance of a VertexArrayObject
-    pub fn new(primitive_type: Primitive) -> Result<VertexArrayObject, RenderError> {
+    pub fn new(primitive_type: Primitive) -> VertexArrayObject {
         let mut id = 0;
 
         unsafe {
             gl::GenVertexArrays(1, &mut id);
         }
 
-        Ok(VertexArrayObject {
+        VertexArrayObject {
             id,
             primitive_type,
             vbs: vec![],
             ibs: vec![],
-        })
+        }
     }
 
     /// Add a vertex buffer to use
