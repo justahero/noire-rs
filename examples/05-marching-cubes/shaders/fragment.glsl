@@ -4,8 +4,9 @@
 #define MAX_POINTS 10
 
 uniform vec2 u_resolution;
+uniform float u_time;
 uniform float u_depth;
-uniform vec3 u_featurePoints[50];
+uniform vec3 u_featurePoints[500];
 
 out vec4 out_color;
 

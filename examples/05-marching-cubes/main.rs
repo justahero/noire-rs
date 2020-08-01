@@ -13,7 +13,7 @@ use noire::canvas::Canvas2D;
 use noire::math::{Color, PerlinNoise, random_f32, Rect};
 use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform};
 use std::time::Instant;
-use cgmath::{Vector3, Vector2, Matrix3, InnerSpace, Rad};
+use cgmath::{Vector3, Vector2, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
 
 fn main() {
     let window_size = Size::new(800, 800);
@@ -31,14 +31,12 @@ fn main() {
     let start_time = Instant::now();
 
     // randomly generate feature points
-    let num_points = 50;
+    let num_points = 500;
     let mut points: Vec<Vector3<f32>> = (0..num_points).into_iter().map( |_| {
         Vector3::new(random_f32(1.0), random_f32(1.0), random_f32(1.0))
     }).collect();
 
-    let depth = 0.5;
-    let axis = Vector3::<f32>::new(0.05, 1.0, -0.5);
-    let matrix = Matrix3::from_axis_angle(axis.normalize(), Rad(0.0));
+    let translation_matrix = Matrix4::<f32>::from_translation(Vector3::new(0.5, 0.5, 0.5));
 
     loop {
         let now = Instant::now();
@@ -46,9 +44,15 @@ fn main() {
         let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
 
         // animate all points
-        // let depth = (1.0 + elapsed.cos() / 4.0) / 2.0;
+        let depth = 0.5 + ((0.5 * elapsed).cos() * 0.4);
+        let axis = Vector3::<f32>::new(0.5, 0.0, -0.5).normalize();
+        let rotation_matrix = Matrix4::from_axis_angle(axis, Deg((0.125 * elapsed).sin()));
+        let view = translation_matrix * rotation_matrix;
         for p in &mut points {
-
+            let v = rotation_matrix * Vector4::new(p.x - 0.5, p.y - 0.5, p.z - 0.5, 1.0);
+            p.x = v.x + 0.5;
+            p.y = v.y + 0.5;
+            p.z = v.z + 0.5;
         }
 
         let size = window.get_framebuffer_size();
@@ -58,6 +62,7 @@ fn main() {
         program.bind();
         program.uniform("u_resolution", size.into());
         program.uniform("u_depth", depth.into());
+        program.uniform("u_time", elapsed.into());
         program.uniform("u_featurePoints[0]", Uniform::Vec3Array(points.clone()));
 
         vao.bind();
