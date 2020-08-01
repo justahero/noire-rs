@@ -26,11 +26,15 @@ void main() {
         min_distance = min(min_distance, dist);
     }
 
-    float r = map(min_distance, 0.00, 0.50, 0.0, 1.0);
+    float r = map(min_distance, 0.00, 0.50 - cos(u_time * 0.025) * 0.15, 0.0, 1.0);
     float g = map(min_distance, 0.05 + sin(u_time * 2.0) * 0.05, 0.25, 0.0, 1.0 - cos(u_time * 0.125) * 0.2);
     float b = map(min_distance, 0.02, 0.15 + cos(u_time * 0.25) * 0.05, 0.0, 1.0);
 
-    vec3 color = vec3(r, g, b);
+    vec3 color = vec3(
+        clamp(r, 0.0, 1.0),
+        clamp(g, 0.0, 1.0),
+        clamp(b, 0.0, 1.0),
+    );
 
     out_color = vec4(color, 1.0);
 }
