@@ -5,12 +5,14 @@ pub mod color;
 pub mod perlin_noise;
 pub mod rect;
 pub mod vector2;
+pub mod vector3;
 
 pub use self::camera::Camera;
 pub use self::color::Color;
 pub use self::perlin_noise::PerlinNoise;
 pub use self::rect::Rect;
 pub use self::vector2::Vector2;
+pub use self::vector3::Vector3;
 
 use cgmath::{Matrix, Matrix3, Matrix4, Point3, Quaternion, SquareMatrix};
 use rand::{thread_rng, Rng};
