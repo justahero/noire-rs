@@ -1,5 +1,7 @@
 use std::ops::Sub;
 
+pub type Point2 = Vector2;
+
 #[derive(Copy, Clone)]
 pub struct Vector2 {
     pub x: f32,
