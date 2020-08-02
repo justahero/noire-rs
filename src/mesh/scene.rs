@@ -1,4 +1,4 @@
-use mesh::Node;
+use crate::mesh::Node;
 
 /// Stores objects in a basic manner
 pub struct Scene<'a> {

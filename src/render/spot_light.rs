@@ -1,7 +1,7 @@
 use cgmath::prelude::InnerSpace;
 use cgmath::{Deg, Matrix4, PerspectiveFov, Point3, Rad, Transform, Vector3};
 
-use math::Color;
+use crate::math::Color;
 
 pub struct Spotlight {
     pub view: Matrix4<f32>,

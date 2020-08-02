@@ -4,9 +4,9 @@ pub mod keyboard;
 pub mod mouse;
 pub mod button;
 
-pub use input::button::{ButtonState, ButtonArgs};
-pub use input::keyboard::Key;
-pub use input::mouse::MouseButton;
+pub use button::{ButtonState, ButtonArgs};
+pub use keyboard::Key;
+pub use mouse::MouseButton;
 
 /// Enum to support different button types
 #[derive(Copy, Clone, Debug, PartialEq)]

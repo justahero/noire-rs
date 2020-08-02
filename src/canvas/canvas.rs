@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 
-use math::Color;
-use render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
+use crate::math::Color;
+use crate::render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
 use crate::render::{Bindable, Drawable, Size, Uniform, vertex_buffer::{VertexType, VertexData}};
 
 static VERTEX_SHADER: &str = r#"

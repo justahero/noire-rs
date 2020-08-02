@@ -3,7 +3,7 @@ use std::mem;
 use gl;
 use gl::types::*;
 
-use render::traits::Bindable;
+use super::Bindable;
 
 pub trait VertexTypeSize {
     /// Returns the size of the vertex type in bytes

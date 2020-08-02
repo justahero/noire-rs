@@ -1,8 +1,8 @@
 use super::{Cube, Plane};
 
-use math::Color;
-use render::{Primitive, RenderError};
-use render::{IndexBuffer, VertexBuffer, VertexArrayObject};
+use crate::math::Color;
+use crate::render::{Primitive, RenderError};
+use crate::render::{IndexBuffer, VertexBuffer, VertexArrayObject};
 
 /// A basic mesh structure that contains vertex data and some
 /// properties to be used in a scene

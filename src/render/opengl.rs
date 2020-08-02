@@ -3,10 +3,11 @@ use std::path::PathBuf;
 use backtrace::{Backtrace, BacktraceFrame};
 use gl;
 
-use render::RenderError;
+use super::RenderError;
 
 /// Callback signature for the OpenGL debug API callback function
 pub type DebugCallback = Box<dyn FnMut(Source, MessageType, Severity, u32, &str)>;
+
 
 /// OpenGL Error
 #[derive(Clone, Debug, PartialEq, Eq)]
