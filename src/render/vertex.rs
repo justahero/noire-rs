@@ -3,9 +3,7 @@ use std::ptr;
 use gl;
 use gl::types::*;
 
-use render::{IndexBuffer, VertexBuffer};
-use render::traits::{Bindable, Drawable};
-use super::Primitive;
+use super::{IndexBuffer, VertexBuffer, traits::{Bindable, Drawable}, Primitive};
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];

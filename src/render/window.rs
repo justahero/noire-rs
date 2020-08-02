@@ -9,7 +9,7 @@ use gl;
 use glfw;
 use glfw::{Context, Glfw, Error, WindowEvent};
 
-use input::{Button, Input};
+use crate::input::{Button, Input};
 use super::context;
 use super::{Capability, CullMode, DepthFunc, Point2, Size};
 

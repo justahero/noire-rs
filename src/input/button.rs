@@ -1,4 +1,4 @@
-use input::Button;
+use super::Button;
 
 /// Stores the state of a button
 #[derive(Copy, Clone, Debug)]

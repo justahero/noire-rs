@@ -8,11 +8,9 @@ use std::ptr;
 use std::str;
 use std::time::{SystemTime};
 
-use math::color::Color;
+use crate::math::color::Color;
 
-use super::{shader::ShaderError, Size};
-use render::{Shader, ShaderType, Texture};
-use render::traits::Bindable;
+use super::{traits::Bindable, Shader, ShaderType, Texture, ShaderError, Size};
 
 /// An Error struct for Program errors
 #[derive(Debug, Clone)]

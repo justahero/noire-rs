@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Sebastian Ziebell"]
 keywords = ["noire", "gl", "3d", "graphics"]
 repository = "https://github.com/justahero/noire-rs.git"
+edition = "2018"
 
 [profile.dev]
 opt-level = 0

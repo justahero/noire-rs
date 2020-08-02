@@ -3,8 +3,7 @@ use std::mem;
 use gl;
 use gl::types::*;
 
-use render::RenderError;
-use render::traits::{Bindable};
+use super::{RenderError, traits::Bindable};
 
 pub struct IndexBuffer {
     pub id: u32,

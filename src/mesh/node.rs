@@ -1,9 +1,9 @@
 use cgmath::One;
 use cgmath::{Matrix3, Matrix4, Vector3};
 
-use math::normal_matrix;
-use super::{Mesh};
-use render::{Bindable, Drawable};
+use crate::math::normal_matrix;
+use crate::render::{Bindable, Drawable};
+use super::Mesh;
 
 /// A basic node, can be used in a scene
 pub struct Node {

@@ -3,7 +3,7 @@ use cgmath::{Deg, EuclideanSpace, Euler, InnerSpace, Matrix4, PerspectiveFov, Po
 use cgmath::vec3;
 use cgmath::One;
 
-use math::convert_to_quaternion;
+use super::convert_to_quaternion;
 
 #[derive(Debug)]
 pub struct Camera {

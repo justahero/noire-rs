@@ -1,7 +1,4 @@
-use render::{Drawable, VertexArrayObject, VertexBuffer};
-use render::{Point2, Primitive, RenderError, Size};
-use render::{Program, ProgramError, Shader, ShaderType, Texture, Uniform};
-use render::{Bindable, Capability, RenderWindow, OpenGLWindow};
+use crate::render::{Drawable, VertexArrayObject, VertexBuffer, Point2, Primitive, RenderError, Size, Program, ProgramError, Shader, ShaderType, Texture, Uniform, Bindable, Capability, RenderWindow, OpenGLWindow};
 
 pub struct ScreenRect {
     /// holds all vertex information

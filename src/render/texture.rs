@@ -1,8 +1,7 @@
 use std::ptr;
 use gl;
 
-use render::{Format, PixelType, RenderError, Size};
-use render::traits::{Bindable};
+use super::{traits::Bindable, Format, PixelType, RenderError, Size};
 
 /// Specific the Format of the Pixel Data
 #[derive(Clone, Copy, Debug, PartialEq)]

@@ -1,6 +1,4 @@
-use render::{RenderError};
-use render::traits::{Bindable};
-use render::texture::Texture;
+use super::{RenderError, Texture, traits::Bindable};
 
 /// A general purpose frame buffer to store pixel data into
 pub struct FrameBuffer {
