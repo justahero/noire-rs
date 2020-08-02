@@ -11,7 +11,7 @@ pub use self::program::{Program, ProgramError, Uniform};
 pub use self::shader::{Shader, ShaderError, ShaderType};
 pub use self::spot_light::Spotlight;
 pub use self::texture::Texture;
-pub use self::traits::*;
+pub use self::traits::{Bindable, Drawable};
 pub use self::vertex::VertexArrayObject;
 pub use self::vertex_buffer::VertexBuffer;
 pub use self::window::{Fullscreen, Pos, RenderWindow, OpenGLWindow, Window};

@@ -10,7 +10,7 @@ use std::time::{SystemTime};
 
 use crate::math::color::Color;
 
-use super::{traits::Bindable, Shader, ShaderType, Texture, ShaderError, Size};
+use super::{Bindable, Shader, ShaderError, ShaderType, Size, Texture};
 
 /// An Error struct for Program errors
 #[derive(Debug, Clone)]
