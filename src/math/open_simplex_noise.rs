@@ -26,8 +26,10 @@ pub struct OpenSimplexNoise {
     pub seed: i64,
     /// Array of unsigned short entries (1-dimensional?)
     perm: Vec<u16>,
-    // Array of 2-dimensional float values (x, y)
+    /// Array of 2-dimensional float values (x, y)
     permGrad2: Vec<(f64, f64)>,
+    /// Array of 3-dimensional float values (x, y, z)
+    permGrad3: Vec<(f64, f64, f64)>,
 }
 
 impl OpenSimplexNoise {
@@ -35,6 +37,7 @@ impl OpenSimplexNoise {
     pub fn new(seed: i64) -> Self {
         let mut perm = Vec::with_capacity(PSIZE);
         let mut permGrad2 = Vec::with_capacity(PSIZE);
+        let mut permGrad3 = Vec::with_capacity(PSIZE);
 
         let mut source: Vec<u16> = Vec::with_capacity(PSIZE);
         for index in 0..PSIZE {
@@ -49,6 +52,8 @@ impl OpenSimplexNoise {
             }
 
             perm[i] = source[r as usize];
+            permGrad2[i] = GRADIENTS_2D[perm[i] as usize];
+            permGrad3[i] = GRADIENTS_3D[perm[i] as usize];
             source[r as usize] = source[i];
         }
 
@@ -56,6 +61,7 @@ impl OpenSimplexNoise {
             seed,
             perm,
             permGrad2,
+            permGrad3,
         }
     }
 
@@ -136,8 +142,124 @@ impl OpenSimplexNoise {
 
         value
     }
+
+    /// 3D Re-oriented 8-point BCC noise, classic orientation
+    /// Proper substitute for what 3D SuperSimplex "should" be,
+    /// in light of Forbidden Formulae.
+    /// Use noise3_XYBeforeZ or noise3_XZBeforeY instead, wherever appropriate.
+    pub fn noise3_classic(&self, x: f64, y: f64, z: f64) -> f64 {
+        // Re-orient the cubic lattices via rotation, to produce the expected look on cardinal planar slices.
+        // If texturing objects that don't tend to have cardinal plane faces, you could even remove this.
+        // Orthonormal rotation. Not a skew transform.
+        let r = (2.0 / 3.0) * (x + y + z);
+        let xr = r - x;
+        let yr = r - y;
+        let zr = r - z;
+
+        // Evaluate both lattices to form a BCC lattice.
+        self.noise3_bcc(xr, yr, zr)
+    }
+
+    /// 3D Re-oriented 8-point BCC noise, with better visual isotropy in (X, Y).
+    /// Recommended for 3D terrain and time-varied animations.
+    /// The Z coordinate should always be the "different" coordinate in your use case.
+    /// If Y is vertical in world coordinates, call noise3_XYBeforeZ(x, z, Y) or use noise3_XZBeforeY.
+    /// If Z is vertical in world coordinates, call noise3_XYBeforeZ(x, y, Z).
+    /// For a time varied animation, call noise3_XYBeforeZ(x, y, T).
+    pub fn noise3_xy_before_z(&self, x: f64, y: f64, z: f64) -> f64 {
+        // Re-orient the cubic lattices without skewing, to make X and Y triangular like 2D.
+        // Orthonormal rotation. Not a skew transform.
+        let xy = x + y;
+        let s2 = xy * -0.211324865405187;
+        let zz = z * 0.577350269189626;
+        let xr = x + s2 - zz;
+        let yr = y + s2 - zz;
+        let zr = xy * 0.577350269189626 + zz;
+
+        // Evaluate both lattices to form a BCC lattice.
+        self.noise3_bcc(xr, yr, zr)
+    }
+
+    /// 3D Re-oriented 8-point BCC noise, with better visual isotropy in (X, Z).
+    /// Recommended for 3D terrain and time-varied animations.
+    /// The Y coordinate should always be the "different" coordinate in your use case.
+    /// If Y is vertical in world coordinates, call noise3_XZBeforeY(x, Y, z).
+    /// If Z is vertical in world coordinates, call noise3_XZBeforeY(x, Z, y) or use noise3_XYBeforeZ.
+    /// For a time varied animation, call noise3_XZBeforeY(x, T, y) or use noise3_XYBeforeZ.
+    pub fn noise3_xz_before_y(&self, x: f64, y: f64, z: f64) -> f64 {
+        // Re-orient the cubic lattices without skewing, to make X and Z triangular like 2D.
+        // Orthonormal rotation. Not a skew transform.
+        let xz = x + z;
+        let s2 = xz * -0.211324865405187;
+        let yy = y * 0.577350269189626;
+        let xr = x + s2 - yy;
+        let zr = z + s2 - yy;
+        let yr = xz * 0.577350269189626 + yy;
+
+        // Evaluate both lattices to form a BCC lattice.
+        self.noise3_bcc(xr, yr, zr)
+    }
+
+    /// Generate overlapping cubic lattices for 3D Re-oriented BCC noise.
+    /// Lookup table implementation inspired by DigitalShadow.
+    /// It was actually faster to narrow down the points in the loop itself,
+    /// than to build up the index with enough info to isolate 8 points.
+    fn noise3_bcc(&self, xr: f64, yr: f64, zr: f64) -> f64 {
+        // Get base and offsets inside cube of first lattice.
+        let xrb = fastFloor(xr);
+        let yrb = fastFloor(yr);
+        let zrb = fastFloor(zr);
+        let xri = xr - xrb as f64;
+        let yri = yr - yrb as f64;
+        let zri = zr - zrb as f64;
+
+        // Identify which octant of the cube we're in. This determines which cell
+        // in the other cubic lattice we're in, and also narrows down one point on each.
+        let xht = (xri + 0.5).floor() as i32;
+        let yht = (yri + 0.5).floor() as i32;
+        let zht = (zri + 0.5).floor() as i32;
+        let index = (xht << 0) | (yht << 1) | (zht << 2);
+
+        // Point contributions
+        let mut value: f64 = 0.0;
+        let mut c = &LOOKUP_3D[index as usize];
+
+        loop {
+            let dxr = xri + c.dxr;
+            let dyr = yri + c.dyr;
+            let dzr = zri + c.dzr;
+            let mut attn = 0.75 - dxr * dxr - dyr * dyr - dzr * dzr;
+
+            if attn < 0.0 {
+                c = match &c.next_on_failure {
+                    Some(c) => &c,
+                    None => break,
+                };
+            } else {
+                let pxm = (xrb + c.xrv) & PMASK as i32;
+                let pym = (yrb + c.yrv) & PMASK as i32;
+                let pzm = (zrb + c.zrv) & PMASK as i32;
+
+                let index = self.perm[(self.perm[pxm as usize] as i32 ^ pym) as usize];
+                let grad = self.permGrad3[(index as i32 ^ pzm) as usize];
+
+                let extrapolation = grad.0 * dxr + grad.1 * dyr + grad.2 * dzr;
+
+                attn *= attn;
+                value += attn * attn * extrapolation;
+
+                c = match &c.next_on_success {
+                    Some(c) => c,
+                    None => break,
+                };
+            }
+        }
+
+        value
+    }
 }
 
+#[derive(Copy, Clone)]
 struct LatticePoint2D {
     pub xsv: i32,
     pub ysv: i32,
@@ -157,6 +279,7 @@ impl LatticePoint2D {
     }
 }
 
+#[derive(Clone)]
 struct LatticePoint3D {
     pub xrv: i32,
     pub yrv: i32,
@@ -190,6 +313,7 @@ impl LatticePoint3D {
     }
 }
 
+#[derive(Copy, Clone)]
 struct LatticePoint4D {
     pub xsv: i32,
     pub ysv: i32,
@@ -252,6 +376,91 @@ lazy_static! {
             table.push(LatticePoint2D::new(1, 1));
             table.push(LatticePoint2D::new(i1, j1));
             table.push(LatticePoint2D::new(i2, j2));
+        }
+
+        table
+    };
+
+    static ref LOOKUP_3D: Vec<LatticePoint3D> = {
+        let mut table = Vec::with_capacity(8);
+
+        for i in 0..8 {
+            let i1; let j1; let k1; let i2; let j2; let k2;
+
+            i1 = (i >> 0) & 1; j1 = (i >> 1) & 1; k1 = (i >> 2) & 1;
+            i2 = i1 ^ 1; j2 = j1 ^ 1; k2 = k1 ^ 1;
+
+            // The two points within this octant, one from each of the two cubic half-lattices.
+            let mut c0 = LatticePoint3D::new(i1, j1, k1, 0);
+            let mut c1 = LatticePoint3D::new(i1 + i2, j1 + j2, k1 + k2, 1);
+
+            // (1, 0, 0) vs (0, 1, 1) away from octant.
+            let mut c2 = LatticePoint3D::new(i1 ^ 1, j1, k1, 0);
+            let mut c3 = LatticePoint3D::new(i1, j1 ^ 1, k1 ^ 1, 0);
+
+            // (1, 0, 0) vs (0, 1, 1) away from octant, on second half-lattice.
+            let mut c4 = LatticePoint3D::new(i1 + (i2 ^ 1), j1 + j2, k1 + k2, 1);
+            let mut c5 = LatticePoint3D::new(i1 + i2, j1 + (j2 ^ 1), k1 + (k2 ^ 1), 1);
+
+            // (0, 1, 0) vs (1, 0, 1) away from octant.
+            let mut c6 = LatticePoint3D::new(i1, j1 ^ 1, k1, 0);
+            let mut c7 = LatticePoint3D::new(i1 ^ 1, j1, k1 ^ 1, 0);
+
+            // (0, 1, 0) vs (1, 0, 1) away from octant, on second half-lattice.
+            let mut c8 = LatticePoint3D::new(i1 + i2, j1 + (j2 ^ 1), k1 + k2, 1);
+            let mut c9 = LatticePoint3D::new(i1 + (i2 ^ 1), j1 + j2, k1 + (k2 ^ 1), 1);
+
+            // (0, 0, 1) vs (1, 1, 0) away from octant.
+            let mut cA = LatticePoint3D::new(i1, j1, k1 ^ 1, 0);
+            let mut cB = LatticePoint3D::new(i1 ^ 1, j1 ^ 1, k1, 0);
+
+            // (0, 0, 1) vs (1, 1, 0) away from octant, on second half-lattice.
+            let mut cC = LatticePoint3D::new(i1 + i2, j1 + j2, k1 + (k2 ^ 1), 1);
+            let mut cD = LatticePoint3D::new(i1 + (i2 ^ 1), j1 + (j2 ^ 1), k1 + k2, 1);
+
+            // First two points are guaranteed.
+            c0.next_on_failure = Some(Box::new(c1.clone()));
+            c0.next_on_success = Some(Box::new(c1.clone()));
+            c1.next_on_failure = Some(Box::new(c2.clone()));
+            c1.next_on_success = Some(Box::new(c2.clone()));
+
+            // If c2 is in range, then we know c3 and c4 are not.
+            c2.next_on_failure = Some(Box::new(c3.clone()));
+            c2.next_on_success = Some(Box::new(c5.clone()));
+            c3.next_on_failure = Some(Box::new(c4.clone()));
+            c3.next_on_success = Some(Box::new(c4.clone()));
+
+            // If c4 is in range, then we know c5 is not.
+            c4.next_on_failure = Some(Box::new(c5.clone()));
+            c4.next_on_success = Some(Box::new(c6.clone()));
+            c5.next_on_failure = Some(Box::new(c6.clone()));
+            c5.next_on_success = Some(Box::new(c6.clone()));
+
+            // If c6 is in range, then we know c7 and c8 are not.
+            c6.next_on_failure = Some(Box::new(c7.clone()));
+            c6.next_on_success = Some(Box::new(c9.clone()));
+            c7.next_on_failure = Some(Box::new(c8.clone()));
+            c7.next_on_success = Some(Box::new(c8.clone()));
+
+            // If c8 is in range, then we know c9 is not.
+            c8.next_on_failure = Some(Box::new(c9.clone()));
+            c8.next_on_success = Some(Box::new(cA.clone()));
+            c9.next_on_failure = Some(Box::new(cA.clone()));
+            c9.next_on_success = Some(Box::new(cA.clone()));
+
+            // If cA is in range, then we know cB and cC are not.
+            cA.next_on_failure = Some(Box::new(cB.clone()));
+            cA.next_on_success = Some(Box::new(cD.clone()));
+            cB.next_on_failure = Some(Box::new(cC.clone()));
+            cB.next_on_success = Some(Box::new(cC.clone()));
+
+            // If cC is in range, then we know cD is not.
+            cC.next_on_failure = Some(Box::new(cD.clone()));
+            cC.next_on_success = None;
+            cD.next_on_failure = None;
+            cD.next_on_success = None;
+
+            table.push(c0);
         }
 
         table
