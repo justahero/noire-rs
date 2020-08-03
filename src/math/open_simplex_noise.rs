@@ -109,11 +109,11 @@ impl OpenSimplexNoise {
         let ysi = ys - ysb as f64;
 
         // Index to point list
-        let a = (xsi + ysi) as i32;
+        let a = (xsi + ysi).floor() as i32;
         let index =
             (a << 2) |
-            ((xsi - ysi / 2.0 + 1.0 - a as f64 / 2.0) as i32) << 3 |
-            ((ysi - xsi / 2.0 + 1.0 - a as f64 / 2.0) as i32) << 4;
+            ((xsi - ysi / 2.0 + 1.0 - a as f64 / 2.0).floor() as i32) << 3 |
+            ((ysi - xsi / 2.0 + 1.0 - a as f64 / 2.0).floor() as i32) << 4;
 
         let ssi = (xsi + ysi) * -0.211324865405187;
         let xi = xsi + ssi;
