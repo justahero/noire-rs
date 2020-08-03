@@ -111,8 +111,67 @@ struct LatticePoint3D {
     pub dxr: f64,
     pub dyr: f64,
     pub dzr: f64,
-    pub next_on_failure: Box<LatticePoint3D>,
-    pub next_on_success: Box<LatticePoint3D>,
+    pub next_on_failure: Option<Box<LatticePoint3D>>,
+    pub next_on_success: Option<Box<LatticePoint3D>>,
+}
+
+impl LatticePoint3D {
+    pub fn new(xrv: i32, yrv: i32, zrv: i32, lattice: i32) -> Self {
+        let dxr = -xrv as f64 + lattice as f64 * 0.5;
+        let dyr = -yrv as f64 + lattice as f64 * 0.5;
+        let dzr = -zrv as f64 + lattice as f64 * 0.5;
+        let xrv = xrv + lattice * 1024;
+        let yrv = yrv + lattice * 1024;
+        let zrv = zrv + lattice * 1024;
+
+        // TODO come back here, implement this
+        Self {
+            dxr,
+            dyr,
+            dzr,
+            xrv,
+            yrv,
+            zrv,
+            next_on_failure: None,
+            next_on_success: None,
+        }
+    }
+}
+
+struct LatticePoint4D {
+    pub xsv: i32,
+    pub ysv: i32,
+    pub zsv: i32,
+    pub wsv: i32,
+    pub dx: f64,
+    pub dy: f64,
+    pub dz: f64,
+    pub dw: f64,
+}
+
+impl LatticePoint4D {
+    pub fn new(xsv: i32, ysv: i32, zsv: i32, wsv: i32) -> Self {
+        let xsv = xsv;
+        let ysv = ysv;
+        let zsv = zsv;
+        let wsv = wsv;
+        let ssv: f64 = (xsv + ysv + zsv + wsv) as f64 * -0.138196601125011;
+        let dx = -xsv as f64 - ssv;
+        let dy = -ysv as f64 - ssv;
+        let dz = -zsv as f64 - ssv;
+        let dw = -wsv as f64 - ssv;
+
+        Self {
+            xsv,
+            ysv,
+            zsv,
+            wsv,
+            dx,
+            dy,
+            dz,
+            dw,
+        }
+    }
 }
 
 
