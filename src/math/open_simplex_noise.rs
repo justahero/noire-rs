@@ -190,6 +190,29 @@ impl LatticePoint4D {
 // the lookup tables similar to the Java static initializer.
 //
 lazy_static! {
+    static ref LOOKUP_2D: Vec<LatticePoint2D> = {
+        let mut table = Vec::with_capacity(32);
+
+        for i in 0..8 {
+            let i1; let j1; let i2; let j2;
+
+            if (i & 1) == 0 {
+                if (i & 2) == 0 { i1 = -1; j1 =  0; } else { i1 = 1; j1 = 0; }
+                if (i & 4) == 0 { i2 =  0; j2 = -1; } else { i2 = 0; j2 = 1; }
+            } else {
+                if (i & 2) != 0 { i1 = 2; j1 = 1; } else { i1 = 0; j1 = 1; }
+                if (i & 4) != 0 { i2 = 1; j2 = 2; } else { i2 = 1; j2 = 0; }
+            }
+
+            table.push(LatticePoint2D::new(0, 0));
+            table.push(LatticePoint2D::new(1, 1));
+            table.push(LatticePoint2D::new(i1, j1));
+            table.push(LatticePoint2D::new(i2, j2));
+        }
+
+        table
+    };
+
     /// Gradients lookup table for 2 dimensions
     static ref GRADIENTS_2D: Vec<(f64, f64)> = {
         let mut grad2 = vec![
