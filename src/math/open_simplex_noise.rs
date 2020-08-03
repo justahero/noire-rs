@@ -53,8 +53,13 @@ impl OpenSimplexNoise {
     ///
     /// returns a noise value between -1..+1
     ///
-    pub fn noise2(x: f64, y: f64) -> f64 {
-        0.0
+    pub fn noise2(&self, x: f64, y: f64) -> f64 {
+        // Get points for A2* lattice
+        let s = 0.366025403784439 * (x + y);
+        let xs = x + s;
+        let ys = y + s;
+
+        self.noise2_base(xs, ys)
     }
 
     /// 2D SuperSimplex noise, with Y pointing down the main diagonal.
@@ -63,8 +68,12 @@ impl OpenSimplexNoise {
     ///
     /// returns a noise value between -1..+1
     ///
-    pub fn noise2_x_before_y(x: f64, y: f64) -> f64 {
-        0.0
+    pub fn noise2_x_before_y(&self, x: f64, y: f64) -> f64 {
+        // Skew transform and rotation baked into one.
+        let xx = x * 0.7071067811865476;
+        let yy = y * 1.224744871380249;
+
+        self.noise2_base(yy + xx, yy - xx)
     }
 
     /// 2D SuperSimplex noise base.
@@ -124,7 +133,6 @@ impl LatticePoint3D {
         let yrv = yrv + lattice * 1024;
         let zrv = zrv + lattice * 1024;
 
-        // TODO come back here, implement this
         Self {
             dxr,
             dyr,
