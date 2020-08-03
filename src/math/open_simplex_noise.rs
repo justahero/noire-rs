@@ -5,6 +5,16 @@ const N2: f64 = 0.05481866495625118;
 const N3: f64 = 0.2781926117527186;
 const N4: f64 = 0.11127401889945551;
 
+#[inline(always)]
+fn fastFloor(x: f64) -> i32 {
+    let xi = x.floor() as i32;
+    if x < xi as f64 {
+        xi - 1
+    } else {
+        xi
+    }
+}
+
 /// Implementation of OpenSimplex 2 Noise, the smooth variant ("SuperSimplex")
 /// based on the most recent version available at the repository https://github.com/KdotJPG/OpenSimplex2
 /// developed by KdotJPG, who originally released the OpenSimplex Noise under a Public Domain license.
@@ -84,13 +94,47 @@ impl OpenSimplexNoise {
     ///
     /// returns a value between -1..+1
     ///
-    fn noise2_base(xs: f64, ys: f64) -> f64 {
-        0.0
-    }
+    fn noise2_base(&self, xs: f64, ys: f64) -> f64 {
+        // Get base points and offsets
+        let xsb = fastFloor(xs);
+        let ysb = fastFloor(ys);
 
-    /// Looks up entry from gradient table and returns pair (x, y) floats
-    fn gradients_2d(index: usize) -> (f64, f64) {
-        (0.0, 0.0)
+        let xsi = xs - xsb as f64;
+        let ysi = ys - ysb as f64;
+
+        // Index to point list
+        let a = (xsi + ysi) as i32;
+        let index =
+            (a << 2) |
+            ((xsi - ysi / 2.0 + 1.0 - a as f64 / 2.0) as i32) << 3 |
+            ((ysi - xsi / 2.0 + 1.0 - a as f64 / 2.0) as i32) << 4;
+
+        let ssi = (xsi + ysi) * -0.211324865405187;
+        let xi = xsi + ssi;
+        let yi = ysi + ssi;
+
+        // Point contributions
+        let mut value = 0.0;
+        for i in 0..4 {
+            let c = &LOOKUP_2D[(index + i) as usize];
+
+            let dx = xi + c.dx;
+            let dy = yi + c.dy;
+            let mut attn = 2.0 / 3.0 - dx * dx - dy * dy;
+            if attn <= 0.0 {
+                continue;
+            }
+
+            let pxm = (xsb + c.xsv) & PMASK as i32;
+            let pym = (ysb + c.ysv) & PMASK as i32;
+            let grad = self.permGrad2[(self.perm[pxm as usize] ^ pym as u16) as usize];
+            let extrapolation = grad.0 * dx + grad.1 * dy;
+
+            attn *= attn;
+            value += attn * attn * extrapolation;
+        }
+
+        value
     }
 }
 
