@@ -6,7 +6,7 @@ const N3: f64 = 0.2781926117527186;
 const N4: f64 = 0.11127401889945551;
 
 #[inline(always)]
-fn fastFloor(x: f64) -> i32 {
+fn fast_floor(x: f64) -> i32 {
     let xi = x.floor() as i32;
     if x < xi as f64 {
         xi - 1
@@ -27,17 +27,17 @@ pub struct OpenSimplexNoise {
     /// Array of unsigned short entries (1-dimensional?)
     perm: Vec<u16>,
     /// Array of 2-dimensional float values (x, y)
-    permGrad2: Vec<(f64, f64)>,
+    perm_grad2: Vec<(f64, f64)>,
     /// Array of 3-dimensional float values (x, y, z)
-    permGrad3: Vec<(f64, f64, f64)>,
+    perm_grad3: Vec<(f64, f64, f64)>,
 }
 
 impl OpenSimplexNoise {
     /// Constructs a new instance based on the given seed
     pub fn new(seed: i64) -> Self {
         let mut perm = vec![0; PSIZE];
-        let mut permGrad2 = vec![(0.0, 0.0); PSIZE];
-        let mut permGrad3 = vec![(0.0, 0.0, 0.0); PSIZE];
+        let mut perm_grad2 = vec![(0.0, 0.0); PSIZE];
+        let mut perm_grad3 = vec![(0.0, 0.0, 0.0); PSIZE];
 
         let mut source = vec![0; PSIZE];
         for index in 0..PSIZE {
@@ -52,16 +52,16 @@ impl OpenSimplexNoise {
             }
 
             perm[i] = source[r as usize];
-            permGrad2[i] = GRADIENTS_2D[perm[i] as usize];
-            permGrad3[i] = GRADIENTS_3D[perm[i] as usize];
+            perm_grad2[i] = GRADIENTS_2D[perm[i] as usize];
+            perm_grad3[i] = GRADIENTS_3D[perm[i] as usize];
             source[r as usize] = source[i];
         }
 
         Self {
             seed,
             perm,
-            permGrad2,
-            permGrad3,
+            perm_grad2,
+            perm_grad3,
         }
     }
 
@@ -102,8 +102,8 @@ impl OpenSimplexNoise {
     ///
     fn noise2_base(&self, xs: f64, ys: f64) -> f64 {
         // Get base points and offsets
-        let xsb = fastFloor(xs);
-        let ysb = fastFloor(ys);
+        let xsb = fast_floor(xs);
+        let ysb = fast_floor(ys);
 
         let xsi = xs - xsb as f64;
         let ysi = ys - ysb as f64;
@@ -133,7 +133,7 @@ impl OpenSimplexNoise {
 
             let pxm = (xsb + c.xsv) & PMASK as i32;
             let pym = (ysb + c.ysv) & PMASK as i32;
-            let grad = self.permGrad2[(self.perm[pxm as usize] ^ pym as u16) as usize];
+            let grad = self.perm_grad2[(self.perm[pxm as usize] ^ pym as u16) as usize];
             let extrapolation = grad.0 * dx + grad.1 * dy;
 
             attn *= attn;
@@ -206,9 +206,9 @@ impl OpenSimplexNoise {
     /// than to build up the index with enough info to isolate 8 points.
     fn noise3_bcc(&self, xr: f64, yr: f64, zr: f64) -> f64 {
         // Get base and offsets inside cube of first lattice.
-        let xrb = fastFloor(xr);
-        let yrb = fastFloor(yr);
-        let zrb = fastFloor(zr);
+        let xrb = fast_floor(xr);
+        let yrb = fast_floor(yr);
+        let zrb = fast_floor(zr);
         let xri = xr - xrb as f64;
         let yri = yr - yrb as f64;
         let zri = zr - zrb as f64;
@@ -241,7 +241,7 @@ impl OpenSimplexNoise {
                 let pzm = (zrb + c.zrv) & PMASK as i32;
 
                 let index = self.perm[(self.perm[pxm as usize] as i32 ^ pym) as usize];
-                let grad = self.permGrad3[(index as i32 ^ pzm) as usize];
+                let grad = self.perm_grad3[(index as i32 ^ pzm) as usize];
 
                 let extrapolation = grad.0 * dxr + grad.1 * dyr + grad.2 * dzr;
 
@@ -411,12 +411,12 @@ lazy_static! {
             let mut c9 = LatticePoint3D::new(i1 + (i2 ^ 1), j1 + j2, k1 + (k2 ^ 1), 1);
 
             // (0, 0, 1) vs (1, 1, 0) away from octant.
-            let mut cA = LatticePoint3D::new(i1, j1, k1 ^ 1, 0);
-            let mut cB = LatticePoint3D::new(i1 ^ 1, j1 ^ 1, k1, 0);
+            let mut ca = LatticePoint3D::new(i1, j1, k1 ^ 1, 0);
+            let mut cb = LatticePoint3D::new(i1 ^ 1, j1 ^ 1, k1, 0);
 
             // (0, 0, 1) vs (1, 1, 0) away from octant, on second half-lattice.
-            let mut cC = LatticePoint3D::new(i1 + i2, j1 + j2, k1 + (k2 ^ 1), 1);
-            let mut cD = LatticePoint3D::new(i1 + (i2 ^ 1), j1 + (j2 ^ 1), k1 + k2, 1);
+            let mut cc = LatticePoint3D::new(i1 + i2, j1 + j2, k1 + (k2 ^ 1), 1);
+            let mut cd = LatticePoint3D::new(i1 + (i2 ^ 1), j1 + (j2 ^ 1), k1 + k2, 1);
 
             // First two points are guaranteed.
             c0.next_on_failure = Some(Box::new(c1.clone()));
@@ -444,21 +444,21 @@ lazy_static! {
 
             // If c8 is in range, then we know c9 is not.
             c8.next_on_failure = Some(Box::new(c9.clone()));
-            c8.next_on_success = Some(Box::new(cA.clone()));
-            c9.next_on_failure = Some(Box::new(cA.clone()));
-            c9.next_on_success = Some(Box::new(cA.clone()));
+            c8.next_on_success = Some(Box::new(ca.clone()));
+            c9.next_on_failure = Some(Box::new(ca.clone()));
+            c9.next_on_success = Some(Box::new(ca.clone()));
 
             // If cA is in range, then we know cB and cC are not.
-            cA.next_on_failure = Some(Box::new(cB.clone()));
-            cA.next_on_success = Some(Box::new(cD.clone()));
-            cB.next_on_failure = Some(Box::new(cC.clone()));
-            cB.next_on_success = Some(Box::new(cC.clone()));
+            ca.next_on_failure = Some(Box::new(cb.clone()));
+            ca.next_on_success = Some(Box::new(cd.clone()));
+            cb.next_on_failure = Some(Box::new(cc.clone()));
+            cb.next_on_success = Some(Box::new(cc.clone()));
 
             // If cC is in range, then we know cD is not.
-            cC.next_on_failure = Some(Box::new(cD.clone()));
-            cC.next_on_success = None;
-            cD.next_on_failure = None;
-            cD.next_on_success = None;
+            cc.next_on_failure = Some(Box::new(cd.clone()));
+            cc.next_on_success = None;
+            cd.next_on_failure = None;
+            cd.next_on_success = None;
 
             table.push(c0);
         }
