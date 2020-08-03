@@ -35,11 +35,11 @@ pub struct OpenSimplexNoise {
 impl OpenSimplexNoise {
     /// Constructs a new instance based on the given seed
     pub fn new(seed: i64) -> Self {
-        let mut perm = Vec::with_capacity(PSIZE);
-        let mut permGrad2 = Vec::with_capacity(PSIZE);
-        let mut permGrad3 = Vec::with_capacity(PSIZE);
+        let mut perm = vec![0; PSIZE];
+        let mut permGrad2 = vec![(0.0, 0.0); PSIZE];
+        let mut permGrad3 = vec![(0.0, 0.0, 0.0); PSIZE];
 
-        let mut source: Vec<u16> = Vec::with_capacity(PSIZE);
+        let mut source = vec![0; PSIZE];
         for index in 0..PSIZE {
             source[index] = index as u16;
         }

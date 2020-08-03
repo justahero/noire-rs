@@ -33,6 +33,10 @@ name = "worley-noise"
 path = "examples/05-worley-noise/main.rs"
 
 [[example]]
+name = "opensimplex"
+path = "examples/06-opensimplex/main.rs"
+
+[[example]]
 name = "filewatch"
 
 [dependencies]
