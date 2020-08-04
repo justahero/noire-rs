@@ -45,6 +45,7 @@ impl OpenSimplexNoise {
         }
 
         for i in (0..PSIZE).rev() {
+            // Does this overlap??
             let seed = seed * 6364136223846793005 + 1442695040888963407;
             let mut r: i32 = (seed as i32 + 31) % (i as i32 + 1);
             if r < 0 {
@@ -63,6 +64,13 @@ impl OpenSimplexNoise {
             perm_grad2,
             perm_grad3,
         }
+    }
+
+    /// 1D SuperSimplex Noise, standard lattice orientation
+    ///
+    /// It re-uses the 2d version with set y value
+    pub fn noise(&self, x: f64) -> f64 {
+        self.noise2(x, 0.0)
     }
 
     /// 2D SuperSimplex noise, standard lattice orientation
@@ -209,9 +217,10 @@ impl OpenSimplexNoise {
         let xrb = fast_floor(xr);
         let yrb = fast_floor(yr);
         let zrb = fast_floor(zr);
-        let xri = xr - xrb as f64;
-        let yri = yr - yrb as f64;
-        let zri = zr - zrb as f64;
+
+        let xri = xr - (xrb as f64);
+        let yri = yr - (yrb as f64);
+        let zri = zr - (zrb as f64);
 
         // Identify which octant of the cube we're in. This determines which cell
         // in the other cubic lattice we're in, and also narrows down one point on each.
@@ -228,21 +237,21 @@ impl OpenSimplexNoise {
             let dxr = xri + c.dxr;
             let dyr = yri + c.dyr;
             let dzr = zri + c.dzr;
+
             let mut attn = 0.75 - dxr * dxr - dyr * dyr - dzr * dzr;
 
             if attn < 0.0 {
                 c = match &c.next_on_failure {
-                    Some(c) => &c,
+                    Some(c) => c,
                     None => break,
                 };
             } else {
-                let pxm = (xrb + c.xrv) & PMASK as i32;
-                let pym = (yrb + c.yrv) & PMASK as i32;
-                let pzm = (zrb + c.zrv) & PMASK as i32;
+                let pxm = (xrb + c.xrv) & (PMASK as i32);
+                let pym = (yrb + c.yrv) & (PMASK as i32);
+                let pzm = (zrb + c.zrv) & (PMASK as i32);
 
-                let index = self.perm[(self.perm[pxm as usize] as i32 ^ pym) as usize];
-                let grad = self.perm_grad3[(index as i32 ^ pzm) as usize];
-
+                let index = self.perm[((self.perm[pxm as usize] as i32) ^ pym) as usize];
+                let grad = self.perm_grad3[((index as i32) ^ pzm) as usize];
                 let extrapolation = grad.0 * dxr + grad.1 * dyr + grad.2 * dzr;
 
                 attn *= attn;
@@ -284,21 +293,21 @@ impl LatticePoint2D {
 
 #[derive(Clone)]
 struct LatticePoint3D {
-    pub xrv: i32,
-    pub yrv: i32,
-    pub zrv: i32,
     pub dxr: f64,
     pub dyr: f64,
     pub dzr: f64,
+    pub xrv: i32,
+    pub yrv: i32,
+    pub zrv: i32,
     pub next_on_failure: Option<Box<LatticePoint3D>>,
     pub next_on_success: Option<Box<LatticePoint3D>>,
 }
 
 impl LatticePoint3D {
     pub fn new(xrv: i32, yrv: i32, zrv: i32, lattice: i32) -> Self {
-        let dxr = -xrv as f64 + lattice as f64 * 0.5;
-        let dyr = -yrv as f64 + lattice as f64 * 0.5;
-        let dzr = -zrv as f64 + lattice as f64 * 0.5;
+        let dxr = (-xrv as f64) + (lattice as f64) * 0.5;
+        let dyr = (-yrv as f64) + (lattice as f64) * 0.5;
+        let dzr = (-zrv as f64) + (lattice as f64) * 0.5;
         let xrv = xrv + lattice * 1024;
         let yrv = yrv + lattice * 1024;
         let zrv = zrv + lattice * 1024;
@@ -385,13 +394,15 @@ lazy_static! {
     };
 
     static ref LOOKUP_3D: Vec<LatticePoint3D> = {
-        let mut table = Vec::with_capacity(8);
+        let mut table = vec![LatticePoint3D::new(0, 0, 0, 0); 8];
 
         for i in 0..8 {
-            let i1; let j1; let k1; let i2; let j2; let k2;
-
-            i1 = (i >> 0) & 1; j1 = (i >> 1) & 1; k1 = (i >> 2) & 1;
-            i2 = i1 ^ 1; j2 = j1 ^ 1; k2 = k1 ^ 1;
+            let i1 = (i >> 0) & 1;
+            let j1 = (i >> 1) & 1;
+            let k1 = (i >> 2) & 1;
+            let i2 = i1 ^ 1;
+            let j2 = j1 ^ 1;
+            let k2 = k1 ^ 1;
 
             // The two points within this octant, one from each of the two cubic half-lattices.
             let mut c0 = LatticePoint3D::new(i1, j1, k1, 0);
@@ -463,7 +474,7 @@ lazy_static! {
             cd.next_on_failure = None;
             cd.next_on_success = None;
 
-            table.push(c0);
+            table[i as usize] = c0;
         }
 
         table
@@ -569,9 +580,9 @@ lazy_static! {
             grad3[i].2 /= N3;
         }
 
-        let mut gradients = Vec::with_capacity(PSIZE);
+        let mut gradients = vec![(0.0, 0.0, 0.0); PSIZE];
         for i in 0..PSIZE {
-            gradients.push(grad3[i % grad3.len()]);
+            gradients[i] = grad3[i % grad3.len()];
         }
 
         gradients
@@ -748,9 +759,9 @@ lazy_static! {
             grad4[i].3 /= N4;
         }
 
-        let mut gradients = Vec::with_capacity(PSIZE);
+        let mut gradients = vec![(0.0, 0.0, 0.0, 0.0); PSIZE];
         for i in 0..PSIZE {
-            gradients.push(grad4[i % grad4.len()]);
+            gradients[i] = grad4[i % grad4.len()];
         }
 
         gradients
