@@ -40,8 +40,8 @@ impl OpenSimplexNoise {
         let mut perm_grad3 = vec![(0.0, 0.0, 0.0); PSIZE];
 
         let mut source = vec![0; PSIZE];
-        for index in 0..PSIZE {
-            source[index] = index as u16;
+        for i in 0..PSIZE {
+            source[i] = i as u16;
         }
 
         for i in (0..PSIZE).rev() {
@@ -105,15 +105,15 @@ impl OpenSimplexNoise {
         let xsb = fast_floor(xs);
         let ysb = fast_floor(ys);
 
-        let xsi = xs - xsb as f64;
-        let ysi = ys - ysb as f64;
+        let xsi = xs - (xsb as f64);
+        let ysi = ys - (ysb as f64);
 
         // Index to point list
         let a = (xsi + ysi).floor() as i32;
         let index =
             (a << 2) |
-            ((xsi - ysi / 2.0 + 1.0 - a as f64 / 2.0).floor() as i32) << 3 |
-            ((ysi - xsi / 2.0 + 1.0 - a as f64 / 2.0).floor() as i32) << 4;
+            ((xsi - ysi / 2.0 + 1.0 - (a as f64) / 2.0) as i32) << 3 |
+            ((ysi - xsi / 2.0 + 1.0 - (a as f64) / 2.0) as i32) << 4;
 
         let ssi = (xsi + ysi) * -0.211324865405187;
         let xi = xsi + ssi;
@@ -131,9 +131,9 @@ impl OpenSimplexNoise {
                 continue;
             }
 
-            let pxm = (xsb + c.xsv) & PMASK as i32;
-            let pym = (ysb + c.ysv) & PMASK as i32;
-            let grad = self.perm_grad2[(self.perm[pxm as usize] ^ pym as u16) as usize];
+            let pxm = (xsb + c.xsv) & (PMASK as i32);
+            let pym = (ysb + c.ysv) & (PMASK as i32);
+            let grad = &self.perm_grad2[(self.perm[pxm as usize] ^ pym as u16) as usize];
             let extrapolation = grad.0 * dx + grad.1 * dy;
 
             attn *= attn;
@@ -259,7 +259,7 @@ impl OpenSimplexNoise {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 struct LatticePoint2D {
     pub xsv: i32,
     pub ysv: i32,
@@ -269,12 +269,15 @@ struct LatticePoint2D {
 
 impl LatticePoint2D {
     pub fn new(xsv: i32, ysv: i32) -> Self {
-        let ssv = (xsv * ysv) as f64 * -0.211324865405187;
-        Self {
+        let ssv = ((xsv + ysv) as f64) * -0.211324865405187;
+        let dx = (-xsv as f64) - ssv;
+        let dy = (-ysv as f64) - ssv;
+
+        LatticePoint2D {
             xsv,
             ysv,
-            dx: -xsv as f64 - ssv,
-            dy: -ysv as f64 - ssv,
+            dx,
+            dy
         }
     }
 }
@@ -359,23 +362,23 @@ impl LatticePoint4D {
 //
 lazy_static! {
     static ref LOOKUP_2D: Vec<LatticePoint2D> = {
-        let mut table = Vec::with_capacity(32);
+        let mut table = vec![LatticePoint2D::new(0, 0); 8 * 4];
 
         for i in 0..8 {
             let i1; let j1; let i2; let j2;
 
             if (i & 1) == 0 {
-                if (i & 2) == 0 { i1 = -1; j1 =  0; } else { i1 = 1; j1 = 0; }
-                if (i & 4) == 0 { i2 =  0; j2 = -1; } else { i2 = 0; j2 = 1; }
+                if (i & 2) == 0 { i1 = -1; j1 = 0; } else { i1 = 1; j1 = 0; }
+                if (i & 4) == 0 { i2 = 0; j2 = -1; } else { i2 = 0; j2 = 1; }
             } else {
                 if (i & 2) != 0 { i1 = 2; j1 = 1; } else { i1 = 0; j1 = 1; }
                 if (i & 4) != 0 { i2 = 1; j2 = 2; } else { i2 = 1; j2 = 0; }
             }
 
-            table.push(LatticePoint2D::new(0, 0));
-            table.push(LatticePoint2D::new(1, 1));
-            table.push(LatticePoint2D::new(i1, j1));
-            table.push(LatticePoint2D::new(i2, j2));
+            table[i * 4 + 0] = LatticePoint2D::new(0, 0);
+            table[i * 4 + 1] = LatticePoint2D::new(1, 1);
+            table[i * 4 + 2] = LatticePoint2D::new(i1, j1);
+            table[i * 4 + 3] = LatticePoint2D::new(i2, j2);
         }
 
         table
@@ -500,9 +503,9 @@ lazy_static! {
             grad2[i].1 /= N2;
         }
 
-        let mut gradients = Vec::with_capacity(PSIZE);
+        let mut gradients = vec![(0.0, 0.0); PSIZE];
         for i in 0..PSIZE {
-            gradients.push(grad2[i % grad2.len()]);
+            gradients[i] = grad2[i % grad2.len()];
         }
         gradients
     };
