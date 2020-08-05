@@ -44,9 +44,11 @@ impl OpenSimplexNoise {
             source[i] = i as u16;
         }
 
+        let mut seed = seed;
+
         for i in (0..PSIZE).rev() {
-            // Does this overlap??
-            let seed = seed * 6364136223846793005 + 1442695040888963407;
+            seed = (seed.overflowing_mul(6364136223846793005).0).overflowing_add(1442695040888963407).0;
+
             let mut r: i32 = (seed as i32 + 31) % (i as i32 + 1);
             if r < 0 {
                 r += i as i32 + 1;
