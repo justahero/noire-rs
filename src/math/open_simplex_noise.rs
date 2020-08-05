@@ -49,9 +49,9 @@ impl OpenSimplexNoise {
         for i in (0..PSIZE).rev() {
             seed = (seed.overflowing_mul(6364136223846793005).0).overflowing_add(1442695040888963407).0;
 
-            let mut r: i32 = (seed as i32 + 31) % (i as i32 + 1);
+            let mut r: i32 = ((seed as i32) + 31) % ((i as i32) + 1);
             if r < 0 {
-                r += i as i32 + 1;
+                r += (i as i32) + 1;
             }
 
             perm[i] = source[r as usize];
@@ -229,6 +229,7 @@ impl OpenSimplexNoise {
         let xht = (xri + 0.5).floor() as i32;
         let yht = (yri + 0.5).floor() as i32;
         let zht = (zri + 0.5).floor() as i32;
+
         let index = (xht << 0) | (yht << 1) | (zht << 2);
 
         // Point contributions
@@ -267,6 +268,69 @@ impl OpenSimplexNoise {
         }
 
         value
+    }
+
+    /// 4D SuperSimplex noise, classic lattice orientation.
+    ///
+    pub fn noise4_classic(&self, x: f64, y: f64, z: f64, w: f64) -> f64 {
+        // Get points for A4 lattice
+        let s = 0.309016994374947 * (x + y + z + w);
+        let xs = x + s;
+        let ys = y + s;
+        let zs = z + s;
+        let ws = w + s;
+
+        self.noise4_base(xs, ys, zs, ws)
+    }
+
+    /// 4D SuperSimplex noise, with XY and ZW forming orthogonal triangular-based planes.
+    /// Recommended for 3D terrain, where X and Y (or Z and W) are horizontal.
+    /// Recommended for noise(x, y, sin(time), cos(time)) trick.
+    pub fn noise4_xy_before_zw(&self, x: f64, y: f64, z: f64, w: f64) -> f64 {
+        let s2 = (x + y) * -0.28522513987434876941 + (z + w) * 0.83897065470611435718;
+        let t2 = (z + w) * 0.21939749883706435719 + (x + y) * -0.48214856493302476942;
+        let xs = x + s2;
+        let ys = y + s2;
+        let zs = z + t2;
+        let ws = w + t2;
+
+        self.noise4_base(xs, ys, zs, ws)
+    }
+
+    /// 4D SuperSimplex noise, with XZ and YW forming orthogonal triangular-based planes.
+    /// Recommended for 3D terrain, where X and Z (or Y and W) are horizontal.
+    pub fn noise4_xz_before_yw(&self, x: f64, y: f64, z: f64, w: f64) -> f64 {
+        let s2 = (x + z) * -0.28522513987434876941 + (y + w) * 0.83897065470611435718;
+        let t2 = (y + w) * 0.21939749883706435719 + (x + z) * -0.48214856493302476942;
+        let xs = x + s2;
+        let ys = y + t2;
+        let zs = z + s2;
+        let ws = w + t2;
+
+        self.noise4_base(xs, ys, zs, ws)
+    }
+
+    /// 4D SuperSimplex noise, with XYZ oriented like noise3_Classic,
+    /// and W for an extra degree of freedom.
+    /// Recommended for time-varied animations which texture a 3D object (W=time)
+    pub fn noise4_xyz_before_w(&self, x: f64, y: f64, z: f64, w: f64) -> f64 {
+        let xyz = x + y + z;
+        let ww = w * 1.118033988749894;
+        let s2 = xyz * -0.16666666666666666 + ww;
+        let xs = x + s2;
+        let ys = y + s2;
+        let zs = z + s2;
+        let ws = -0.5 * xyz + ww;
+
+        self.noise4_base(xs, ys, zs, ws)
+    }
+
+    /// 4D SuperSimplex noise base.
+    /// Using ultra-simple 4x4x4x4 lookup partitioning.
+    /// This isn't as elegant or SIMD/GPU/etc. portable as other approaches,
+    /// but it does compete performance-wise with optimized OpenSimplex1.
+    fn noise4_base(&self, xs: f64, ys: f64, zs: f64, ws: f64) -> f64 {
+        0.0
     }
 }
 
