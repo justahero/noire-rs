@@ -30,6 +30,8 @@ pub struct OpenSimplexNoise {
     perm_grad2: Vec<(f64, f64)>,
     /// Array of 3-dimensional float values (x, y, z)
     perm_grad3: Vec<(f64, f64, f64)>,
+    /// Array of 4-dimensional float values (x, y, z, w)
+    perm_grad4: Vec<(f64, f64, f64, f64)>,
 }
 
 impl OpenSimplexNoise {
@@ -38,6 +40,7 @@ impl OpenSimplexNoise {
         let mut perm = vec![0; PSIZE];
         let mut perm_grad2 = vec![(0.0, 0.0); PSIZE];
         let mut perm_grad3 = vec![(0.0, 0.0, 0.0); PSIZE];
+        let mut perm_grad4 = vec![(0.0, 0.0, 0.0, 0.0); PSIZE];
 
         let mut source = vec![0; PSIZE];
         for i in 0..PSIZE {
@@ -57,6 +60,7 @@ impl OpenSimplexNoise {
             perm[i] = source[r as usize];
             perm_grad2[i] = GRADIENTS_2D[perm[i] as usize];
             perm_grad3[i] = GRADIENTS_3D[perm[i] as usize];
+            perm_grad4[i] = GRADIENTS_4D[perm[i] as usize];
             source[r as usize] = source[i];
         }
 
@@ -65,6 +69,7 @@ impl OpenSimplexNoise {
             perm,
             perm_grad2,
             perm_grad3,
+            perm_grad4,
         }
     }
 
@@ -330,7 +335,58 @@ impl OpenSimplexNoise {
     /// This isn't as elegant or SIMD/GPU/etc. portable as other approaches,
     /// but it does compete performance-wise with optimized OpenSimplex1.
     fn noise4_base(&self, xs: f64, ys: f64, zs: f64, ws: f64) -> f64 {
-        0.0
+        // Get base points and offsets
+        let xsb = fast_floor(xs);
+        let ysb = fast_floor(ys);
+        let zsb = fast_floor(zs);
+        let wsb = fast_floor(ws);
+        let xsi = xs - (xsb as f64);
+        let ysi = ys - (ysb as f64);
+        let zsi = zs - (zsb as f64);
+        let wsi = ws - (wsb as f64);
+
+        // Unskewed offsets
+        let ssi = (xsi + ysi + zsi + wsi) * -0.138196601125011;
+        let xi = xsi + ssi;
+        let yi = ysi + ssi;
+        let zi = zsi + ssi;
+        let wi = wsi + ssi;
+
+        let index = ((fast_floor(xs * 4.0) & 3) << 0)
+            | ((fast_floor(ys * 4.0) & 3) << 2)
+            | ((fast_floor(zs * 4.0) & 3) << 4)
+            | ((fast_floor(ws * 4.0) & 3) << 6);
+
+        let mut value = 0.0;
+
+        // for (LatticePoint4D c : LOOKUP_4D[index]) {
+        for (_, c) in LOOKUP_4D[index as usize].iter().enumerate() {
+            let dx = xi + c.dx;
+            let dy = yi + c.dy;
+            let dz = zi + c.dz;
+            let dw = wi + c.dw;
+
+            let mut attn = 0.8 - dx * dx - dy * dy - dz * dz - dw * dw;
+
+            if attn > 0.0 {
+                attn *= attn;
+
+                let pxm = (xsb + c.xsv) & (PMASK as i32);
+                let pym = (ysb + c.ysv) & (PMASK as i32);
+                let pzm = (zsb + c.zsv) & (PMASK as i32);
+                let pwm = (wsb + c.wsv) & (PMASK as i32);
+
+                let xindex = self.perm[pxm as usize];
+                let yindex = self.perm[((xindex as i32) ^ pym) as usize];
+                let zindex = self.perm[((yindex as i32) ^ pzm) as usize];
+                let grad = self.perm_grad4[((zindex as i32) ^ pwm) as usize];
+                let extrapolation = grad.0 * dx + grad.1 * dy + grad.2 * dz + grad.3 * dw;
+
+                value += attn * attn * extrapolation;
+            }
+        }
+
+        value
     }
 }
 
@@ -805,22 +861,22 @@ lazy_static! {
         lookup_pregen.push(vec![0x55, 0x59, 0x65, 0x69, 0x6A, 0x95, 0x99, 0x9A, 0xA5, 0xA6, 0xA9, 0xAA, 0xAE, 0xBA, 0xEA]);
         lookup_pregen.push(vec![0x55, 0x56, 0x59, 0x5A, 0x65, 0x66, 0x69, 0x6A, 0x95, 0x96, 0x99, 0x9A, 0xA5, 0xA6, 0xA9, 0xAA, 0xAB, 0xAE, 0xBA, 0xEA]);
 
-        let mut lattice_points = vec![LatticePoint4D::new(0, 0, 0,0); 256];
-        for i in 0..lattice_points.len() {
+        let mut lattice_points = Vec::new();
+        for i in 0..256 {
             let cx = (((i >> 0) & 3) - 1) as i32;
             let cy = (((i >> 2) & 3) - 1) as i32;
             let cz = (((i >> 4) & 3) - 1) as i32;
             let cw = (((i >> 6) & 3) - 1) as i32;
 
-            lattice_points[i] = LatticePoint4D::new(cx, cy, cz, cw);
+            lattice_points.push(LatticePoint4D::new(cx, cy, cz, cw));
         }
 
-        let mut table = vec![];
-        for i in 0..lattice_points.len() {
-            table[i] = vec![LatticePoint4D::new(0, 0, 0, 0); lookup_pregen[i].len()];
+        let mut table = vec![vec![]; 256];
+        for i in 0..256 {
+            table[i] = Vec::new();
 
             for j in 0..lookup_pregen[i].len() {
-                table[i][j] = lattice_points[lookup_pregen[i as usize][j as usize] as usize];
+                table[i].push(lattice_points[lookup_pregen[i as usize][j as usize] as usize]);
             }
         }
 
