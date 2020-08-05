@@ -240,7 +240,7 @@ impl OpenSimplexNoise {
             let dyr = yri + c.dyr;
             let dzr = zri + c.dzr;
 
-            let mut attn = 0.75 - dxr * dxr - dyr * dyr - dzr * dzr;
+            let mut attn = 0.5 - dxr * dxr - dyr * dyr - dzr * dzr;
 
             if attn < 0.0 {
                 c = match &c.next_on_failure {
