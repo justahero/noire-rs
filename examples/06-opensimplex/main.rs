@@ -46,7 +46,7 @@ fn main() {
 
             for x in 0..size.width / 4 {
                 let index = x + y * size.width;
-                let r = (0.5 + opensimplex.noise3_classic(xoff, yoff, zoff) / 2.0) as f32;
+                let r = 0.5 + (opensimplex.noise4_classic(xoff, yoff, zoff, 0.0) / 2.0) as f32;
 
                 canvas.set_color(Color::rgb(r, r, r));
                 canvas.draw_rect(
