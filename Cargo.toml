@@ -33,6 +33,10 @@ name = "worley-noise"
 path = "examples/05-worley-noise/main.rs"
 
 [[example]]
+name = "opensimplex"
+path = "examples/06-opensimplex/main.rs"
+
+[[example]]
 name = "filewatch"
 
 [dependencies]
@@ -40,6 +44,7 @@ backtrace   = "0.3.46"
 cgmath      = "0.17.0"
 gl          = "0.14.0"
 glfw        = "0.37.0"
+lazy_static = "1.4.0"
 notify      = "4.0.15"
 rand        = "0.7.3"
 rand_chacha = "0.2.2"
