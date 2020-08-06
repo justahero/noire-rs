@@ -2,7 +2,6 @@
 
 pub mod camera;
 pub mod color;
-pub mod open_simplex_noise;
 pub mod perlin_noise;
 pub mod rect;
 pub mod vector2;
@@ -10,7 +9,6 @@ pub mod vector3;
 
 pub use self::camera::Camera;
 pub use self::color::Color;
-pub use self::open_simplex_noise::OpenSimplexNoise;
 pub use self::perlin_noise::PerlinNoise;
 pub use self::rect::Rect;
 pub use self::vector2::Vector2;

@@ -5,9 +5,8 @@ extern crate backtrace;
 extern crate cgmath;
 extern crate gl;
 extern crate glfw;
-#[macro_use]
-extern crate lazy_static;
 extern crate notify;
+extern crate opensimplex;
 extern crate rand;
 extern crate rand_chacha;
 extern crate regex;
