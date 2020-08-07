@@ -1,0 +1,12 @@
+[package]
+name = "opensimplex"
+version = "0.1.0"
+authors = ["Sebastian Ziebell"]
+keywords = ["noise", "procedural", "opensimplex", "simplex"]
+description = "Rust port of the OpenSimplex algorithm"
+repository = "https://github.com/justahero/noire-rs/tree/main/src/opensimplex"
+edition = "2018"
+readme = "Readme.md"
+
+[dependencies]
+lazy_static = "1.4.0"

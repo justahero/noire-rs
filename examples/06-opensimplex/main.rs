@@ -9,8 +9,9 @@ extern crate notify;
 
 use gl::types::*;
 
+use opensimplex::OpenSimplexNoise;
 use noire::canvas::Canvas2D;
-use noire::math::{Color, PerlinNoise, random_f32, Rect, OpenSimplexNoise};
+use noire::math::{Color, PerlinNoise, random_f32, Rect};
 use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform};
 use std::time::Instant;
 use cgmath::{Vector3, Vector2, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
