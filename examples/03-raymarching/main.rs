@@ -21,7 +21,7 @@ use noire::render::{Fullscreen, Pos, OpenGLWindow, RenderWindow, Window};
 use noire::math::{Camera, Color};
 use noire::math::*;
 use noire::input::*;
-use noire::input::keyboard::*;
+use noire::{core::{Timer, FpsTimer}, input::keyboard::*};
 
 use std::time::{Duration, Instant};
 use std::collections::VecDeque;
@@ -63,25 +63,12 @@ fn main() {
         height: 0,
     };
 
-    let start_time = Instant::now();
-    let mut last_time = start_time;
-    let mut list_frames = VecDeque::new();
+    let timer = Timer::now();
+    let mut fps_timer = FpsTimer::now();
 
     loop {
-        let now = Instant::now();
-        let elapsed = from_duration(now.duration_since(start_time));
-        let frame_elapsed = from_duration(now.duration_since(last_time));
-
-        last_time = now;
-
-        // update fps calulation
-        list_frames.push_back(frame_elapsed);
-        if list_frames.len() > (MAX_FPS_COUNT as usize) {
-            list_frames.pop_front();
-        }
-        let fps: f32 = list_frames.iter().sum();
-        let fps = 1.0 / fps * (MAX_FPS_COUNT as f32);
-        // println!("FPS: {}", fps);
+        let frame_elapsed = fps_timer.next_frame();
+        let elapsed = timer.elapsed_in_seconds() as f32;
 
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
