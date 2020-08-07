@@ -15,7 +15,7 @@ use noire::math::*;
 use noire::math::{Camera, Color};
 use noire::mesh::{Cube, Mesh, Plane};
 use noire::render::{Bindable, Capability, Drawable, Program, Shader, VertexArrayObject};
-use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
+use noire::{core::Timer, render::{OpenGLWindow, RenderWindow, Size, Window}};
 
 use notify::*;
 use std::sync::mpsc::channel;
@@ -38,7 +38,7 @@ fn main() {
     // create vertex data
     let mut mesh = Mesh::create_cube(Cube::create(1.0), Color::rgb(1.0, 1.0, 1.0)).unwrap();
 
-    let start_time = Instant::now();
+    let timer = Timer::now();
 
     let mut camera = Camera::new();
     camera
@@ -51,9 +51,7 @@ fn main() {
     let light_pos = vec3(-4.0, 0.0, 2.0);
 
     loop {
-        let now = Instant::now();
-        let elapsed = now.duration_since(start_time);
-        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+        let elapsed = timer.elapsed_in_seconds() as f32;
 
         window.clear(0.95, 0.95, 0.95, 1.0);
         window.clear_depth(1.0);

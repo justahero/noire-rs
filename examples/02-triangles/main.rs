@@ -8,6 +8,7 @@ extern crate notify;
 
 use gl::types::*;
 
+use noire::core::Timer;
 use noire::render::{Bindable, Drawable, Primitive, Program, Shader, VertexArrayObject};
 use noire::render::{IndexBuffer, VertexBuffer};
 use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
@@ -27,12 +28,12 @@ fn main() {
     // create vertex data
     let mut vao = VertexArrayObject::screen_rect();
 
-    let start_time = Instant::now();
+    let timer = Timer::now();
 
     loop {
-        let now = Instant::now();
-        let elapsed = now.duration_since(start_time);
-        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+        let elapsed = timer.elapsed_in_seconds() as f32;
+
+        println!("ELAPSED: {}", elapsed);
 
         window.clear(0.3, 0.3, 0.3, 1.0);
 

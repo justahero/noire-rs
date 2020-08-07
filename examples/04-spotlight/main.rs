@@ -16,7 +16,7 @@ use noire::mesh::{Cube, Mesh, Node, Plane, Scene};
 use noire::render::{FrameBuffer, Program, Spotlight, Texture, Uniform};
 use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Size};
-use noire::render::{OpenGLWindow, RenderWindow, Window};
+use noire::{core::Timer, render::{OpenGLWindow, RenderWindow, Window}};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let window_size = Size::new(1024, 1024);
@@ -79,11 +79,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     shadow_frame_buffer.set_depth_buffer(&shadow_texture).expect("Set depth buffer failed");
 
     let start_time = Instant::now();
+    let timer = Timer::now();
 
     loop {
-        let now = Instant::now();
-        let elapsed = now.duration_since(start_time);
-        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+        let elapsed = timer.elapsed_in_seconds() as f32;
 
         //----------------------------------------------------------
         // render light first

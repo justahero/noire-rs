@@ -11,7 +11,7 @@ use gl::types::*;
 
 use noire::canvas::Canvas2D;
 use noire::math::{Color, PerlinNoise, random_f32, Rect};
-use noire::render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform};
+use noire::{core::Timer, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform}};
 use std::time::Instant;
 use cgmath::{Vector3, Vector2, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
 
@@ -28,7 +28,7 @@ fn main() {
     // create vertex data
     let mut vao = VertexArrayObject::screen_rect();
 
-    let start_time = Instant::now();
+    let timer = Timer::now();
 
     // randomly generate feature points
     let num_points = 500;
@@ -39,9 +39,7 @@ fn main() {
     let translation_matrix = Matrix4::<f32>::from_translation(Vector3::new(0.5, 0.5, 0.5));
 
     loop {
-        let now = Instant::now();
-        let elapsed = now.duration_since(start_time);
-        let elapsed = (elapsed.as_secs() as f64 + elapsed.subsec_nanos() as f64 * 1e-9) as f32;
+        let elapsed = timer.elapsed_in_seconds() as f32;
 
         // animate all points
         let depth = 0.5 + ((0.5 * elapsed).cos() * 0.4);
