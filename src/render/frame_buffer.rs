@@ -1,6 +1,7 @@
 use super::{Bindable, RenderError, Texture};
 
 /// A general purpose frame buffer to store pixel data into
+/// This is a good resource to learn more about Framebuffers, https://open.gl/framebuffers
 pub struct FrameBuffer {
     pub id: u32,
 }
