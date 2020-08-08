@@ -122,8 +122,8 @@ struct Frame {
 /// Fetches the last GL error, if present returns ERR, otherwise Ok
 /// The function also tries to find the source file location where the error originates from
 /// by traversing the back trace
-fn get_error<'a>() -> Result<(), String> {
-    let mut error = 0;
+pub(crate) fn get_error<'a>() -> Result<(), String> {
+    let error;
 
     unsafe {
         error = gl::GetError();
