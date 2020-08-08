@@ -1,6 +1,9 @@
+use gl::types::GLenum;
+
 use super::{Bindable, RenderError, Texture};
 
-/// A general purpose frame buffer to store pixel data into
+/// A general purpose Framebuffer to store pixel data into
+/// This is a good resource to learn more about Framebuffers, https://open.gl/framebuffers
 pub struct FrameBuffer {
     pub id: u32,
 }
@@ -44,47 +47,36 @@ impl FrameBuffer {
         Ok(FrameBuffer { id })
     }
 
-    /// Set Texture to this Frame buffer
+    /// Set Texture to this Framebuffer
     ///
     /// ## Arguments
     ///
     /// * `texture` - The texture to attach
-    pub fn set_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
-        self.bind();
-
-        unsafe {
-            gl::FramebufferTexture2D(
-                gl::FRAMEBUFFER,
-                gl::COLOR_ATTACHMENT0,
-                texture.target,
-                texture.id,
-                0,
-            );
-        }
-
-        check_status()?;
-
-        self.unbind();
-
-        Ok(self)
+    pub fn attach_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
+        self.set_texture(gl::COLOR_ATTACHMENT0, texture.target, texture.id)
     }
 
-    /// Set Depth Texture to this Frame Buffer
+    /// Detaches the texture from the Framebuffer
+    pub fn detach_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
+        self.set_texture(gl::COLOR_ATTACHMENT0, texture.target, 0)
+    }
+
+    /// Set Depth Texture to this Framebuffer
     ///
     /// ## Argumnets
     ///
     /// * `texture` - the depth Texture instance
     pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
+        self.set_texture(gl::DEPTH_ATTACHMENT, texture.target, texture.id)
+    }
+
+    /// Attaches or detaches a texture or renderbuffer to or from this Framebuffer
+    /// A convenience wrapper function around 'FramebufferTexture2D'
+    fn set_texture(&mut self, attachment: GLenum, target: GLenum, id: u32) -> Result<&mut Self, RenderError> {
         self.bind();
 
         unsafe {
-            gl::FramebufferTexture2D(
-                gl::FRAMEBUFFER,
-                gl::DEPTH_ATTACHMENT,
-                texture.target,
-                texture.id,
-                0,
-            );
+            gl::FramebufferTexture2D(gl::FRAMEBUFFER, attachment, target, id, 0);
         }
 
         check_status()?;
