@@ -22,12 +22,26 @@ fn main() {
 
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
+    window.enable(Capability::ProgramPointSize);
 
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
 
     let mut canvas = Canvas2D::new(600, 600);
     let noise = PerlinNoise::new(0);
+
+    let rez = 20;
+    let cols = 1 + canvas.width / rez;
+    let rows = 1 + canvas.height / rez;
+
+    // initialize field values
+    let mut field = vec![0.0; (cols * rows) as usize];
+    for x in 0..cols {
+        for y in 0..rows {
+            let index = x + y * cols;
+            field[index as usize] = random_f32(2.0).floor();
+        }
+    }
 
     loop {
         let elapsed = timer.elapsed_in_seconds() as f32;
@@ -37,29 +51,22 @@ fn main() {
 
         let size = window.get_framebuffer_size();
         window.reset_viewport();
-        window.clear(0.3, 0.3, 0.3, 1.0);
-        // canvas.set_color(Color::rgb(1.0, 0.0, 0.0));
-
-        let increment = 0.04;
-        let mut yoff = 0.5;
+        window.clear(0.4, 0.4, 0.4, 1.0);
 
         // render to canvas
         canvas.bind();
-        for y in 0..size.height {
-            let mut xoff = 0.0;
+        canvas.set_pointsize(rez as f32 * 0.35);
+        for x in 0..cols {
+            for y in 0..rows {
+                let index = x + y * cols;
+                let r = field[index as usize] as f32;
 
-            for x in 0..size.width {
-                let index = x + y * size.width;
-                // let r = 0.5 + noise.gen2(xoff, yoff) as f32;
-
-                xoff += increment;
+                canvas.set_color(Color::rgb(r, r,r ));
+                canvas.draw_point((x * rez) as i32, (y * rez) as i32);
             }
-
-            yoff += increment;
         }
+        canvas.render();
         canvas.unbind();
-
-        canvas.render(&size);
 
         window.swap_buffers();
         window.poll_events();
