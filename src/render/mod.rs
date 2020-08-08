@@ -8,6 +8,7 @@ pub use self::context::Context;
 pub use self::frame_buffer::FrameBuffer;
 pub use self::index_buffer::IndexBuffer;
 pub use self::program::{Program, ProgramError, Uniform};
+pub use self::render_buffer::RenderBuffer;
 pub use self::shader::{Shader, ShaderError, ShaderType};
 pub use self::spot_light::Spotlight;
 pub use self::texture::Texture;
@@ -22,6 +23,7 @@ pub mod frame_buffer;
 pub mod index_buffer;
 pub mod opengl;
 pub mod program;
+pub mod render_buffer;
 pub mod shader;
 pub mod texture;
 pub mod traits;
@@ -34,6 +36,14 @@ pub mod window;
 #[derive(Debug, Clone)]
 pub struct RenderError {
     pub message: String
+}
+
+impl RenderError {
+    pub fn new(message: String) -> Self {
+        Self {
+            message
+        }
+    }
 }
 
 /// Generates an appropriate error message for Display
