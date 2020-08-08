@@ -1,9 +1,32 @@
 use gl::types::GLenum;
 
-use super::{Bindable, RenderError, Texture};
+use super::{Bindable, RenderError, Texture, RenderBuffer, Size};
+
+#[derive(Clone)]
+pub enum Attachment {
+    Color(u32),
+    Depth,
+    Stencil,
+    DepthStencil,
+}
+
+impl From<Attachment> for gl::types::GLenum {
+    fn from(attachment: Attachment) -> Self {
+        match attachment {
+            Attachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
+            Attachment::Depth => gl::DEPTH_ATTACHMENT,
+            Attachment::Stencil => gl::STENCIL_ATTACHMENT,
+            Attachment::DepthStencil => gl::DEPTH_STENCIL_ATTACHMENT,
+        }
+    }
+}
 
 /// A general purpose Framebuffer to store pixel data into
-/// This is a good resource to learn more about Framebuffers, https://open.gl/framebuffers
+///
+/// ## Resources
+///
+/// * Introduction into Framebuffers: https://open.gl/framebuffers
+/// * OpenGL Framebuffer: https://www.khronos.org/opengl/wiki/Framebuffer
 pub struct FrameBuffer {
     pub id: u32,
 }
@@ -35,6 +58,39 @@ fn status_error(error: u32) -> String {
     }
 }
 
+/// Small wrapper function to blit pixel data from a read framebuffer to a destination framebuffer,
+/// copies a block of pixel data from one framebuffer to the other, while allowing different sized
+/// framebuffer objects, it's scaled up or down accordingly.
+///
+/// This function is also useful to copy data from a MSAA sampled framebuffer to a non-sampled FBO.
+///
+/// For convenience, the blit function assumes the full size of the framebuffers are used.
+pub fn blit(read_buffer: &FrameBuffer, write_buffer: &FrameBuffer, size: Size<usize>) -> Result<(), RenderError> {
+    let mask  = gl::COLOR_BUFFER_BIT;
+
+    unsafe {
+        gl::BindFramebuffer(gl::READ_FRAMEBUFFER, read_buffer.id);
+        gl::BindFramebuffer(gl::DRAW_FRAMEBUFFER, write_buffer.id);
+    }
+
+    unsafe {
+        gl::BlitFramebuffer(
+            0,
+            0,
+            size.width as i32,
+            size.height as i32,
+            0,
+            0,
+            size.width as i32,
+            size.height as i32,
+            mask,
+            gl::NEAREST,
+        );
+    }
+
+    Ok(())
+}
+
 impl FrameBuffer {
     /// Create a new instance of a Frame Buffer
     pub fn create() -> Result<Self, RenderError> {
@@ -47,18 +103,36 @@ impl FrameBuffer {
         Ok(FrameBuffer { id })
     }
 
+    /// Checks if the current attachments / configs are valid for this Framebuffer
+    /// Returns a result with possible error message
+    pub fn valid(&self) -> Result<(), RenderError> {
+        check_status()
+    }
+
     /// Set Texture to this Framebuffer
     ///
     /// ## Arguments
     ///
     /// * `texture` - The texture to attach
-    pub fn attach_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
-        self.set_texture(gl::COLOR_ATTACHMENT0, texture.target, texture.id)
+    /// * `index` - The color attachment slot
+    pub fn attach_texture(&mut self, texture: &Texture, index: u32) -> Result<(), RenderError> {
+        self.set_texture(Attachment::Color(index), texture.target, texture.id)
     }
 
     /// Detaches the texture from the Framebuffer
-    pub fn detach_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
-        self.set_texture(gl::COLOR_ATTACHMENT0, texture.target, 0)
+    pub fn detach_texture(&mut self, texture: &Texture, index: u32) -> Result<(), RenderError> {
+        self.set_texture(Attachment::Color(index), texture.target, 0)
+    }
+
+    /// Attaches a Renderbuffer to this Framebuffer
+    pub fn attach_renderbuffer(&mut self, attachment: Attachment, buffer: &RenderBuffer) -> Result<(), RenderError> {
+        self.set_renderbuffer(attachment, buffer.id)
+    }
+
+    /// Detaches any Renderbuffer from this Framebuffer
+    /// **Note**, for now it only uses the first color attachment slot
+    pub fn detach_renderbuffer(&mut self, attachment: Attachment) -> Result<(), RenderError> {
+        self.set_renderbuffer(attachment, 0)
     }
 
     /// Set Depth Texture to this Framebuffer
@@ -66,24 +140,39 @@ impl FrameBuffer {
     /// ## Argumnets
     ///
     /// * `texture` - the depth Texture instance
-    pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
-        self.set_texture(gl::DEPTH_ATTACHMENT, texture.target, texture.id)
+    pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<(), RenderError> {
+        self.set_texture(Attachment::Depth, texture.target, texture.id)
     }
 
     /// Attaches or detaches a texture or renderbuffer to or from this Framebuffer
     /// A convenience wrapper function around 'FramebufferTexture2D'
-    fn set_texture(&mut self, attachment: GLenum, target: GLenum, id: u32) -> Result<&mut Self, RenderError> {
+    fn set_texture(&mut self, attachment: Attachment, target: GLenum, id: u32) -> Result<(), RenderError> {
         self.bind();
 
         unsafe {
-            gl::FramebufferTexture2D(gl::FRAMEBUFFER, attachment, target, id, 0);
+            gl::FramebufferTexture2D(gl::FRAMEBUFFER, attachment.into(), target, id, 0);
         }
 
         check_status()?;
 
         self.unbind();
 
-        Ok(self)
+        Ok(())
+    }
+
+    /// Attaches or detaches the given renderbuffer
+    fn set_renderbuffer(&mut self, attachment: Attachment, id: u32) -> Result<(), RenderError> {
+        self.bind();
+
+        unsafe {
+            gl::FramebufferRenderbuffer(gl::FRAMEBUFFER, attachment.into(), gl::RENDERBUFFER, id);
+        }
+
+        check_status()?;
+
+        self.unbind();
+
+        Ok(())
     }
 }
 
