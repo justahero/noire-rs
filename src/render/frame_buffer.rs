@@ -1,6 +1,6 @@
 use gl::types::GLenum;
 
-use super::{Bindable, RenderError, Texture};
+use super::{Bindable, RenderError, Texture, RenderBuffer};
 
 /// A general purpose Framebuffer to store pixel data into
 /// This is a good resource to learn more about Framebuffers, https://open.gl/framebuffers
@@ -52,13 +52,24 @@ impl FrameBuffer {
     /// ## Arguments
     ///
     /// * `texture` - The texture to attach
-    pub fn attach_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
+    pub fn attach_texture(&mut self, texture: &Texture) -> Result<(), RenderError> {
         self.set_texture(gl::COLOR_ATTACHMENT0, texture.target, texture.id)
     }
 
     /// Detaches the texture from the Framebuffer
-    pub fn detach_texture(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
+    pub fn detach_texture(&mut self, texture: &Texture) -> Result<(), RenderError> {
         self.set_texture(gl::COLOR_ATTACHMENT0, texture.target, 0)
+    }
+
+    /// Attaches a Renderbuffer to this Framebuffer
+    pub fn attach_renderbuffer(&mut self, buffer: &RenderBuffer) -> Result<(), RenderError> {
+        self.set_renderbuffer(gl::COLOR_ATTACHMENT0, buffer.id)
+    }
+
+    /// Detaches any Renderbuffer from this Framebuffer
+    /// **Note**, for now it only uses the first color attachment slot
+    pub fn detach_renderbuffer(&mut self) -> Result<(), RenderError> {
+        self.set_renderbuffer(gl::COLOR_ATTACHMENT0, 0)
     }
 
     /// Set Depth Texture to this Framebuffer
@@ -66,13 +77,13 @@ impl FrameBuffer {
     /// ## Argumnets
     ///
     /// * `texture` - the depth Texture instance
-    pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<&mut Self, RenderError> {
+    pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<(), RenderError> {
         self.set_texture(gl::DEPTH_ATTACHMENT, texture.target, texture.id)
     }
 
     /// Attaches or detaches a texture or renderbuffer to or from this Framebuffer
     /// A convenience wrapper function around 'FramebufferTexture2D'
-    fn set_texture(&mut self, attachment: GLenum, target: GLenum, id: u32) -> Result<&mut Self, RenderError> {
+    fn set_texture(&mut self, attachment: GLenum, target: GLenum, id: u32) -> Result<(), RenderError> {
         self.bind();
 
         unsafe {
@@ -83,7 +94,22 @@ impl FrameBuffer {
 
         self.unbind();
 
-        Ok(self)
+        Ok(())
+    }
+
+    /// Attaches or detaches the given renderbuffer
+    fn set_renderbuffer(&mut self, attachment: GLenum, id: u32) -> Result<(), RenderError> {
+        self.bind();
+
+        unsafe {
+            gl::FramebufferRenderbuffer(gl::FRAMEBUFFER, attachment, gl::RENDERBUFFER, id);
+        }
+
+        check_status()?;
+
+        self.unbind();
+
+        Ok(())
     }
 }
 
