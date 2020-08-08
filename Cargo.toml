@@ -37,6 +37,10 @@ name = "opensimplex"
 path = "examples/06-opensimplex/main.rs"
 
 [[example]]
+name = "marching-squares"
+path = "examples/07-marching-squares/main.rs"
+
+[[example]]
 name = "filewatch"
 
 [dependencies]

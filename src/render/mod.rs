@@ -25,9 +25,9 @@ pub mod opengl;
 pub mod program;
 pub mod render_buffer;
 pub mod shader;
+pub mod spot_light;
 pub mod texture;
 pub mod traits;
-pub mod spot_light;
 pub mod vertex;
 pub mod vertex_buffer;
 pub mod window;
@@ -67,7 +67,7 @@ impl error::Error for RenderError {
 }
 
 /// Struct to provide size dimensions
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Size<T> {
     /// width
     pub width: T,
@@ -142,7 +142,7 @@ impl From<Primitive> for gl::types::GLenum {
     }
 }
 
-/// Texture format
+/// Texture & Pixel format
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(u32)]
 pub enum Format {

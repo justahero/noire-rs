@@ -161,7 +161,7 @@ pub fn set_fullscreen(glfw: &mut Glfw, window: &mut glfw::Window, mode: Fullscre
 }
 
 /// Initializes GLFW and returns it
-fn init_glfw() -> Result<Glfw, WindowError> {
+fn init_glfw(resizable: bool) -> Result<Glfw, WindowError> {
     let callback = glfw::Callback {
         f: glfw_error_callback as fn(glfw::Error, String, &Cell<usize>),
         data: Cell::new(0),
@@ -192,7 +192,7 @@ impl RenderWindow {
 
     /// Creates a windowed RenderWindow with given size
     pub fn create(size: &Size<u32>, title: &str) -> Result<RenderWindow, WindowError> {
-        let mut glfw = init_glfw()?;
+        let mut glfw = init_glfw(false)?;
 
         let (mut window, events) =
             match glfw.create_window(size.width, size.height, title, glfw::WindowMode::Windowed) {

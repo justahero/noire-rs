@@ -44,6 +44,7 @@ fn check_status() -> Result<(), RenderError> {
     Ok(())
 }
 
+/// Returns the error string based on given Framebuffer error code
 fn status_error(error: u32) -> String {
     match error {
         gl::FRAMEBUFFER_UNSUPPORTED => "Framebuffer is not supported".to_string(),
