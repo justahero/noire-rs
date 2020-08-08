@@ -145,9 +145,9 @@ impl Canvas2D {
     /// Renders the content of the canvas.
     /// The function resizes the Renderbuffer if the framebuffer size is different
     pub fn render(&mut self) {
-        self.render_points();
-        self.render_lines();
         self.render_rects();
+        self.render_lines();
+        self.render_points();
     }
 
     /// Renders all points

@@ -25,7 +25,7 @@ fn line(canvas: &Canvas2D, l: &Vector2, r: &Vector2) {
 }
 
 fn main() {
-    let window_size = Size::new(800, 800);
+    let window_size = Size::new(600, 600);
     let rez = 10;
 
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
@@ -35,7 +35,7 @@ fn main() {
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
 
-    let mut canvas = Canvas2D::new(800, 800);
+    let mut canvas = Canvas2D::new(600, 600);
     let noise = OpenSimplexNoise::new(0);
 
     let rez = 10.0;
@@ -73,7 +73,7 @@ fn main() {
                 field[index as usize] = r;
 
                 canvas.set_color(Color::rgb(r, r,r ));
-                canvas.draw_point((x as f32) * rez, (y as f32) * rez);
+                canvas.draw_rect(x as f32 * rez, y as f32 * rez, x as f32 * rez + rez, y as f32 * rez + rez);
 
                 yoff += increment;
             }
