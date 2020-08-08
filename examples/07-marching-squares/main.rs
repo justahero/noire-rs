@@ -16,6 +16,10 @@ use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, 
 use std::time::Instant;
 use cgmath::{Vector3, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
 
+fn lerp(v0: f32, v1: f32, t: f32) -> f32 {
+    (1.0 - t) * v0 + t * v1
+}
+
 fn get_state(a: i32, b: i32, c: i32, d: i32) -> i32 {
     a * 8 + b * 4 + c * 2 + d
 }
@@ -25,20 +29,19 @@ fn line(canvas: &Canvas2D, l: &Vector2, r: &Vector2) {
 }
 
 fn main() {
-    let window_size = Size::new(600, 600);
+    let window_size = Size::new(800, 800);
     let rez = 10;
 
-    let mut window = RenderWindow::create(&window_size, "Hello This is window")
-        .expect("Failed to create Render Window");
+    let mut window = RenderWindow::create(&window_size, "Hello This is window").unwrap();
     window.enable(Capability::ProgramPointSize);
 
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
 
-    let mut canvas = Canvas2D::new(600, 600);
+    let mut canvas = Canvas2D::new(800, 800);
     let noise = OpenSimplexNoise::new(0);
 
-    let rez = 10.0;
+    let rez = 15.0;
     let cols = 1 + canvas.width / (rez as u32);
     let rows = 1 + canvas.height / (rez as u32);
 
@@ -89,6 +92,11 @@ fn main() {
                 let x = (i as f32) * rez;
                 let y = (j as f32) * rez;
 
+                let a_val = field[index as usize] + 1.0;
+                let b_val = field[(index + 1) as usize] + 1.0;
+                let c_val = field[(index + cols + 1) as usize] + 1.0;
+                let d_val = field[(index + cols) as usize] + 1.0;
+
                 let a = Vector2::new(x + rez * 0.5, y            );
                 let b = Vector2::new(x + rez      , y + rez * 0.5);
                 let c = Vector2::new(x + rez * 0.5, y + rez      );
@@ -100,6 +108,18 @@ fn main() {
                     field[(index + cols + 1) as usize].ceil() as i32,
                     field[(index + cols) as usize].ceil() as i32,
                 );
+
+                let amt = (1.0 - a_val) / (b_val - a_val);
+                let a = Vector2::new(lerp(x, x + rez, amt), y);
+
+                let amt = (1.0 - b_val) / (c_val - b_val);
+                let b = Vector2::new(x + rez, lerp(y, y + rez, amt));
+
+                let amt = (1.0 - d_val) / (c_val - d_val);
+                let c = Vector2::new(lerp(x, x + rez, amt), y + rez);
+
+                let amt = (1.0 - a_val) / (d_val - a_val);
+                let d = Vector2::new(x, lerp(y, y + rez, amt));
 
                 match state {
                     1 => {line(&canvas, &c, &d); },
@@ -120,7 +140,6 @@ fn main() {
                 };
             }
         }
-
 
         canvas.render();
         canvas.unbind();
