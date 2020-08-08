@@ -67,7 +67,7 @@ impl error::Error for RenderError {
 }
 
 /// Struct to provide size dimensions
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Size<T> {
     /// width
     pub width: T,

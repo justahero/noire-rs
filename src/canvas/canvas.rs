@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use crate::math::Color;
 use crate::render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
-use crate::render::{Bindable, Drawable, Size, Uniform, vertex_buffer::{VertexType, VertexData}};
+use crate::render::{Bindable, Drawable, vertex_buffer::{VertexType, VertexData}, Uniform};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -37,6 +37,10 @@ void main() {
 "#;
 
 pub struct Canvas2D {
+    /// Width of the Canvas2D
+    pub width: u32,
+    /// Height of the Canvas2D
+    pub height: u32,
     /// compiled shader program to render primitives
     program: Program,
     /// color to render the next primitive with
@@ -61,10 +65,12 @@ fn compile_program() -> Program {
 
 impl Canvas2D {
     /// Create a new instance of the canvas
-    pub fn new() -> Self {
+    pub fn new(width: u32, height: u32) -> Self {
         let program = compile_program();
 
         Canvas2D {
+            width,
+            height,
             program,
             draw_color: Color::BLACK,
             point_size: 1.0,
@@ -137,14 +143,15 @@ impl Canvas2D {
     }
 
     /// Renders the content of the canvas.
-    pub fn render(&mut self, framebuffer_size: &Size<u32>) {
-        self.render_points(framebuffer_size);
-        self.render_lines(framebuffer_size);
-        self.render_rects(framebuffer_size);
+    /// The function resizes the Renderbuffer if the framebuffer size is different
+    pub fn render(&mut self) {
+        self.render_points();
+        self.render_lines();
+        self.render_rects();
     }
 
     /// Renders all points
-    fn render_points(&mut self, size: &Size<u32>) {
+    fn render_points(&mut self) {
         let mut points = self.point_vertices.borrow_mut();
 
         if !points.is_empty() {
@@ -155,24 +162,16 @@ impl Canvas2D {
             let mut vao = VertexArrayObject::new(Primitive::Points);
             vao.add_vb(vb);
 
-            // bind resources, uniforms, attributes
-            self.program.bind();
-            self.program.uniform("u_pointSize", Uniform::Float(self.point_size));
-            self.program.uniform("u_resolution", Uniform::Float2(size.width as f32, size.height as f32));
-
             vao.bind();
             vao.draw();
             vao.unbind();
-
-            // unbind resources
-            self.program.unbind();
 
             points.clear();
         }
     }
 
     /// Renders all lines using VertexBuffer and VAO
-    fn render_lines(&mut self, size: &Size<u32>) {
+    fn render_lines(&mut self) {
         let mut lines = self.line_vertices.borrow_mut();
 
         if !lines.is_empty() {
@@ -183,23 +182,16 @@ impl Canvas2D {
             let mut vao = VertexArrayObject::new(Primitive::Lines);
             vao.add_vb(vb);
 
-            // bind resources, uniforms, attributes
-            self.program.bind();
-            self.program.uniform("u_resolution", Uniform::Float2(size.width as f32, size.height as f32));
-
             vao.bind();
             vao.draw();
             vao.unbind();
-
-            // unbind resources
-            self.program.unbind();
 
             lines.clear();
         }
     }
 
     /// Renders all rects using VertexBuffer and VAO
-    fn render_rects(&mut self, size: &Size<u32>) {
+    fn render_rects(&mut self) {
         let mut rects = self.rect_vertices.borrow_mut();
 
         if !rects.is_empty() {
@@ -210,18 +202,29 @@ impl Canvas2D {
             let mut vao = VertexArrayObject::new(Primitive::Triangles);
             vao.add_vb(vb);
 
-            // bind resources, uniforms, attributes
-            self.program.bind();
-            self.program.uniform("u_resolution", Uniform::Float2(size.width as f32, size.height as f32));
-
             vao.bind();
             vao.draw();
             vao.unbind();
 
-            // unbind resources
-            self.program.unbind();
-
             rects.clear();
         }
+    }
+}
+
+impl Bindable for Canvas2D {
+    fn bind(&mut self) -> &mut Self {
+        self.program.bind();
+        self.program.uniform("u_resolution", Uniform::Float2(self.width as f32, self.height as f32));
+        self.program.uniform("u_pointSize", Uniform::Float(self.point_size));
+        self
+    }
+
+    fn unbind(&mut self) -> &mut Self {
+        self.program.unbind();
+        self
+    }
+
+    fn bound(&self) -> bool {
+        todo!()
     }
 }
