@@ -2,6 +2,25 @@ use gl::types::GLenum;
 
 use super::{Bindable, RenderError, Texture, RenderBuffer};
 
+#[derive(Clone)]
+pub enum Attachment {
+    Color(u32),
+    Depth,
+    Stencil,
+    DepthStencil,
+}
+
+impl From<Attachment> for gl::types::GLenum {
+    fn from(attachment: Attachment) -> Self {
+        match attachment {
+            Attachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
+            Attachment::Depth => gl::DEPTH_ATTACHMENT,
+            Attachment::Stencil => gl::STENCIL_ATTACHMENT,
+            Attachment::DepthStencil => gl::DEPTH_STENCIL_ATTACHMENT,
+        }
+    }
+}
+
 /// A general purpose Framebuffer to store pixel data into
 /// This is a good resource to learn more about Framebuffers, https://open.gl/framebuffers
 pub struct FrameBuffer {
@@ -52,24 +71,25 @@ impl FrameBuffer {
     /// ## Arguments
     ///
     /// * `texture` - The texture to attach
-    pub fn attach_texture(&mut self, texture: &Texture) -> Result<(), RenderError> {
-        self.set_texture(gl::COLOR_ATTACHMENT0, texture.target, texture.id)
+    /// * `index` - The color attachment slot
+    pub fn attach_texture(&mut self, texture: &Texture, index: u32) -> Result<(), RenderError> {
+        self.set_texture(Attachment::Color(index), texture.target, texture.id)
     }
 
     /// Detaches the texture from the Framebuffer
-    pub fn detach_texture(&mut self, texture: &Texture) -> Result<(), RenderError> {
-        self.set_texture(gl::COLOR_ATTACHMENT0, texture.target, 0)
+    pub fn detach_texture(&mut self, texture: &Texture, index: u32) -> Result<(), RenderError> {
+        self.set_texture(Attachment::Color(index), texture.target, 0)
     }
 
     /// Attaches a Renderbuffer to this Framebuffer
-    pub fn attach_renderbuffer(&mut self, buffer: &RenderBuffer) -> Result<(), RenderError> {
-        self.set_renderbuffer(gl::COLOR_ATTACHMENT0, buffer.id)
+    pub fn attach_renderbuffer(&mut self, attachment: Attachment, buffer: &RenderBuffer) -> Result<(), RenderError> {
+        self.set_renderbuffer(attachment, buffer.id)
     }
 
     /// Detaches any Renderbuffer from this Framebuffer
     /// **Note**, for now it only uses the first color attachment slot
-    pub fn detach_renderbuffer(&mut self) -> Result<(), RenderError> {
-        self.set_renderbuffer(gl::COLOR_ATTACHMENT0, 0)
+    pub fn detach_renderbuffer(&mut self, attachment: Attachment) -> Result<(), RenderError> {
+        self.set_renderbuffer(attachment, 0)
     }
 
     /// Set Depth Texture to this Framebuffer
@@ -78,16 +98,16 @@ impl FrameBuffer {
     ///
     /// * `texture` - the depth Texture instance
     pub fn set_depth_buffer(&mut self, texture: &Texture) -> Result<(), RenderError> {
-        self.set_texture(gl::DEPTH_ATTACHMENT, texture.target, texture.id)
+        self.set_texture(Attachment::Depth, texture.target, texture.id)
     }
 
     /// Attaches or detaches a texture or renderbuffer to or from this Framebuffer
     /// A convenience wrapper function around 'FramebufferTexture2D'
-    fn set_texture(&mut self, attachment: GLenum, target: GLenum, id: u32) -> Result<(), RenderError> {
+    fn set_texture(&mut self, attachment: Attachment, target: GLenum, id: u32) -> Result<(), RenderError> {
         self.bind();
 
         unsafe {
-            gl::FramebufferTexture2D(gl::FRAMEBUFFER, attachment, target, id, 0);
+            gl::FramebufferTexture2D(gl::FRAMEBUFFER, attachment.into(), target, id, 0);
         }
 
         check_status()?;
@@ -98,11 +118,11 @@ impl FrameBuffer {
     }
 
     /// Attaches or detaches the given renderbuffer
-    fn set_renderbuffer(&mut self, attachment: GLenum, id: u32) -> Result<(), RenderError> {
+    fn set_renderbuffer(&mut self, attachment: Attachment, id: u32) -> Result<(), RenderError> {
         self.bind();
 
         unsafe {
-            gl::FramebufferRenderbuffer(gl::FRAMEBUFFER, attachment, gl::RENDERBUFFER, id);
+            gl::FramebufferRenderbuffer(gl::FRAMEBUFFER, attachment.into(), gl::RENDERBUFFER, id);
         }
 
         check_status()?;
