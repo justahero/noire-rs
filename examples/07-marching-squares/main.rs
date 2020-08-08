@@ -25,7 +25,7 @@ fn line(canvas: &Canvas2D, l: &Vector2, r: &Vector2) {
 }
 
 fn main() {
-    let window_size = Size::new(600, 600);
+    let window_size = Size::new(800, 800);
     let rez = 10;
 
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
@@ -35,21 +35,17 @@ fn main() {
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
 
-    let mut canvas = Canvas2D::new(600, 600);
-    let noise = PerlinNoise::new(0);
+    let mut canvas = Canvas2D::new(800, 800);
+    let noise = OpenSimplexNoise::new(0);
 
-    let rez = 20.0;
+    let rez = 10.0;
     let cols = 1 + canvas.width / (rez as u32);
     let rows = 1 + canvas.height / (rez as u32);
 
-    // initialize field values
-    let mut field = vec![0; (cols * rows) as usize];
-    for x in 0..cols {
-        for y in 0..rows {
-            let index = x + y * cols;
-            field[index as usize] = random_f32(2.0).floor() as i32;
-        }
-    }
+    let increment = 0.1;
+    let mut zoff = 0.0;
+
+    let mut field: Vec<f32> = vec![0.0; (cols * rows) as usize];
 
     loop {
         let elapsed = timer.elapsed_in_seconds() as f32;
@@ -66,15 +62,23 @@ fn main() {
 
         // render all points
         canvas.set_pointsize(rez * 0.35);
+        let mut xoff = 0.0;
         for x in 0..cols {
+            xoff += increment;
+            let mut yoff = 0.0;
             for y in 0..rows {
                 let index = x + y * cols;
-                let r = field[index as usize] as f32;
+
+                let r = noise.noise4_classic(xoff, yoff, zoff, zoff) as f32;
+                field[index as usize] = r;
 
                 canvas.set_color(Color::rgb(r, r,r ));
-                canvas.draw_point(x as f32 * rez, y as f32 * rez);
+                canvas.draw_point((x as f32) * rez, (y as f32) * rez);
+
+                yoff += increment;
             }
         }
+        zoff += 0.01;
 
         // render all iso lines, the contour
         canvas.set_color(Color::rgb(1.0, 1.0, 1.0));
@@ -91,10 +95,10 @@ fn main() {
                 let d = Vector2::new(x            , y + rez * 0.5);
 
                 let state = get_state(
-                    field[index as usize],
-                    field[(index + 1) as usize],
-                    field[(index + cols + 1) as usize],
-                    field[(index + cols) as usize],
+                    field[index as usize].ceil() as i32,
+                    field[(index + 1) as usize].ceil() as i32,
+                    field[(index + cols + 1) as usize].ceil() as i32,
+                    field[(index + cols) as usize].ceil() as i32,
                 );
 
                 match state {
