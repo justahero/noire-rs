@@ -48,6 +48,8 @@ pub struct Capabilities {
     pub forward_compatible: bool,
     /// Maximum texture size
     pub max_texture_size: Size<usize>,
+    /// Maximum number of color attachments to a FBO
+    pub max_color_attachments: usize,
 }
 
 /// Fetches the Vendor string from OpenGL
@@ -91,6 +93,13 @@ unsafe fn get_shader_version() -> Result<String, CapabilityError> {
     Ok(String::from_utf8(CStr::from_ptr(s as *const _).to_bytes().to_vec())?)
 }
 
+/// Returns the number of max color attachments
+unsafe fn get_max_color_attachments() -> Result<usize, CapabilityError> {
+    let mut attachments = 0;
+    gl::GetIntegerv(gl::MAX_COLOR_ATTACHMENTS, &mut attachments);
+    Ok(attachments as usize)
+}
+
 impl Capabilities {
     /// enumerate some of the OpenGL capabilities
     pub fn enumerate() -> Result<Self, CapabilityError> {
@@ -100,6 +109,7 @@ impl Capabilities {
         let shader_version = unsafe { get_shader_version()? };
         let (debug, forward_compatible) = unsafe { get_context_flags() };
         let max_texture_size = unsafe { get_max_texture_size() };
+        let max_color_attachments = unsafe { get_max_color_attachments()? };
 
         Ok(Capabilities {
             vendor,
@@ -109,6 +119,7 @@ impl Capabilities {
             debug,
             forward_compatible,
             max_texture_size,
+            max_color_attachments,
         })
     }
 }
