@@ -1,6 +1,6 @@
 use gl::types::GLenum;
 
-use super::{Bindable, RenderError, Texture, RenderBuffer};
+use super::{Bindable, RenderError, Texture, RenderBuffer, Size};
 
 #[derive(Clone)]
 pub enum Attachment {
@@ -22,7 +22,11 @@ impl From<Attachment> for gl::types::GLenum {
 }
 
 /// A general purpose Framebuffer to store pixel data into
-/// This is a good resource to learn more about Framebuffers, https://open.gl/framebuffers
+///
+/// ## Resources
+///
+/// * Introduction into Framebuffers: https://open.gl/framebuffers
+/// * OpenGL Framebuffer: https://www.khronos.org/opengl/wiki/Framebuffer
 pub struct FrameBuffer {
     pub id: u32,
 }
@@ -54,6 +58,39 @@ fn status_error(error: u32) -> String {
     }
 }
 
+/// Small wrapper function to blit pixel data from a read framebuffer to a destination framebuffer,
+/// copies a block of pixel data from one framebuffer to the other, while allowing different sized
+/// framebuffer objects, it's scaled up or down accordingly.
+///
+/// This function is also useful to copy data from a MSAA sampled framebuffer to a non-sampled FBO.
+///
+/// For convenience, the blit function assumes the full size of the framebuffers are used.
+pub fn blit(read_buffer: &FrameBuffer, write_buffer: &FrameBuffer, size: Size<usize>) -> Result<(), RenderError> {
+    let mask  = gl::COLOR_BUFFER_BIT;
+
+    unsafe {
+        gl::BindFramebuffer(gl::READ_FRAMEBUFFER, read_buffer.id);
+        gl::BindFramebuffer(gl::DRAW_FRAMEBUFFER, write_buffer.id);
+    }
+
+    unsafe {
+        gl::BlitFramebuffer(
+            0,
+            0,
+            size.width as i32,
+            size.height as i32,
+            0,
+            0,
+            size.width as i32,
+            size.height as i32,
+            mask,
+            gl::NEAREST,
+        );
+    }
+
+    Ok(())
+}
+
 impl FrameBuffer {
     /// Create a new instance of a Frame Buffer
     pub fn create() -> Result<Self, RenderError> {
@@ -64,6 +101,12 @@ impl FrameBuffer {
         }
 
         Ok(FrameBuffer { id })
+    }
+
+    /// Checks if the current attachments / configs are valid for this Framebuffer
+    /// Returns a result with possible error message
+    pub fn valid(&self) -> Result<(), RenderError> {
+        check_status()
     }
 
     /// Set Texture to this Framebuffer
