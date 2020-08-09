@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use crate::math::Color;
 use crate::render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
-use crate::render::{Bindable, Drawable, vertex_buffer::{VertexType, VertexData}, Uniform};
+use crate::render::{Bindable, Drawable, Uniform};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -124,7 +124,7 @@ impl Canvas2D {
     }
 
     /// Pushes the geometry for a rect, to be rendered
-    pub fn draw_rect(&mut self, left: f32, top: f32, right: f32, bottom: f32) -> &Self {
+    pub fn draw_rect(&mut self, left: f32, top: f32, right: f32, bottom: f32) {
         /*
         let mut rects = self.rect_vertices.borrow_mut();
         rects.push(left);
@@ -160,13 +160,14 @@ impl Canvas2D {
             left, top, c.r, c.g, c.b,
         ];
 
-        // TODO get VB and set vertex data
+        // TODOs
+        // * get VB and set vertex data
+        // * write data to vertex buffer
+        // * render the buffer
         let vb = self.vao.get_vb(0).unwrap();
-        vb.update(&data);
+        vb.write(&data);
 
         self.vao.draw();
-
-        self
     }
 
     /// Renders the content of the canvas.
@@ -178,7 +179,7 @@ impl Canvas2D {
     }
 
     /// Renders all points
-    fn render_points(&mut self) {
+    fn _render_points(&mut self) {
         /*
         let mut points = self.point_vertices.borrow_mut();
 
@@ -200,7 +201,7 @@ impl Canvas2D {
     }
 
     /// Renders all lines using VertexBuffer and VAO
-    fn render_lines(&mut self) {
+    fn _render_lines(&mut self) {
         /*
         let mut lines = self.line_vertices.borrow_mut();
 

@@ -1,4 +1,4 @@
-use std::{rc::Rc, ptr};
+use std::ptr;
 
 use gl;
 use gl::types::*;
