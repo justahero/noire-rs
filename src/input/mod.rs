@@ -50,9 +50,7 @@ impl From<keyboard::Key> for Button {
 
 #[cfg(test)]
 mod tests {
-    use input::keyboard;
-    use input::button::ButtonArgs;
-    use input::{Button,Input};
+    use super::{Button,Input, keyboard, button::ButtonArgs};
 
     #[test]
     fn test_keypress_button() {
@@ -63,7 +61,7 @@ mod tests {
 
     #[test]
     fn test_general_button_state() {
-        use input::button::ButtonState;
+        use super::button::ButtonState;
         let key = keyboard::Key::Escape.into();
         let button = Button::Keyboard(key);
 

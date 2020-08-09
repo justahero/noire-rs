@@ -23,7 +23,7 @@ fn main() {
 
     let timer = Timer::now();
 
-    let mut canvas = Canvas2D::new();
+    let mut canvas = Canvas2D::new(800, 800);
     let opensimplex = OpenSimplexNoise::new(0);
 
     let mut zoff = 0.0;
@@ -48,12 +48,7 @@ fn main() {
                 let r = 0.5 + (opensimplex.noise4_classic(xoff, yoff, zoff, 0.0) / 2.0) as f32;
 
                 canvas.set_color(Color::rgb(r, r, r));
-                canvas.draw_rect(
-                    (x * 4) as i32,
-                    (y * 4) as i32,
-                    ((x + 1) * 4) as i32,
-                    ((y + 1) * 4) as i32
-                );
+                canvas.draw_rect((x * 4) as f32, (y * 4) as f32, ((x + 1) * 4) as f32, ((y + 1) * 4) as f32);
 
                 xoff += increment;
             }
@@ -63,7 +58,7 @@ fn main() {
 
         zoff += 0.01;
 
-        canvas.render(&size);
+        canvas.render();
 
         window.swap_buffers();
         window.poll_events();
