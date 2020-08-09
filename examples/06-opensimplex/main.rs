@@ -62,7 +62,7 @@ fn main() {
 
         zoff += 0.01;
 
-        canvas.render();
+        // canvas.render();
         canvas.unbind();
 
         window.swap_buffers();
