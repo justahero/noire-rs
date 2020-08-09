@@ -438,7 +438,7 @@ impl Program {
 
     pub fn color(location: i32, color: Color) {
         unsafe {
-            gl::Uniform4f(location, color.red, color.green, color.blue, color.alpha);
+            gl::Uniform4f(location, color.r, color.g, color.b, color.a);
         }
     }
 
