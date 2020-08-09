@@ -1,4 +1,4 @@
-use std::ptr;
+use std::{ptr, cell::{RefMut, RefCell}, rc::Rc};
 
 use gl;
 use gl::types::*;
@@ -15,9 +15,9 @@ pub struct VertexArrayObject {
     /// The used render type
     primitive_type: Primitive,
     /// The list of Vertex Buffers
-    vbs: Vec<VertexBuffer>,
+    vbs: Vec<RefCell<VertexBuffer>>,
     /// The list of Index Buffers,
-    ibs: Vec<IndexBuffer>,
+    ib: Option<RefCell<IndexBuffer>>,
 }
 
 impl VertexArrayObject {
@@ -33,7 +33,7 @@ impl VertexArrayObject {
             id,
             primitive_type,
             vbs: vec![],
-            ibs: vec![],
+            ib: None,
         }
     }
 
@@ -51,19 +51,19 @@ impl VertexArrayObject {
 
     /// Add a vertex buffer to use
     pub fn add_vb(&mut self, vb: VertexBuffer) -> &mut Self {
-        self.vbs.push(vb);
+        self.vbs.push(RefCell::new(vb));
         self
     }
 
     /// Add an index buffer
     pub fn add_ib(&mut self, ib: IndexBuffer) -> &mut Self {
-        self.ibs.push(ib);
+        self.ib = Some(RefCell::new(ib));
         self
     }
 
     /// Returns the VertexBuffer at index
-    pub fn get_vb(&mut self, index: usize) -> Option<&VertexBuffer> {
-        self.vbs.get(index)
+    pub fn get_vb(&mut self, index: usize) -> &RefCell<VertexBuffer> {
+        &self.vbs[index]
     }
 }
 
@@ -80,6 +80,7 @@ impl Bindable for VertexArrayObject {
 
         let mut index = 0;
         for vb in self.vbs.iter_mut() {
+            let mut vb = vb.borrow_mut();
             vb.bind();
 
             let mut offset = 0;
@@ -102,16 +103,17 @@ impl Bindable for VertexArrayObject {
             }
         }
 
-        for ib in self.ibs.iter_mut() {
-            ib.bind();
+        if let Some(ib) = &self.ib {
+            ib.borrow_mut().bind();
         }
+
         self
     }
 
     /// Unbinds / frees the resource
     fn unbind(&mut self) -> &mut Self {
         for (i, vb) in self.vbs.iter_mut().enumerate() {
-            vb.unbind();
+            vb.borrow_mut().unbind();
             unsafe {
                 gl::DisableVertexAttribArray(i as u32);
             }
@@ -120,9 +122,10 @@ impl Bindable for VertexArrayObject {
             gl::BindVertexArray(0);
         }
 
-        for ib in self.ibs.iter_mut() {
-            ib.unbind();
+        if let Some(ib) = &self.ib {
+            ib.borrow_mut().unbind();
         }
+
         self
     }
 
@@ -141,13 +144,8 @@ impl Drawable for VertexArrayObject {
     fn draw(&mut self) {
         assert!(self.vbs.len() > 0);
 
-        let vb = &self.vbs[0];
-        if self.ibs.is_empty() {
-            unsafe {
-                gl::DrawArrays(self.primitive_type.into(), 0, vb.size() as i32);
-            }
-        } else {
-            let ib = &self.ibs[0];
+        if let Some(ib) = &self.ib {
+            let ib = ib.borrow_mut();
             unsafe {
                 gl::DrawElements(
                     gl::TRIANGLES,
@@ -155,6 +153,11 @@ impl Drawable for VertexArrayObject {
                     gl::UNSIGNED_INT,
                     ptr::null(),
                 );
+            }
+        } else {
+            let vb = self.vbs[0].borrow_mut();
+            unsafe {
+                gl::DrawArrays(self.primitive_type.into(), 0, vb.size() as i32);
             }
         }
     }

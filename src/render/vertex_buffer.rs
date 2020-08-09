@@ -190,18 +190,21 @@ impl VertexBuffer {
 
     /// Copies vertices data into VertexBuffer at offset
     ///
-    pub fn write(&self, data: &[f32]) {
-        let offset = 0;
+    pub fn write(&mut self, data: &[f32]) {
         let size = data.len() * self.component_size();
+
+        self.bind();
 
         unsafe {
             gl::BufferSubData(
                 gl::ARRAY_BUFFER,
-                offset as GLintptr,
+                0 as GLintptr,
                 size as GLsizeiptr,
                 mem::transmute(&data[0]),
             );
         }
+
+        self.unbind();
     }
 
     /// Returns the size of the VertexBuffer
