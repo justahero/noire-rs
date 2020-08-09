@@ -68,6 +68,21 @@ impl VertexTypeSize for VertexType {
     }
 }
 
+#[derive(Clone, Debug)]
+pub enum BufferUsage {
+    Static,
+    Dynamic,
+}
+
+impl From<BufferUsage> for u32 {
+    fn from(usage: BufferUsage) -> Self {
+        match usage {
+            BufferUsage::Static => gl::STATIC_DRAW,
+            BufferUsage::Dynamic => gl::DYNAMIC_DRAW,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct VertexData<'a> {
     /// Holds the list of vertex data
@@ -112,7 +127,7 @@ pub struct VertexBuffer {
 }
 
 /// Generates a new Array Buffer and returns the associated id
-unsafe fn generate_buffer(data: &[f32]) -> u32 {
+unsafe fn generate_buffer(data: &[f32], usage: BufferUsage) -> u32 {
     let total_size = data.len() * mem::size_of::<f32>();
 
     let mut id = 0;
@@ -123,7 +138,7 @@ unsafe fn generate_buffer(data: &[f32]) -> u32 {
         gl::ARRAY_BUFFER,
         total_size as GLsizeiptr,
         mem::transmute(&data[0]),
-        gl::STATIC_DRAW,
+        usage.into(),
     );
     gl::BindBuffer(gl::ARRAY_BUFFER, 0);
 
@@ -133,23 +148,26 @@ unsafe fn generate_buffer(data: &[f32]) -> u32 {
 impl VertexBuffer {
     /// Creates a new empty Vertex Buffer with vertex layout but without any existing data
     /// This function is useful to pre-allocate a large enough buffer that needs updates later.
-    pub fn with_size(count: usize, components: Vec<u32>) -> Self {
+    ///
+    /// The Vertexbuffer is initially filled with 0.0 float values
+    ///
+    pub fn dynamic(count: usize, components: &[u32]) -> Self {
         let num_components = components.iter().sum::<u32>();
-        let id = unsafe {
-            generate_buffer(&vec![0.0; count * num_components as usize])
-        };
+        let data = vec![0.0; count * num_components as usize];
+        let id = unsafe { generate_buffer(&data, BufferUsage::Dynamic) };
 
         Self {
             id,
             count,
-            components,
+            components: Vec::from(components),
             vertex_type: VertexType::Float,
         }
     }
 
-    /// Constructs a new Vertex Buffer from Vertex Data
+    /// Constructs a new Vertex Buffer from Vertex Data as a static VertexBuffer
+    ///
     pub fn new(vertex_data: &VertexData) -> Self {
-        let id = unsafe { generate_buffer(vertex_data.data) };
+        let id = unsafe { generate_buffer(vertex_data.data, BufferUsage::Static) };
 
         Self {
             id,
@@ -159,10 +177,22 @@ impl VertexBuffer {
         }
     }
 
-    /// Creates a new VertexBuffer from a float array
+    /// Creates a new VertexBuffer from a float array as a static VertexBuffer
+    ///
     pub fn create(data: &[f32], components: &[u32]) -> Self {
         let vertex_data = VertexData::new(data, &components, VertexType::Float);
         Self::new(&vertex_data)
+    }
+
+    /// Copies vertices data into VertexBuffer at offset
+    ///
+    pub fn update(&self, data: &[f32]) {
+    }
+
+    /// Copies the data with glBufferSubData to the VertexBuffer memory
+    ///
+    pub fn sub_write(&self, data: &[f32]) {
+
     }
 
     /// Returns the size of the VertexBuffer

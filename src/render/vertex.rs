@@ -1,4 +1,4 @@
-use std::ptr;
+use std::{rc::Rc, ptr};
 
 use gl;
 use gl::types::*;
@@ -59,6 +59,11 @@ impl VertexArrayObject {
     pub fn add_ib(&mut self, ib: IndexBuffer) -> &mut Self {
         self.ibs.push(ib);
         self
+    }
+
+    /// Returns the VertexBuffer at index
+    pub fn get_vb(&mut self, index: usize) -> Option<&VertexBuffer> {
+        self.vbs.get(index)
     }
 }
 

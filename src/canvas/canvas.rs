@@ -51,8 +51,9 @@ pub struct Canvas2D {
     point_vertices: RefCell<Box<Vec<f32>>>,
     /// store all line coordinates with colors, components: (x,y,r,g,b)
     line_vertices: RefCell<Box<Vec<f32>>>,
-    /// store all rect coordinates with colors, components: (x,y,r,g,b)
-    rect_vertices: RefCell<Box<Vec<f32>>>,
+
+    /// VAO to hold vertices for rects
+    vao: VertexArrayObject,
 }
 
 /// Compiles the used shader program
@@ -68,6 +69,10 @@ impl Canvas2D {
     pub fn new(width: u32, height: u32) -> Self {
         let program = compile_program();
 
+        let vb = VertexBuffer::dynamic(6, &vec![2, 3]);
+        let mut vao = VertexArrayObject::new(Primitive::Triangles);
+        vao.add_vb(vb);
+
         Canvas2D {
             width,
             height,
@@ -76,7 +81,7 @@ impl Canvas2D {
             point_size: 1.0,
             point_vertices: RefCell::new(Box::new(Vec::new())),
             line_vertices: RefCell::new(Box::new(Vec::new())),
-            rect_vertices: RefCell::new(Box::new(Vec::new())),
+            vao,
         }
     }
 
@@ -119,7 +124,8 @@ impl Canvas2D {
     }
 
     /// Pushes the geometry for a rect, to be rendered
-    pub fn draw_rect(&self, left: f32, top: f32, right: f32, bottom: f32) -> &Self {
+    pub fn draw_rect(&mut self, left: f32, top: f32, right: f32, bottom: f32) -> &Self {
+        /*
         let mut rects = self.rect_vertices.borrow_mut();
         rects.push(left);
         rects.push(top);
@@ -140,18 +146,40 @@ impl Canvas2D {
         rects.push(top);
         rects.append(&mut self.draw_color.rgb_vec());
         self
+        */
+
+        // TODO draw rect immediately and check if this works well enough
+
+        let c = &self.draw_color;
+        let data = vec![
+            left, top, c.r, c.g, c.b,
+            right, top, c.r, c.g, c.b,
+            right, bottom, c.r, c.g, c.b,
+            right, bottom, c.r, c.g, c.b,
+            left, bottom, c.r, c.g, c.b,
+            left, top, c.r, c.g, c.b,
+        ];
+
+        // TODO get VB and set vertex data
+        let vb = self.vao.get_vb(0).unwrap();
+        vb.update(&data);
+
+        self.vao.draw();
+
+        self
     }
 
     /// Renders the content of the canvas.
     /// The function resizes the Renderbuffer if the framebuffer size is different
     pub fn render(&mut self) {
-        self.render_rects();
-        self.render_lines();
-        self.render_points();
+        // self.render_rects();
+        // self.render_lines();
+        // self.render_points();
     }
 
     /// Renders all points
     fn render_points(&mut self) {
+        /*
         let mut points = self.point_vertices.borrow_mut();
 
         if !points.is_empty() {
@@ -168,10 +196,12 @@ impl Canvas2D {
 
             points.clear();
         }
+        */
     }
 
     /// Renders all lines using VertexBuffer and VAO
     fn render_lines(&mut self) {
+        /*
         let mut lines = self.line_vertices.borrow_mut();
 
         if !lines.is_empty() {
@@ -188,31 +218,13 @@ impl Canvas2D {
 
             lines.clear();
         }
-    }
-
-    /// Renders all rects using VertexBuffer and VAO
-    fn render_rects(&mut self) {
-        let mut rects = self.rect_vertices.borrow_mut();
-
-        if !rects.is_empty() {
-            let vertex_data = VertexData::new(&rects[..], &[2, 3], VertexType::Float);
-            let vb = VertexBuffer::new(&vertex_data);
-
-            // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Triangles);
-            vao.add_vb(vb);
-
-            vao.bind();
-            vao.draw();
-            vao.unbind();
-
-            rects.clear();
-        }
+        */
     }
 }
 
 impl Bindable for Canvas2D {
     fn bind(&mut self) -> &mut Self {
+        self.vao.bind();
         self.program.bind();
         self.program.uniform("u_resolution", Uniform::Float2(self.width as f32, self.height as f32));
         self.program.uniform("u_pointSize", Uniform::Float(self.point_size));
@@ -221,6 +233,7 @@ impl Bindable for Canvas2D {
 
     fn unbind(&mut self) -> &mut Self {
         self.program.unbind();
+        self.vao.unbind();
         self
     }
 
