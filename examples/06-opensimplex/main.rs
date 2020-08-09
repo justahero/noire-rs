@@ -12,7 +12,7 @@ use gl::types::*;
 use opensimplex::OpenSimplexNoise;
 use noire::canvas::Canvas2D;
 use noire::math::{Color, PerlinNoise, random_f32, Rect};
-use noire::{core::Timer, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform}};
+use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform}};
 use std::time::Instant;
 use cgmath::{Vector3, Vector2, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
 
@@ -22,6 +22,7 @@ fn main() {
         .expect("Failed to create Render Window");
 
     let timer = Timer::now();
+    let mut fps_timer = FpsTimer::now();
 
     let mut canvas = Canvas2D::new(800, 800);
     let opensimplex = OpenSimplexNoise::new(0);
@@ -30,6 +31,8 @@ fn main() {
 
     loop {
         let elapsed = timer.elapsed_in_seconds() as f32;
+        fps_timer.next_frame();
+        println!("FPS: {}", fps_timer.fps());
 
         let size = window.get_framebuffer_size();
         window.reset_viewport();
