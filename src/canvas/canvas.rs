@@ -51,8 +51,9 @@ pub struct Canvas2D {
     point_vertices: RefCell<Box<Vec<f32>>>,
     /// store all line coordinates with colors, components: (x,y,r,g,b)
     line_vertices: RefCell<Box<Vec<f32>>>,
-    /// store all rect coordinates with colors, components: (x,y,r,g,b)
-    rect_vertices: RefCell<Box<Vec<f32>>>,
+
+    vb: VertexBuffer,
+    vao_handle: u32,
 }
 
 /// Compiles the used shader program
@@ -63,10 +64,49 @@ fn compile_program() -> Program {
     Program::create(vertex_shader, fragment_shader).unwrap()
 }
 
+unsafe fn create_vao(vb: &mut VertexBuffer) -> u32 {
+    // create new VAO object, get handle
+    let mut id = 0;
+    gl::GenVertexArrays(1, &mut id);
+
+    // bind VAO
+    gl::BindVertexArray(id);
+
+    // bind VB
+    vb.bind();
+
+    // setup VertexAttribPointer for vb
+    let mut index = 0;
+    let mut offset = 0;
+    for &component in vb.components() {
+        gl::VertexAttribPointer(
+            index as u32,
+            5,
+            vb.vertex_type().into(),
+            gl::FALSE,
+            vb.stride() as i32,
+            offset as *const gl::types::GLvoid,
+        );
+
+        index += 1;
+        offset += component as usize * std::mem::size_of::<f32>();
+    }
+
+    gl::EnableVertexAttribArray(index);
+
+    // disable VAO
+    gl::BindVertexArray(0);
+
+    id
+}
+
 impl Canvas2D {
     /// Create a new instance of the canvas
     pub fn new(width: u32, height: u32) -> Self {
         let program = compile_program();
+
+        let mut vb = VertexBuffer::dynamic(4, vec![2, 3]);
+        let vao_handle = unsafe { create_vao(&mut vb) };
 
         Canvas2D {
             width,
@@ -76,7 +116,8 @@ impl Canvas2D {
             point_size: 1.0,
             point_vertices: RefCell::new(Box::new(Vec::new())),
             line_vertices: RefCell::new(Box::new(Vec::new())),
-            rect_vertices: RefCell::new(Box::new(Vec::new())),
+            vao_handle,
+            vb,
         }
     }
 
@@ -136,74 +177,6 @@ impl Canvas2D {
         vao.draw();
         vao.bind();
 
-    }
-
-    /// Renders the content of the canvas.
-    /// The function resizes the Renderbuffer if the framebuffer size is different
-    pub fn render(&mut self) {
-        // self.render_rects();
-        self.render_lines();
-        self.render_points();
-    }
-
-    /// Renders all points
-    fn render_points(&mut self) {
-        let mut points = self.point_vertices.borrow_mut();
-
-        if !points.is_empty() {
-            let vertex_data = VertexData::new(&points[..], &[2, 3], VertexType::Float);
-            let vb = VertexBuffer::new(&vertex_data);
-
-            // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Points);
-            vao.add_vb(vb);
-
-            vao.bind();
-            vao.draw();
-            vao.unbind();
-
-            points.clear();
-        }
-    }
-
-    /// Renders all lines using VertexBuffer and VAO
-    fn render_lines(&mut self) {
-        let mut lines = self.line_vertices.borrow_mut();
-
-        if !lines.is_empty() {
-            let vertex_data = VertexData::new(&lines[..], &[2, 3], VertexType::Float);
-            let vb = VertexBuffer::new(&vertex_data);
-
-            // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Lines);
-            vao.add_vb(vb);
-
-            vao.bind();
-            vao.draw();
-            vao.unbind();
-
-            lines.clear();
-        }
-    }
-
-    /// Renders all rects using VertexBuffer and VAO
-    fn render_rects(&mut self) {
-        let mut rects = self.rect_vertices.borrow_mut();
-
-        if !rects.is_empty() {
-            let vertex_data = VertexData::new(&rects[..], &[2, 3], VertexType::Float);
-            let vb = VertexBuffer::new(&vertex_data);
-
-            // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Triangles);
-            vao.add_vb(vb);
-
-            vao.bind();
-            vao.draw();
-            vao.unbind();
-
-            rects.clear();
-        }
     }
 }
 
