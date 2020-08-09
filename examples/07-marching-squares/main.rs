@@ -30,7 +30,6 @@ fn line(canvas: &Canvas2D, l: &Vector2, r: &Vector2) {
 
 fn main() {
     let window_size = Size::new(800, 800);
-    let rez = 10;
 
     let mut window = RenderWindow::create(&window_size, "Hello This is window").unwrap();
     window.enable(Capability::ProgramPointSize);
@@ -41,7 +40,7 @@ fn main() {
     let mut canvas = Canvas2D::new(800, 800);
     let noise = OpenSimplexNoise::new(0);
 
-    let rez = 15.0;
+    let rez = 8.0;
     let cols = 1 + canvas.width / (rez as u32);
     let rows = 1 + canvas.height / (rez as u32);
 
@@ -72,7 +71,7 @@ fn main() {
             for y in 0..rows {
                 let index = x + y * cols;
 
-                let r = noise.noise4_classic(xoff, yoff, zoff, zoff) as f32;
+                let r = noise.noise4_classic(xoff, yoff, 0.0, zoff) as f32;
                 field[index as usize] = r;
 
                 canvas.set_color(Color::rgb(r, r,r ));
