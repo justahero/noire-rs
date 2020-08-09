@@ -3,7 +3,7 @@ use std::{ptr, mem};
 use gl;
 use gl::types::*;
 
-use super::Bindable;
+use super::{opengl::get_error, Bindable};
 
 pub trait VertexTypeSize {
     /// Returns the size of the vertex type in bytes
@@ -191,7 +191,7 @@ impl VertexBuffer {
     /// Copies vertices data into VertexBuffer at offset
     ///
     pub fn write(&mut self, data: &[f32]) {
-        let size = data.len() * self.component_size();
+        let size = data.len() * 4;
 
         self.bind();
 

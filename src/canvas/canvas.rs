@@ -160,10 +160,6 @@ impl Canvas2D {
             left, top, c.r, c.g, c.b,
         ];
 
-        // TODOs
-        // * get VB and set vertex data
-        // * write data to vertex buffer
-        // * render the buffer
         let vb = self.vao.get_vb(0);
         vb.borrow_mut().write(&data);
 

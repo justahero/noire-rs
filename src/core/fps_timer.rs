@@ -1,7 +1,7 @@
 use super::Timer;
 use std::collections::VecDeque;
 
-static MAX_FPS_COUNT: usize = 50;
+static MAX_FPS_COUNT: usize = 25;
 
 pub struct FpsTimer {
     /// The timer to get elapsed time for
@@ -40,6 +40,6 @@ impl FpsTimer {
     /// Calculate the average frame rate of the last N frames
     pub fn fps(&self) -> f64 {
         let fps: f64 = self.frames.iter().sum();
-        1.0 / fps * (self.frames.len() as f64)
+        self.frames.len() as f64 / fps
     }
 }

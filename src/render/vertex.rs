@@ -1,4 +1,4 @@
-use std::{ptr, cell::{RefMut, RefCell}, rc::Rc};
+use std::{ptr, cell::RefCell};
 
 use gl;
 use gl::types::*;
