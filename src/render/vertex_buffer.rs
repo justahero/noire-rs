@@ -134,8 +134,10 @@ impl VertexBuffer {
     /// Creates a new empty Vertex Buffer with vertex layout but without any existing data
     /// This function is useful to pre-allocate a large enough buffer that needs updates later.
     pub fn with_size(count: usize, components: Vec<u32>) -> Self {
-        let mut id = 0;
-        unsafe { gl::GenBuffers(1, &mut id) };
+        let num_components = components.iter().sum::<u32>();
+        let id = unsafe {
+            generate_buffer(&vec![0.0; count * num_components as usize])
+        };
 
         Self {
             id,
@@ -158,15 +160,9 @@ impl VertexBuffer {
     }
 
     /// Creates a new VertexBuffer from a float array
-    pub fn create(data: &[f32], num_components: usize) -> Self {
-        let id = unsafe { generate_buffer(data) };
-
-        Self {
-            id,
-            count: data.len() / num_components,
-            components: vec![num_components as u32],
-            vertex_type: VertexType::Float,
-        }
+    pub fn create(data: &[f32], components: &[u32]) -> Self {
+        let vertex_data = VertexData::new(data, &components, VertexType::Float);
+        Self::new(&vertex_data)
     }
 
     /// Returns the size of the VertexBuffer
