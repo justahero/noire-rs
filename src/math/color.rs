@@ -1,56 +1,61 @@
+/// Basic struct to hold 4 components color
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Color {
-    pub red: f32,
-    pub green: f32,
-    pub blue: f32,
-    pub alpha: f32,
+    /// The red channel
+    pub r: f32,
+    /// The green channel
+    pub g: f32,
+    /// The blue channel
+    pub b: f32,
+    /// The alpha channel
+    pub a: f32,
 }
 
 impl Color {
     pub const WHITE: Self = Color {
-        red: 1.0,
-        green: 1.0,
-        blue: 1.0,
-        alpha: 1.0,
+        r: 1.0,
+        g: 1.0,
+        b: 1.0,
+        a: 1.0,
     };
 
     pub const BLACK: Self = Color {
-        red: 0.0,
-        green: 0.0,
-        blue: 0.0,
-        alpha: 1.0,
+        r: 0.0,
+        g: 0.0,
+        b: 0.0,
+        a: 1.0,
     };
 
-    pub fn new(red: f32, green: f32, blue: f32, alpha: f32) -> Self {
+    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
         Color {
-            red,
-            green,
-            blue,
-            alpha,
+            r,
+            g,
+            b,
+            a,
         }
     }
 
-    pub fn rgb(red: f32, green: f32, blue: f32) -> Self {
+    pub fn rgb(r: f32, g: f32, b: f32) -> Self {
         Color {
-            red,
-            green,
-            blue,
-            alpha: 1.0
+            r,
+            g,
+            b,
+            a: 1.0
         }
     }
 
     /// Returns color as array with RGBA components
     pub fn rgba_array(&self) -> [f32; 4] {
-        [self.red, self.green, self.blue, self.alpha]
+        [self.r, self.g, self.b, self.a]
     }
 
     /// Returns the rgb values as vec
     pub fn rgb_vec(&self) -> Vec<f32> {
-        vec![self.red, self.green, self.blue]
+        vec![self.r, self.g, self.b]
     }
 
     /// Returns color as array with RGB components
     pub fn rgb_array(&self) -> [f32; 3] {
-        [self.red, self.green, self.blue]
+        [self.r, self.g, self.b]
     }
 }
