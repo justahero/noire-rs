@@ -35,6 +35,7 @@ fn main() {
         window.reset_viewport();
         window.clear(0.3, 0.3, 0.3, 1.0);
         canvas.set_color(Color::rgb(1.0, 0.0, 0.0));
+        canvas.bind();
 
         let increment = 0.04;
         let mut yoff = 0.5;
@@ -59,6 +60,7 @@ fn main() {
         zoff += 0.01;
 
         canvas.render();
+        canvas.unbind();
 
         window.swap_buffers();
         window.poll_events();
