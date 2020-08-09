@@ -131,11 +131,25 @@ unsafe fn generate_buffer(data: &[f32]) -> u32 {
 }
 
 impl VertexBuffer {
+    /// Creates a new empty Vertex Buffer with vertex layout but without any existing data
+    /// This function is useful to pre-allocate a large enough buffer that needs updates later.
+    pub fn with_size(count: usize, components: Vec<u32>) -> Self {
+        let mut id = 0;
+        unsafe { gl::GenBuffers(1, &mut id) };
+
+        Self {
+            id,
+            count,
+            components,
+            vertex_type: VertexType::Float,
+        }
+    }
+
     /// Constructs a new Vertex Buffer from Vertex Data
     pub fn new(vertex_data: &VertexData) -> Self {
         let id = unsafe { generate_buffer(vertex_data.data) };
 
-        VertexBuffer {
+        Self {
             id,
             count: vertex_data.count(),
             components: vertex_data.components.clone(),
@@ -147,7 +161,7 @@ impl VertexBuffer {
     pub fn create(data: &[f32], num_components: usize) -> Self {
         let id = unsafe { generate_buffer(data) };
 
-        VertexBuffer {
+        Self {
             id,
             count: data.len() / num_components,
             components: vec![num_components as u32],
@@ -155,18 +169,22 @@ impl VertexBuffer {
         }
     }
 
+    /// Returns the size of the VertexBuffer
     pub fn size(&self) -> usize {
         self.count
     }
 
+    /// Returns the number of (Float) components
     pub fn num_components(&self) -> u32 {
         self.components.iter().sum()
     }
 
+    /// Returns the components part, e.g. (x,y,z,tx,ty,r,g,b) -> [3,2,3]
     pub fn components(&self) -> &Vec<u32> {
         &self.components
     }
 
+    /// Returns the vertex type, in most cases Float
     pub fn vertex_type(&self) -> VertexType {
         self.vertex_type
     }
