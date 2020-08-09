@@ -39,7 +39,7 @@ impl VertexArrayObject {
 
     /// Create a 2-dimensional rect, in range between -1..+1
     pub fn screen_rect() -> Self {
-        let vb = VertexBuffer::create(&VERTICES, 2);
+        let vb = VertexBuffer::create(&VERTICES, &[2]);
         let ib = IndexBuffer::create(&INDICES).unwrap();
 
         let mut vao = VertexArrayObject::new(Primitive::TriangleStrip);
