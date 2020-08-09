@@ -119,33 +119,29 @@ impl Canvas2D {
     }
 
     /// Pushes the geometry for a rect, to be rendered
-    pub fn draw_rect(&self, left: f32, top: f32, right: f32, bottom: f32) -> &Self {
-        let mut rects = self.rect_vertices.borrow_mut();
-        rects.push(left);
-        rects.push(top);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(right);
-        rects.push(top);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(right);
-        rects.push(bottom);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(right);
-        rects.push(bottom);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(left);
-        rects.push(bottom);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(left);
-        rects.push(top);
-        rects.append(&mut self.draw_color.rgb_vec());
-        self
+    pub fn draw_rect(&self, left: f32, top: f32, right: f32, bottom: f32) {
+        let c = &self.draw_color;
+        let data = vec![
+            left, top, c.r, c.g, c.b,
+            right, top, c.r, c.g, c.b,
+            right, bottom, c.r, c.g, c.b,
+            left, bottom, c.r, c.g, c.b,
+        ];
+
+        let vb = VertexBuffer::create(&data, &[2, 3]);
+        let mut vao = VertexArrayObject::new(Primitive::TriangleFan);
+
+        vao.add_vb(vb);
+        vao.bind();
+        vao.draw();
+        vao.bind();
+
     }
 
     /// Renders the content of the canvas.
     /// The function resizes the Renderbuffer if the framebuffer size is different
     pub fn render(&mut self) {
-        self.render_rects();
+        // self.render_rects();
         self.render_lines();
         self.render_points();
     }
