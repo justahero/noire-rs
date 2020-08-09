@@ -114,8 +114,8 @@ pub struct VertexBuffer {
 /// Generates a dynamic ArrayyBuffer for dynamic writes
 /// The function only allocates the memory, it has to be filled with vertex data.
 ///
-unsafe fn allocate_dynamic_buffer(data: &[f32]) -> u32 {
-    let total_size = data.len() * mem::size_of::<f32>();
+unsafe fn allocate_dynamic_buffer(count: usize, num_components: usize) -> u32 {
+    let total_size = count * num_components * mem::size_of::<f32>();
 
     let mut id = 0;
     gl::GenBuffers(1, &mut id);
@@ -157,14 +157,12 @@ impl VertexBuffer {
     ///
     pub fn dynamic(count: usize, components: Vec<u32>) -> Self {
         let num_components = components.iter().sum::<u32>();
-        let id = unsafe {
-            allocate_dynamic_buffer(&vec![0.0; count * num_components as usize])
-        };
+        let id = unsafe { allocate_dynamic_buffer(count, num_components as usize) };
 
         Self {
             id,
             count,
-            components,
+            components: Vec::from(components),
             vertex_type: VertexType::Float,
         }
     }
