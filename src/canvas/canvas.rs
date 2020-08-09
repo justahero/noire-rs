@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use crate::math::Color;
 use crate::render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
-use crate::render::{Bindable, Drawable, vertex_buffer::{VertexType, VertexData}, Uniform};
+use crate::render::{Bindable, Drawable, vertex_buffer::{VertexType, VertexData}, Uniform, opengl::get_error};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -81,18 +81,17 @@ unsafe fn create_vao(vb: &mut VertexBuffer) -> u32 {
     for &component in vb.components() {
         gl::VertexAttribPointer(
             index as u32,
-            5,
+            component as i32,
             vb.vertex_type().into(),
             gl::FALSE,
             vb.stride() as i32,
             offset as *const gl::types::GLvoid,
         );
+        gl::EnableVertexAttribArray(index);
 
         index += 1;
         offset += component as usize * std::mem::size_of::<f32>();
     }
-
-    gl::EnableVertexAttribArray(index);
 
     // disable VAO
     gl::BindVertexArray(0);
@@ -160,7 +159,7 @@ impl Canvas2D {
     }
 
     /// Pushes the geometry for a rect, to be rendered
-    pub fn draw_rect(&self, left: f32, top: f32, right: f32, bottom: f32) {
+    pub fn draw_rect(&mut self, left: f32, top: f32, right: f32, bottom: f32) {
         let c = &self.draw_color;
         let data = vec![
             left, top, c.r, c.g, c.b,
@@ -169,19 +168,21 @@ impl Canvas2D {
             left, bottom, c.r, c.g, c.b,
         ];
 
-        let vb = VertexBuffer::create(&data, &[2, 3]);
-        let mut vao = VertexArrayObject::new(Primitive::TriangleFan);
+        self.vb.write(&data);
 
-        vao.add_vb(vb);
-        vao.bind();
-        vao.draw();
-        vao.bind();
-
+        unsafe {
+            gl::DrawArrays(Primitive::TriangleFan as u32, 0, 4);
+        }
     }
 }
 
 impl Bindable for Canvas2D {
     fn bind(&mut self) -> &mut Self {
+        unsafe {
+            gl::BindVertexArray(self.vao_handle);
+        }
+
+        self.vb.bind();
         self.program.bind();
         self.program.uniform("u_resolution", Uniform::Float2(self.width as f32, self.height as f32));
         self.program.uniform("u_pointSize", Uniform::Float(self.point_size));
@@ -189,6 +190,11 @@ impl Bindable for Canvas2D {
     }
 
     fn unbind(&mut self) -> &mut Self {
+        unsafe {
+            gl::BindVertexArray(0);
+        }
+        self.vb.unbind();
+
         self.program.unbind();
         self
     }
