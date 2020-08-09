@@ -1,4 +1,4 @@
-use std::mem;
+use std::{ptr, mem};
 
 use gl;
 use gl::types::*;
@@ -111,8 +111,29 @@ pub struct VertexBuffer {
     pub vertex_type: VertexType,
 }
 
-/// Generates a new Array Buffer and returns the associated id
-unsafe fn generate_buffer(data: &[f32]) -> u32 {
+/// Generates a dynamic ArrayyBuffer for dynamic writes
+/// The function only allocates the memory, it has to be filled with vertex data.
+///
+unsafe fn allocate_dynamic_buffer(data: &[f32]) -> u32 {
+    let total_size = data.len() * mem::size_of::<f32>();
+
+    let mut id = 0;
+    gl::GenBuffers(1, &mut id);
+
+    gl::BindBuffer(gl::ARRAY_BUFFER, id);
+    gl::BufferData(
+        gl::ARRAY_BUFFER,
+        total_size as GLsizeiptr,
+        ptr::null(),
+        gl::DYNAMIC_DRAW,
+    );
+    gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+
+    id
+}
+
+/// Generates a static ArrayBuffer that is initialized with vertex data
+unsafe fn allocate_static_buffer(data: &[f32]) -> u32 {
     let total_size = data.len() * mem::size_of::<f32>();
 
     let mut id = 0;
@@ -132,11 +153,12 @@ unsafe fn generate_buffer(data: &[f32]) -> u32 {
 
 impl VertexBuffer {
     /// Creates a new empty Vertex Buffer with vertex layout but without any existing data
-    /// This function is useful to pre-allocate a large enough buffer that needs updates later.
-    pub fn with_size(count: usize, components: Vec<u32>) -> Self {
+    /// This function is useful to pre-allocate a large enough buffer that frequently updates vertex data.
+    ///
+    pub fn dynamic(count: usize, components: Vec<u32>) -> Self {
         let num_components = components.iter().sum::<u32>();
         let id = unsafe {
-            generate_buffer(&vec![0.0; count * num_components as usize])
+            allocate_dynamic_buffer(&vec![0.0; count * num_components as usize])
         };
 
         Self {
@@ -147,9 +169,10 @@ impl VertexBuffer {
         }
     }
 
-    /// Constructs a new Vertex Buffer from Vertex Data
+    /// Constructs a new static VertexBuffer from the given vertex data
+    ///
     pub fn new(vertex_data: &VertexData) -> Self {
-        let id = unsafe { generate_buffer(vertex_data.data) };
+        let id = unsafe { allocate_static_buffer(vertex_data.data) };
 
         Self {
             id,
@@ -159,10 +182,33 @@ impl VertexBuffer {
         }
     }
 
-    /// Creates a new VertexBuffer from a float array
+    /// Creates a new VertexBuffer from given vertex array and components list
+    ///
     pub fn create(data: &[f32], components: &[u32]) -> Self {
         let vertex_data = VertexData::new(data, &components, VertexType::Float);
         Self::new(&vertex_data)
+    }
+
+    /// Copies vertex data from array into VertexBuffer
+    pub fn write(&mut self, data: &[f32]) {
+        self.write_offset(data, 0);
+    }
+
+    /// Copies array of vertex data into the VertexBuffer at specific offset
+    pub fn write_offset(&mut self, data: &[f32], offset: usize) {
+        let size = data.len() * mem::size_of::<f32>();
+        self.bind();
+
+        unsafe {
+            gl::BufferSubData(
+                gl::ARRAY_BUFFER,
+                (offset * self.component_size()) as GLintptr,
+                size as GLsizeiptr,
+                mem::transmute(&data[0]),
+            );
+        }
+
+        self.unbind();
     }
 
     /// Returns the size of the VertexBuffer
@@ -191,8 +237,8 @@ impl VertexBuffer {
     }
 
     /// Returns the size in bytes of all vertex components, e.g. (x,y,z,nx,ny) = 5 * 4
-    pub fn component_size(&self) -> i32 {
-        (self.num_components() as usize * (mem::size_of::<f32>())) as i32
+    pub fn component_size(&self) -> usize {
+        self.num_components() as usize * (mem::size_of::<f32>())
     }
 }
 
