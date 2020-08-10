@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 
 use crate::math::Color;
-use crate::render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
-use crate::render::{Bindable, Drawable, vertex_buffer::{VertexType, VertexData}, Uniform, opengl::get_error};
+use crate::render::{Primitive, Program, Shader, VertexBuffer};
+use crate::render::{Uniform, Bindable, VertexArrayObject, Drawable};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -10,7 +10,7 @@ static VERTEX_SHADER: &str = r#"
 uniform vec2 u_resolution;
 uniform float u_pointSize = 1.0;
 
-layout(location = 0) in vec2 position;
+layout(location = 0) in vec3 position;
 layout(location = 1) in vec3 color;
 
 out vec3 vColor;
@@ -36,6 +36,71 @@ void main() {
 }
 "#;
 
+/// Helper struct to collect all vertices
+struct DrawBatch {
+    pub vao: VertexArrayObject,
+    pub count: usize,
+}
+
+impl DrawBatch {
+    pub fn new(primitive: Primitive, count: usize) -> Self {
+        let vb = VertexBuffer::dynamic(count, vec![3, 3]);
+        let mut vao = VertexArrayObject::new(primitive);
+        vao.add_vb(vb);
+
+        DrawBatch {
+            vao,
+            count,
+        }
+    }
+
+    /// Appends the vertex data
+    pub fn append(&mut self, data: &[f32]) {
+        if let Some(vb) = self.vao.get_vb_mut(0) {
+            vb.write_offset(&data, self.count);
+            self.count += data.len() / 6;
+        }
+    }
+
+    /// Returns true if VertexBuffer is filled with vertex data to capacity
+    pub fn filled(&self) -> bool {
+        if let Some(vb) = self.vao.get_vb(0) {
+            self.count >= vb.size()
+        } else {
+            false
+        }
+    }
+}
+
+impl Drawable for DrawBatch {
+    fn draw(&mut self) {
+        if self.count > 0 {
+            unsafe {
+                gl::DrawArrays(self.vao.primitive.into(), 0, self.count as i32);
+            }
+        }
+        self.count = 0;
+    }
+}
+
+impl Bindable for DrawBatch {
+    fn bind(&mut self) -> &mut Self {
+        self.vao.bind();
+        self
+    }
+
+    fn unbind(&mut self) -> &mut Self {
+        // render any outstanding vertices
+        self.draw();
+        self.vao.unbind();
+        self
+    }
+
+    fn bound(&self) -> bool {
+        todo!()
+    }
+}
+
 pub struct Canvas2D {
     /// Width of the Canvas2D
     pub width: u32,
@@ -47,13 +112,11 @@ pub struct Canvas2D {
     draw_color: Color,
     /// size of the point
     point_size: f32,
-    /// store all point coordinates with colors, components: (x,yr,g,b)
-    point_vertices: RefCell<Box<Vec<f32>>>,
-    /// store all line coordinates with colors, components: (x,y,r,g,b)
-    line_vertices: RefCell<Box<Vec<f32>>>,
 
-    vb: VertexBuffer,
-    vao_handle: u32,
+    rects: DrawBatch,
+
+    /// The number of shapes to render
+    shapes_count: usize,
 }
 
 /// Compiles the used shader program
@@ -64,48 +127,12 @@ fn compile_program() -> Program {
     Program::create(vertex_shader, fragment_shader).unwrap()
 }
 
-unsafe fn create_vao(vb: &mut VertexBuffer) -> u32 {
-    // create new VAO object, get handle
-    let mut id = 0;
-    gl::GenVertexArrays(1, &mut id);
-
-    // bind VAO
-    gl::BindVertexArray(id);
-
-    // bind VB
-    vb.bind();
-
-    // setup VertexAttribPointer for vb
-    let mut index = 0;
-    let mut offset = 0;
-    for &component in vb.components() {
-        gl::VertexAttribPointer(
-            index as u32,
-            component as i32,
-            vb.vertex_type().into(),
-            gl::FALSE,
-            vb.stride() as i32,
-            offset as *const gl::types::GLvoid,
-        );
-        gl::EnableVertexAttribArray(index);
-
-        index += 1;
-        offset += component as usize * std::mem::size_of::<f32>();
-    }
-
-    // disable VAO
-    gl::BindVertexArray(0);
-
-    id
-}
-
 impl Canvas2D {
     /// Create a new instance of the canvas
     pub fn new(width: u32, height: u32) -> Self {
         let program = compile_program();
 
-        let mut vb = VertexBuffer::dynamic(600, vec![2, 3]);
-        let vao_handle = unsafe { create_vao(&mut vb) };
+        let rects = DrawBatch::new(Primitive::Triangles, 6 * 2048);
 
         Canvas2D {
             width,
@@ -113,41 +140,39 @@ impl Canvas2D {
             program,
             draw_color: Color::BLACK,
             point_size: 1.0,
-            point_vertices: RefCell::new(Box::new(Vec::new())),
-            line_vertices: RefCell::new(Box::new(Vec::new())),
-            vao_handle,
-            vb,
+            rects,
+            shapes_count: 0,
         }
     }
 
     /// Clears the canvas, sets it to given colors
-    pub fn clear(&self, _r: f32, _g: f32, _b: f32, _a: f32) -> &Self {
-        self
+    pub fn clear(&self, _r: f32, _g: f32, _b: f32, _a: f32) {
     }
 
     /// Sets the point size (if available)
-    pub fn set_pointsize(&mut self, size: f32) -> &Self {
+    pub fn set_pointsize(&mut self, size: f32) {
         self.point_size = size;
-        self
     }
 
     /// Sets the color to render the next draw calls with
-    pub fn set_color(&mut self, color: Color) -> &Self {
+    pub fn set_color(&mut self, color: Color) {
         self.draw_color = color;
-        self
     }
 
     /// Draws a point
-    pub fn draw_point(&self, x: f32, y: f32) -> &Self {
+    pub fn draw_point(&self, x: f32, y: f32) {
+        /*
         let mut points = self.point_vertices.borrow_mut();
         points.push(x);
         points.push(y);
         points.append(&mut self.draw_color.rgb_vec());
         self
+        */
     }
 
     /// Draws a line
-    pub fn draw_line(&self, start_x: f32, start_y: f32, end_x: f32, end_y: f32) -> &Self {
+    pub fn draw_line(&self, start_x: f32, start_y: f32, end_x: f32, end_y: f32) {
+        /*
         let mut lines = self.line_vertices.borrow_mut();
         lines.push(start_x);
         lines.push(start_y);
@@ -156,38 +181,43 @@ impl Canvas2D {
         lines.push(end_y);
         lines.append(&mut self.draw_color.rgb_vec());
         self
+        */
     }
 
     /// Pushes the geometry for a rect, to be rendered
     pub fn draw_rect(&mut self, left: f32, top: f32, right: f32, bottom: f32) {
         let c = &self.draw_color;
         let data = vec![
-            left, top, c.r, c.g, c.b,
-            right, top, c.r, c.g, c.b,
-            right, bottom, c.r, c.g, c.b,
-            right, bottom, c.r, c.g, c.b,
-            left, bottom, c.r, c.g, c.b,
-            left, top, c.r, c.g, c.b,
+            left, top, self.zoffset(), c.r, c.g, c.b,
+            right, top, self.zoffset(), c.r, c.g, c.b,
+            right, bottom, self.zoffset(), c.r, c.g, c.b,
+            right, bottom, self.zoffset(), c.r, c.g, c.b,
+            left, bottom, self.zoffset(), c.r, c.g, c.b,
+            left, top, self.zoffset(), c.r, c.g, c.b,
         ];
 
-        self.vb.append(&data);
-        if self.vb.full() {
-            unsafe {
-                gl::DrawArrays(Primitive::Triangles as u32, 0, self.vb.size() as i32);
-            }
-            self.vb.clear();
+        // not the most elegant solution, but should work okayish
+        self.rects.append(&data);
+        if self.rects.filled() {
+            self.rects.draw();
         }
 
+        self.inc_shapes();
+    }
+
+    fn inc_shapes(&mut self) {
+        self.shapes_count += 1;
+    }
+
+    /// Returns the next z value
+    fn zoffset(&self) -> f32 {
+        1.0 / ((self.shapes_count + 1) as f32)
     }
 }
 
 impl Bindable for Canvas2D {
     fn bind(&mut self) -> &mut Self {
-        unsafe {
-            gl::BindVertexArray(self.vao_handle);
-        }
-
-        self.vb.bind();
+        self.rects.bind();
         self.program.bind();
         self.program.uniform("u_resolution", Uniform::Float2(self.width as f32, self.height as f32));
         self.program.uniform("u_pointSize", Uniform::Float(self.point_size));
@@ -195,17 +225,10 @@ impl Bindable for Canvas2D {
     }
 
     fn unbind(&mut self) -> &mut Self {
-        unsafe {
-            gl::DrawArrays(Primitive::TriangleFan as u32, 0, self.vb.size() as i32);
-        }
-        self.vb.clear();
-
-        unsafe {
-            gl::BindVertexArray(0);
-        }
-        self.vb.unbind();
-
+        self.rects.unbind();
         self.program.unbind();
+        // reset the count value
+        self.shapes_count = 0;
         self
     }
 

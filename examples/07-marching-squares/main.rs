@@ -140,7 +140,6 @@ fn main() {
             }
         }
 
-        canvas.render();
         canvas.unbind();
 
         window.swap_buffers();
