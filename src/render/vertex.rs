@@ -50,28 +50,20 @@ impl VertexArrayObject {
     }
 
     /// Add a vertex buffer to use
-    pub fn add_vb(&mut self, vb: VertexBuffer) -> &mut Self {
+    pub fn add_vb(&mut self, vb: VertexBuffer) {
         self.vbs.push(vb);
-        self
+        self.setup_vertex_layout();
     }
 
     /// Add an index buffer
-    pub fn add_ib(&mut self, ib: IndexBuffer) -> &mut Self {
+    pub fn add_ib(&mut self, ib: IndexBuffer) {
         self.ibs.push(ib);
-        self
     }
-}
 
-impl Bindable for VertexArrayObject {
-    /// Binds the resource
-    ///
-    /// References
-    /// * https://stackoverflow.com/questions/16380005/opengl-3-4-glvertexattribpointer-stride-and-offset-miscalculation
-    /// * https://learnopengl.com/Getting-started/Shaders
-    fn bind(&mut self) -> &mut Self {
-        unsafe {
-            gl::BindVertexArray(self.id);
-        }
+    /// Sets up vertex buffer arrays and the vertex layout
+    /// This is done whenever the buffers for this VAO changes to update the layout.
+    fn setup_vertex_layout(&mut self) {
+        unsafe { gl::BindVertexArray(self.id); }
 
         let mut index = 0;
         for vb in self.vbs.iter_mut() {
@@ -88,12 +80,39 @@ impl Bindable for VertexArrayObject {
                         vb.stride() as i32,
                         offset as *const gl::types::GLvoid,
                     );
-
                     gl::EnableVertexAttribArray(index);
                 }
 
                 index += 1;
                 offset += component as usize * std::mem::size_of::<f32>();
+            }
+        }
+
+        unsafe { gl::BindVertexArray(0); }
+    }
+}
+
+impl Bindable for VertexArrayObject {
+    /// Binds the resource
+    ///
+    /// References
+    /// * https://stackoverflow.com/questions/16380005/opengl-3-4-glvertexattribpointer-stride-and-offset-miscalculation
+    /// * https://learnopengl.com/Getting-started/Shaders
+    ///
+    fn bind(&mut self) -> &mut Self {
+        unsafe {
+            gl::BindVertexArray(self.id);
+        }
+
+        let mut index = 0;
+        for vb in self.vbs.iter_mut() {
+            vb.bind();
+
+            for _i in vb.components() {
+                unsafe {
+                    gl::EnableVertexAttribArray(index);
+                }
+                index += 1;
             }
         }
 
