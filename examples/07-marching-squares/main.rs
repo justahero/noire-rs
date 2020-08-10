@@ -24,7 +24,7 @@ fn get_state(a: i32, b: i32, c: i32, d: i32) -> i32 {
     a * 8 + b * 4 + c * 2 + d
 }
 
-fn line(canvas: &Canvas2D, l: &Vector2, r: &Vector2) {
+fn line(canvas: &mut Canvas2D, l: &Vector2, r: &Vector2) {
     canvas.draw_line(l.x, l.y, r.x, r.y);
 }
 
@@ -121,20 +121,20 @@ fn main() {
                 let d = Vector2::new(x, lerp(y, y + rez, amt));
 
                 match state {
-                    1 => {line(&canvas, &c, &d); },
-                    2 => {line(&canvas, &b, &c); },
-                    3 => {line(&canvas, &b, &d); },
-                    4 => {line(&canvas, &a, &b); },
-                    5 => {line(&canvas, &a, &d); line(&canvas, &b, &c); },
-                    6 => {line(&canvas, &a, &c); },
-                    7 => {line(&canvas, &a, &d); },
-                    8 => {line(&canvas, &a, &d); },
-                    9 => {line(&canvas, &a, &c); },
-                    10 => {line(&canvas, &a, &b); line(&canvas, &c, &d); },
-                    11 => {line(&canvas, &a, &b); },
-                    12 => {line(&canvas, &b, &d); },
-                    13 => {line(&canvas, &b, &c); },
-                    14 => {line(&canvas, &c, &d); },
+                    1 => {line(&mut canvas, &c, &d); },
+                    2 => {line(&mut canvas, &b, &c); },
+                    3 => {line(&mut canvas, &b, &d); },
+                    4 => {line(&mut canvas, &a, &b); },
+                    5 => {line(&mut canvas, &a, &d); line(&mut canvas, &b, &c); },
+                    6 => {line(&mut canvas, &a, &c); },
+                    7 => {line(&mut canvas, &a, &d); },
+                    8 => {line(&mut canvas, &a, &d); },
+                    9 => {line(&mut canvas, &a, &c); },
+                    10 => {line(&mut canvas, &a, &b); line(&mut canvas, &c, &d); },
+                    11 => {line(&mut canvas, &a, &b); },
+                    12 => {line(&mut canvas, &b, &d); },
+                    13 => {line(&mut canvas, &b, &c); },
+                    14 => {line(&mut canvas, &c, &d); },
                     _ => (),
                 };
             }

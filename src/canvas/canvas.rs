@@ -114,6 +114,7 @@ pub struct Canvas2D {
     point_size: f32,
 
     rects: DrawBatch,
+    lines: DrawBatch,
 
     /// The number of shapes to render
     shapes_count: usize,
@@ -133,6 +134,7 @@ impl Canvas2D {
         let program = compile_program();
 
         let rects = DrawBatch::new(Primitive::Triangles, 6 * 2048);
+        let lines = DrawBatch::new(Primitive::Lines, 1024);
 
         Canvas2D {
             width,
@@ -141,6 +143,7 @@ impl Canvas2D {
             draw_color: Color::BLACK,
             point_size: 1.0,
             rects,
+            lines,
             shapes_count: 0,
         }
     }
@@ -171,7 +174,20 @@ impl Canvas2D {
     }
 
     /// Draws a line
-    pub fn draw_line(&self, start_x: f32, start_y: f32, end_x: f32, end_y: f32) {
+    pub fn draw_line(&mut self, start_x: f32, start_y: f32, end_x: f32, end_y: f32) {
+        let c = &self.draw_color;
+        let data = vec![
+            start_x, start_y, self.zoffset(), c.r, c.g, c.b,
+            end_x, end_y, self.zoffset(), c.r, c.g, c.b,
+        ];
+
+        self.lines.append(&data);
+        if self.lines.filled() {
+            self.lines.draw();
+        }
+
+        self.inc_shapes();
+
         /*
         let mut lines = self.line_vertices.borrow_mut();
         lines.push(start_x);
