@@ -104,7 +104,7 @@ impl Canvas2D {
     pub fn new(width: u32, height: u32) -> Self {
         let program = compile_program();
 
-        let mut vb = VertexBuffer::dynamic(4, vec![2, 3]);
+        let mut vb = VertexBuffer::dynamic(600, vec![2, 3]);
         let vao_handle = unsafe { create_vao(&mut vb) };
 
         Canvas2D {
@@ -165,14 +165,19 @@ impl Canvas2D {
             left, top, c.r, c.g, c.b,
             right, top, c.r, c.g, c.b,
             right, bottom, c.r, c.g, c.b,
+            right, bottom, c.r, c.g, c.b,
             left, bottom, c.r, c.g, c.b,
+            left, top, c.r, c.g, c.b,
         ];
 
-        self.vb.write(&data);
-
-        unsafe {
-            gl::DrawArrays(Primitive::TriangleFan as u32, 0, 4);
+        self.vb.append(&data);
+        if self.vb.full() {
+            unsafe {
+                gl::DrawArrays(Primitive::Triangles as u32, 0, self.vb.size() as i32);
+            }
+            self.vb.clear();
         }
+
     }
 }
 
@@ -190,6 +195,11 @@ impl Bindable for Canvas2D {
     }
 
     fn unbind(&mut self) -> &mut Self {
+        unsafe {
+            gl::DrawArrays(Primitive::TriangleFan as u32, 0, self.vb.size() as i32);
+        }
+        self.vb.clear();
+
         unsafe {
             gl::BindVertexArray(0);
         }
