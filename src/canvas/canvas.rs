@@ -1,8 +1,8 @@
 use std::cell::RefCell;
 
 use crate::math::Color;
-use crate::render::{Primitive, Program, Shader, VertexArrayObject, VertexBuffer};
-use crate::render::{Bindable, Drawable, vertex_buffer::{VertexType, VertexData}, Uniform};
+use crate::render::{Primitive, Program, Shader, VertexBuffer};
+use crate::render::{Uniform, Bindable, VertexArrayObject, Drawable};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -36,6 +36,96 @@ void main() {
 }
 "#;
 
+fn generate_vao(vb: &mut VertexBuffer) -> u32 {
+    let mut id = 0;
+
+    unsafe { gl::GenVertexArrays(1, &mut id); }
+    unsafe { gl::BindVertexArray(id); }
+
+    vb.bind();
+
+    let mut index = 0;
+    let mut offset = 0;
+    for &component in &vb.components {
+        unsafe {
+            gl::VertexAttribPointer(
+                index as u32,
+                component as i32,
+                vb.vertex_type().into(),
+                gl::FALSE,
+                vb.stride() as i32,
+                offset as *const gl::types::GLvoid,
+            );
+            gl::EnableVertexAttribArray(index);
+        }
+
+        index += 1;
+        offset += component as usize * std::mem::size_of::<f32>();
+    }
+
+    unsafe { gl::BindVertexArray(0); }
+
+    id
+}
+
+/// Helper struct to collect all vertices
+struct VertexBatch {
+    pub primitive: Primitive,
+    pub vao: u32,
+    pub vb: VertexBuffer,
+    pub count: usize,
+}
+
+impl VertexBatch {
+    pub fn new(primitive: Primitive, count: usize) -> Self {
+        let mut vb = VertexBuffer::dynamic(count, vec![2, 3]);
+        let vao = generate_vao(&mut vb);
+
+        VertexBatch {
+            vao,
+            vb,
+            primitive,
+            count,
+        }
+    }
+
+    /// Appends the vertex data
+    pub fn append(&mut self, data: &[f32]) {
+        self.vb.write_offset(&data, self.count);
+        self.count += data.len() / self.vb.num_components() as usize;
+    }
+
+    /// Returns true if VertexBuffer is filled with vertex data to capacity
+    pub fn filled(&self) -> bool {
+        self.count >= self.vb.size() - (self.vb.num_components() * self.vb.stride()) as usize
+    }
+
+    fn bind(&self) {
+        for index in 0..self.vb.components.len() {
+            unsafe { gl::EnableVertexAttribArray(index as u32); }
+        }
+    }
+
+    fn unbind(&self) {
+        for index in 0..self.vb.components.len() {
+            unsafe { gl::DisableVertexAttribArray(index as u32); }
+        }
+    }
+}
+
+impl Drawable for VertexBatch {
+    fn draw(&mut self) {
+        unsafe { gl::BindVertexArray(self.vao) };
+        self.bind();
+        if self.count > 0 {
+            unsafe { gl::DrawArrays(self.primitive.into(), 0, self.count as i32); }
+            self.count = 0;
+        }
+        self.unbind();
+        unsafe { gl::BindVertexArray(0) };
+    }
+}
+
 pub struct Canvas2D {
     /// Width of the Canvas2D
     pub width: u32,
@@ -47,12 +137,12 @@ pub struct Canvas2D {
     draw_color: Color,
     /// size of the point
     point_size: f32,
-    /// store all point coordinates with colors, components: (x,yr,g,b)
-    point_vertices: RefCell<Box<Vec<f32>>>,
-    /// store all line coordinates with colors, components: (x,y,r,g,b)
-    line_vertices: RefCell<Box<Vec<f32>>>,
-    /// store all rect coordinates with colors, components: (x,y,r,g,b)
-    rect_vertices: RefCell<Box<Vec<f32>>>,
+    /// VAO Buffer with vertex data for rects
+    rects: VertexBatch,
+    /// VAO Buffer with vertex data for lines
+    lines: VertexBatch,
+    /// VAO Buffer with vertex data for points
+    points: VertexBatch,
 }
 
 /// Compiles the used shader program
@@ -68,145 +158,73 @@ impl Canvas2D {
     pub fn new(width: u32, height: u32) -> Self {
         let program = compile_program();
 
+        let rects = VertexBatch::new(Primitive::Triangles, 512);
+        let lines = VertexBatch::new(Primitive::Lines, 512);
+        let points = VertexBatch::new(Primitive::Points, 512);
+
         Canvas2D {
             width,
             height,
             program,
             draw_color: Color::BLACK,
             point_size: 1.0,
-            point_vertices: RefCell::new(Box::new(Vec::new())),
-            line_vertices: RefCell::new(Box::new(Vec::new())),
-            rect_vertices: RefCell::new(Box::new(Vec::new())),
+            rects,
+            lines,
+            points,
         }
-    }
-
-    /// Clears the canvas, sets it to given colors
-    pub fn clear(&self, _r: f32, _g: f32, _b: f32, _a: f32) -> &Self {
-        self
     }
 
     /// Sets the point size (if available)
-    pub fn set_pointsize(&mut self, size: f32) -> &Self {
+    pub fn set_pointsize(&mut self, size: f32) {
         self.point_size = size;
-        self
     }
 
     /// Sets the color to render the next draw calls with
-    pub fn set_color(&mut self, color: Color) -> &Self {
+    pub fn set_color(&mut self, color: Color) {
         self.draw_color = color;
-        self
     }
 
     /// Draws a point
-    pub fn draw_point(&self, x: f32, y: f32) -> &Self {
-        let mut points = self.point_vertices.borrow_mut();
-        points.push(x);
-        points.push(y);
-        points.append(&mut self.draw_color.rgb_vec());
-        self
+    pub fn draw_point(&mut self, x: f32, y: f32) {
+        let c = &self.draw_color;
+        let data = vec![x, y, c.r, c.g, c.b];
+
+        self.points.append(&data);
+        if self.points.filled() {
+            self.points.draw();
+        }
     }
 
     /// Draws a line
-    pub fn draw_line(&self, start_x: f32, start_y: f32, end_x: f32, end_y: f32) -> &Self {
-        let mut lines = self.line_vertices.borrow_mut();
-        lines.push(start_x);
-        lines.push(start_y);
-        lines.append(&mut self.draw_color.rgb_vec());
-        lines.push(end_x);
-        lines.push(end_y);
-        lines.append(&mut self.draw_color.rgb_vec());
-        self
+    pub fn draw_line(&mut self, start_x: f32, start_y: f32, end_x: f32, end_y: f32) {
+        let c = &self.draw_color;
+        let data = vec![
+            start_x, start_y, c.r, c.g, c.b,
+            end_x, end_y, c.r, c.g, c.b,
+        ];
+
+        self.lines.append(&data);
+        if self.lines.filled() {
+            self.lines.draw();
+        }
     }
 
     /// Pushes the geometry for a rect, to be rendered
-    pub fn draw_rect(&self, left: f32, top: f32, right: f32, bottom: f32) -> &Self {
-        let mut rects = self.rect_vertices.borrow_mut();
-        rects.push(left);
-        rects.push(top);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(right);
-        rects.push(top);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(right);
-        rects.push(bottom);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(right);
-        rects.push(bottom);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(left);
-        rects.push(bottom);
-        rects.append(&mut self.draw_color.rgb_vec());
-        rects.push(left);
-        rects.push(top);
-        rects.append(&mut self.draw_color.rgb_vec());
-        self
-    }
+    pub fn draw_rect(&mut self, left: f32, top: f32, right: f32, bottom: f32) {
+        let c = &self.draw_color;
+        let data = vec![
+            left, top, c.r, c.g, c.b,
+            right, top, c.r, c.g, c.b,
+            right, bottom, c.r, c.g, c.b,
+            right, bottom, c.r, c.g, c.b,
+            left, bottom, c.r, c.g, c.b,
+            left, top, c.r, c.g, c.b,
+        ];
 
-    /// Renders the content of the canvas.
-    /// The function resizes the Renderbuffer if the framebuffer size is different
-    pub fn render(&mut self) {
-        self.render_rects();
-        self.render_lines();
-        self.render_points();
-    }
-
-    /// Renders all points
-    fn render_points(&mut self) {
-        let mut points = self.point_vertices.borrow_mut();
-
-        if !points.is_empty() {
-            let vertex_data = VertexData::new(&points[..], &[2, 3], VertexType::Float);
-            let vb = VertexBuffer::new(&vertex_data);
-
-            // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Points);
-            vao.add_vb(vb);
-
-            vao.bind();
-            vao.draw();
-            vao.unbind();
-
-            points.clear();
-        }
-    }
-
-    /// Renders all lines using VertexBuffer and VAO
-    fn render_lines(&mut self) {
-        let mut lines = self.line_vertices.borrow_mut();
-
-        if !lines.is_empty() {
-            let vertex_data = VertexData::new(&lines[..], &[2, 3], VertexType::Float);
-            let vb = VertexBuffer::new(&vertex_data);
-
-            // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Lines);
-            vao.add_vb(vb);
-
-            vao.bind();
-            vao.draw();
-            vao.unbind();
-
-            lines.clear();
-        }
-    }
-
-    /// Renders all rects using VertexBuffer and VAO
-    fn render_rects(&mut self) {
-        let mut rects = self.rect_vertices.borrow_mut();
-
-        if !rects.is_empty() {
-            let vertex_data = VertexData::new(&rects[..], &[2, 3], VertexType::Float);
-            let vb = VertexBuffer::new(&vertex_data);
-
-            // create buffers
-            let mut vao = VertexArrayObject::new(Primitive::Triangles);
-            vao.add_vb(vb);
-
-            vao.bind();
-            vao.draw();
-            vao.unbind();
-
-            rects.clear();
+        // not the most elegant solution, but should work okayish
+        self.rects.append(&data);
+        if self.rects.filled() {
+            self.rects.draw();
         }
     }
 }
@@ -220,6 +238,8 @@ impl Bindable for Canvas2D {
     }
 
     fn unbind(&mut self) -> &mut Self {
+        self.rects.draw();
+        self.lines.draw();
         self.program.unbind();
         self
     }

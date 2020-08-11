@@ -24,7 +24,7 @@ fn get_state(a: i32, b: i32, c: i32, d: i32) -> i32 {
     a * 8 + b * 4 + c * 2 + d
 }
 
-fn line(canvas: &Canvas2D, l: &Vector2, r: &Vector2) {
+fn line(canvas: &mut Canvas2D, l: &Vector2, r: &Vector2) {
     canvas.draw_line(l.x, l.y, r.x, r.y);
 }
 
@@ -40,11 +40,12 @@ fn main() {
     let mut canvas = Canvas2D::new(800, 800);
     let noise = OpenSimplexNoise::new(0);
 
-    let rez = 8.0;
+    let rez = 6.0;
     let cols = 1 + canvas.width / (rez as u32);
     let rows = 1 + canvas.height / (rez as u32);
 
-    let increment = 0.1;
+    let increment = 0.04;
+    let zincrement = 0.0025;
     let mut zoff = 0.0;
 
     let mut field: Vec<f32> = vec![0.0; (cols * rows) as usize];
@@ -80,7 +81,7 @@ fn main() {
                 yoff += increment;
             }
         }
-        zoff += 0.01;
+        zoff += zincrement;
 
         // render all iso lines, the contour
         canvas.set_color(Color::rgb(1.0, 1.0, 1.0));
@@ -121,26 +122,25 @@ fn main() {
                 let d = Vector2::new(x, lerp(y, y + rez, amt));
 
                 match state {
-                    1 => {line(&canvas, &c, &d); },
-                    2 => {line(&canvas, &b, &c); },
-                    3 => {line(&canvas, &b, &d); },
-                    4 => {line(&canvas, &a, &b); },
-                    5 => {line(&canvas, &a, &d); line(&canvas, &b, &c); },
-                    6 => {line(&canvas, &a, &c); },
-                    7 => {line(&canvas, &a, &d); },
-                    8 => {line(&canvas, &a, &d); },
-                    9 => {line(&canvas, &a, &c); },
-                    10 => {line(&canvas, &a, &b); line(&canvas, &c, &d); },
-                    11 => {line(&canvas, &a, &b); },
-                    12 => {line(&canvas, &b, &d); },
-                    13 => {line(&canvas, &b, &c); },
-                    14 => {line(&canvas, &c, &d); },
+                    1 => {line(&mut canvas, &c, &d); },
+                    2 => {line(&mut canvas, &b, &c); },
+                    3 => {line(&mut canvas, &b, &d); },
+                    4 => {line(&mut canvas, &a, &b); },
+                    5 => {line(&mut canvas, &a, &d); line(&mut canvas, &b, &c); },
+                    6 => {line(&mut canvas, &a, &c); },
+                    7 => {line(&mut canvas, &a, &d); },
+                    8 => {line(&mut canvas, &a, &d); },
+                    9 => {line(&mut canvas, &a, &c); },
+                    10 => {line(&mut canvas, &a, &b); line(&mut canvas, &c, &d); },
+                    11 => {line(&mut canvas, &a, &b); },
+                    12 => {line(&mut canvas, &b, &d); },
+                    13 => {line(&mut canvas, &b, &c); },
+                    14 => {line(&mut canvas, &c, &d); },
                     _ => (),
                 };
             }
         }
 
-        canvas.render();
         canvas.unbind();
 
         window.swap_buffers();

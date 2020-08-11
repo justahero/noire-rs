@@ -11,9 +11,9 @@ static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
 /// A struct to represent a OpenGL vertex array object (VAO)
 pub struct VertexArrayObject {
     /// the OpenGL instance id
-    id: u32,
+    pub id: u32,
     /// The used render type
-    primitive_type: Primitive,
+    pub primitive: Primitive,
     /// The list of Vertex Buffers
     vbs: Vec<VertexBuffer>,
     /// The list of Index Buffers,
@@ -22,7 +22,7 @@ pub struct VertexArrayObject {
 
 impl VertexArrayObject {
     /// Create a new instance of a VertexArrayObject
-    pub fn new(primitive_type: Primitive) -> VertexArrayObject {
+    pub fn new(primitive: Primitive) -> VertexArrayObject {
         let mut id = 0;
 
         unsafe {
@@ -31,7 +31,7 @@ impl VertexArrayObject {
 
         VertexArrayObject {
             id,
-            primitive_type,
+            primitive,
             vbs: vec![],
             ibs: vec![],
         }
@@ -58,6 +58,16 @@ impl VertexArrayObject {
     /// Add an index buffer
     pub fn add_ib(&mut self, ib: IndexBuffer) {
         self.ibs.push(ib);
+    }
+
+    /// Returns a reference to the VertexBuffer
+    pub fn get_vb(&self, index: usize) -> Option<&VertexBuffer> {
+        self.vbs.get(index)
+    }
+
+    /// Returns a mutable reference to the VertexBuffer
+    pub fn get_vb_mut(&mut self, index: usize) -> Option<&mut VertexBuffer> {
+        self.vbs.get_mut(index)
     }
 
     /// Sets up vertex buffer arrays and the vertex layout
@@ -158,7 +168,7 @@ impl Drawable for VertexArrayObject {
         let vb = &self.vbs[0];
         if self.ibs.is_empty() {
             unsafe {
-                gl::DrawArrays(self.primitive_type.into(), 0, vb.size() as i32);
+                gl::DrawArrays(self.primitive.into(), 0, vb.size() as i32);
             }
         } else {
             let ib = &self.ibs[0];
