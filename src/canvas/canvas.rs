@@ -36,68 +36,93 @@ void main() {
 }
 "#;
 
+fn generate_vao(vb: &mut VertexBuffer) -> u32 {
+    let mut id = 0;
+
+    unsafe { gl::GenVertexArrays(1, &mut id); }
+    unsafe { gl::BindVertexArray(id); }
+
+    vb.bind();
+
+    let mut index = 0;
+    let mut offset = 0;
+    for &component in &vb.components {
+        unsafe {
+            gl::VertexAttribPointer(
+                index as u32,
+                component as i32,
+                vb.vertex_type().into(),
+                gl::FALSE,
+                vb.stride() as i32,
+                offset as *const gl::types::GLvoid,
+            );
+            gl::EnableVertexAttribArray(index);
+        }
+
+        index += 1;
+        offset += component as usize * std::mem::size_of::<f32>();
+    }
+
+    unsafe { gl::BindVertexArray(0); }
+
+    id
+}
+
 /// Helper struct to collect all vertices
 struct DrawBatch {
-    pub vao: VertexArrayObject,
+    pub primitive: Primitive,
+    pub vao: u32,
+    pub vb: VertexBuffer,
     pub count: usize,
 }
 
 impl DrawBatch {
     pub fn new(primitive: Primitive, count: usize) -> Self {
-        let vb = VertexBuffer::dynamic(count, vec![3, 3]);
-        let mut vao = VertexArrayObject::new(primitive);
-        vao.add_vb(vb);
+        let mut vb = VertexBuffer::dynamic(count, vec![3, 3]);
+        let vao = generate_vao(&mut vb);
 
         DrawBatch {
             vao,
+            vb,
+            primitive,
             count,
         }
     }
 
     /// Appends the vertex data
     pub fn append(&mut self, data: &[f32]) {
-        if let Some(vb) = self.vao.get_vb_mut(0) {
-            vb.write_offset(&data, self.count);
-            self.count += data.len() / 6;
-        }
+        self.vb.write_offset(&data, self.count);
+        self.count += data.len() / self.vb.num_components() as usize;
     }
 
     /// Returns true if VertexBuffer is filled with vertex data to capacity
     pub fn filled(&self) -> bool {
-        if let Some(vb) = self.vao.get_vb(0) {
-            self.count >= vb.size()
-        } else {
-            false
+        self.count >= self.vb.size() - (self.vb.num_components() * self.vb.stride()) as usize
+    }
+
+    fn bind(&self) {
+        for index in 0..self.vb.components.len() {
+            unsafe { gl::EnableVertexAttribArray(index as u32); }
+        }
+    }
+
+    fn unbind(&self) {
+        for index in 0..self.vb.components.len() {
+            unsafe { gl::DisableVertexAttribArray(index as u32); }
         }
     }
 }
 
 impl Drawable for DrawBatch {
     fn draw(&mut self) {
+        unsafe { gl::BindVertexArray(self.vao) };
+        self.bind();
         if self.count > 0 {
-            unsafe {
-                gl::DrawArrays(self.vao.primitive.into(), 0, self.count as i32);
-            }
+            unsafe { gl::DrawArrays(self.primitive.into(), 0, self.count as i32); }
+            self.count = 0;
         }
-        self.count = 0;
-    }
-}
-
-impl Bindable for DrawBatch {
-    fn bind(&mut self) -> &mut Self {
-        self.vao.bind();
-        self
-    }
-
-    fn unbind(&mut self) -> &mut Self {
-        // render any outstanding vertices
-        self.draw();
-        self.vao.unbind();
-        self
-    }
-
-    fn bound(&self) -> bool {
-        todo!()
+        self.unbind();
+        unsafe { gl::BindVertexArray(0) };
     }
 }
 
@@ -133,8 +158,8 @@ impl Canvas2D {
     pub fn new(width: u32, height: u32) -> Self {
         let program = compile_program();
 
-        let rects = DrawBatch::new(Primitive::Triangles, 6 * 2048);
-        let lines = DrawBatch::new(Primitive::Lines, 1024);
+        let rects = DrawBatch::new(Primitive::Triangles, 512);
+        let lines = DrawBatch::new(Primitive::Lines, 512);
 
         Canvas2D {
             width,
@@ -233,7 +258,6 @@ impl Canvas2D {
 
 impl Bindable for Canvas2D {
     fn bind(&mut self) -> &mut Self {
-        self.rects.bind();
         self.program.bind();
         self.program.uniform("u_resolution", Uniform::Float2(self.width as f32, self.height as f32));
         self.program.uniform("u_pointSize", Uniform::Float(self.point_size));
@@ -241,9 +265,9 @@ impl Bindable for Canvas2D {
     }
 
     fn unbind(&mut self) -> &mut Self {
-        self.rects.unbind();
+        self.rects.draw();
+
         self.program.unbind();
-        // reset the count value
         self.shapes_count = 0;
         self
     }
