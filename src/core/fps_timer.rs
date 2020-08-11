@@ -10,6 +10,8 @@ pub struct FpsTimer {
     frames: VecDeque<f64>,
     /// The last time stamp
     last_time: f64,
+    /// Total frames measured since start
+    total_frames: usize,
 }
 
 impl FpsTimer {
@@ -18,7 +20,8 @@ impl FpsTimer {
         Self {
             timer: Timer::now(),
             frames: VecDeque::new(),
-            last_time: 0.0
+            last_time: 0.0,
+            total_frames: 0,
         }
     }
 
@@ -28,11 +31,13 @@ impl FpsTimer {
         let current_time = self.timer.elapsed_in_seconds();
         let elapsed = current_time - self.last_time;
         self.last_time = current_time;
-        self.frames.push_back(elapsed);
 
+        self.frames.push_back(elapsed);
         if self.frames.len() >= MAX_FPS_COUNT {
             self.frames.pop_front();
         }
+
+        self.total_frames += 1;
 
         elapsed
     }
@@ -41,5 +46,10 @@ impl FpsTimer {
     pub fn fps(&self) -> f64 {
         let fps: f64 = self.frames.iter().sum();
         1.0 / fps * (self.frames.len() as f64)
+    }
+
+    /// Returns the total number frames measured
+    pub fn total_frames(&self) -> usize {
+        self.total_frames
     }
 }
