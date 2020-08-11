@@ -127,6 +127,8 @@ pub enum Primitive {
     Points = gl::POINTS,
     /// used to render separate triangles
     Triangles = gl::TRIANGLES,
+    /// used to render a triangle fan
+    TriangleFan = gl::TRIANGLE_FAN,
     /// used to render connected triangle strips
     TriangleStrip = gl::TRIANGLE_STRIP,
 }
@@ -137,6 +139,7 @@ impl From<Primitive> for gl::types::GLenum {
             Primitive::Lines => gl::LINES,
             Primitive::Points => gl::POINTS,
             Primitive::Triangles => gl::TRIANGLES,
+            Primitive::TriangleFan => gl::TRIANGLE_FAN,
             Primitive::TriangleStrip => gl::TRIANGLE_STRIP,
         }
     }
