@@ -13,8 +13,9 @@ use opensimplex::OpenSimplexNoise;
 use noire::canvas::Canvas2D;
 use noire::math::{Color, PerlinNoise, random_f32, Rect, Vector2};
 use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform}};
-use std::time::Instant;
+use std::{path::Path, time::Instant, ffi::c_void, fs::File};
 use cgmath::{Vector3, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
+use image::{RgbImage, ImageBuffer, DynamicImage, ImageFormat};
 
 fn lerp(v0: f32, v1: f32, t: f32) -> f32 {
     (1.0 - t) * v0 + t * v1
@@ -28,8 +29,53 @@ fn line(canvas: &mut Canvas2D, l: &Vector2, r: &Vector2) {
     canvas.draw_line(l.x, l.y, r.x, r.y);
 }
 
+/// Saves the content of the frame buffer (back) to a file named
+///
+/// Check the following article for more details on how to read pixel data from
+/// Framebuffer to store it in an image file
+/// https://tonyfinn.com/capturing-screenshots-with-rust-opengl.html
+/// TODO
+fn save_frame_buffer(width: u32, height: u32, filename: &String) -> std::io::Result<()>  {
+    let path = Path::new(filename);
+
+    // get pixel data from framebuffer (BACK)
+    let image = copy_frame_buffer_to_image(width, height);
+
+    // store the image to the file
+    // TODO fix the following line
+    let mut image_file = File::create(&filename)?;
+    image.write_to(&mut image_file, ImageFormat::Png).expect("Failed to save image");
+
+    Ok(())
+}
+
+/// Copies the content of the frame buffer (back) to an image.
+/// TODO refactor
+/// * add result return type with appropriate error
+/// * move function to somewhere else
+///
+fn copy_frame_buffer_to_image(width: u32, height: u32) -> DynamicImage {
+    let mut image = DynamicImage::new_rgba8(width, height);
+    let pixel_data = image.as_mut_rgba8().unwrap();
+
+    unsafe {
+        let ptr = pixel_data.as_mut_ptr() as *mut c_void;
+
+        gl::PixelStorei(gl::PACK_ALIGNMENT, 1);
+        gl::ReadPixels(
+            0, 0,
+            width as i32, height as i32,
+            gl::RGBA,
+            gl::UNSIGNED_BYTE,
+            ptr,
+        );
+    }
+
+    image
+}
+
 fn main() {
-    let window_size = Size::new(800, 800);
+    let window_size = Size::new(600, 600);
 
     let mut window = RenderWindow::create(&window_size, "Hello This is window").unwrap();
     window.enable(Capability::ProgramPointSize);
@@ -37,15 +83,16 @@ fn main() {
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
 
-    let mut canvas = Canvas2D::new(800, 800);
+    let mut canvas = Canvas2D::new(600, 600);
     let noise = OpenSimplexNoise::new(0);
 
-    let rez = 6.0;
+    let rez = 5.0;
     let cols = 1 + canvas.width / (rez as u32);
     let rows = 1 + canvas.height / (rez as u32);
 
-    let increment = 0.04;
-    let zincrement = 0.0025;
+    let frames = 480;
+    let increment = 0.05;
+    let zincrement = 0.008;
     let mut zoff = 0.0;
 
     let mut field: Vec<f32> = vec![0.0; (cols * rows) as usize];
@@ -142,6 +189,14 @@ fn main() {
         }
 
         canvas.unbind();
+
+        // Grab the content of the frame buffer
+        if fps_timer.total_frames() <= frames {
+            let count = fps_timer.total_frames();
+            save_frame_buffer(size.width, size.height, &format!("./output/image-{:04}.png", count)).unwrap();
+        } else {
+            return;
+        }
 
         window.swap_buffers();
         window.poll_events();

@@ -5,6 +5,7 @@ extern crate backtrace;
 extern crate cgmath;
 extern crate gl;
 extern crate glfw;
+extern crate image;
 extern crate notify;
 extern crate opensimplex;
 extern crate rand;
