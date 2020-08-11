@@ -40,11 +40,12 @@ fn main() {
     let mut canvas = Canvas2D::new(800, 800);
     let noise = OpenSimplexNoise::new(0);
 
-    let rez = 8.0;
+    let rez = 6.0;
     let cols = 1 + canvas.width / (rez as u32);
     let rows = 1 + canvas.height / (rez as u32);
 
-    let increment = 0.1;
+    let increment = 0.04;
+    let zincrement = 0.0025;
     let mut zoff = 0.0;
 
     let mut field: Vec<f32> = vec![0.0; (cols * rows) as usize];
@@ -80,7 +81,7 @@ fn main() {
                 yoff += increment;
             }
         }
-        zoff += 0.01;
+        zoff += zincrement;
 
         // render all iso lines, the contour
         canvas.set_color(Color::rgb(1.0, 1.0, 1.0));
