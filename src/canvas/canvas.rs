@@ -10,7 +10,7 @@ static VERTEX_SHADER: &str = r#"
 uniform vec2 u_resolution;
 uniform float u_pointSize = 1.0;
 
-layout(location = 0) in vec3 position;
+layout(location = 0) in vec2 position;
 layout(location = 1) in vec3 color;
 
 out vec3 vColor;
@@ -69,19 +69,19 @@ fn generate_vao(vb: &mut VertexBuffer) -> u32 {
 }
 
 /// Helper struct to collect all vertices
-struct DrawBatch {
+struct VertexBatch {
     pub primitive: Primitive,
     pub vao: u32,
     pub vb: VertexBuffer,
     pub count: usize,
 }
 
-impl DrawBatch {
+impl VertexBatch {
     pub fn new(primitive: Primitive, count: usize) -> Self {
-        let mut vb = VertexBuffer::dynamic(count, vec![3, 3]);
+        let mut vb = VertexBuffer::dynamic(count, vec![2, 3]);
         let vao = generate_vao(&mut vb);
 
-        DrawBatch {
+        VertexBatch {
             vao,
             vb,
             primitive,
@@ -113,7 +113,7 @@ impl DrawBatch {
     }
 }
 
-impl Drawable for DrawBatch {
+impl Drawable for VertexBatch {
     fn draw(&mut self) {
         unsafe { gl::BindVertexArray(self.vao) };
         self.bind();
@@ -137,12 +137,12 @@ pub struct Canvas2D {
     draw_color: Color,
     /// size of the point
     point_size: f32,
-
-    rects: DrawBatch,
-    lines: DrawBatch,
-
-    /// The number of shapes to render
-    shapes_count: usize,
+    /// VAO Buffer with vertex data for rects
+    rects: VertexBatch,
+    /// VAO Buffer with vertex data for lines
+    lines: VertexBatch,
+    /// VAO Buffer with vertex data for points
+    points: VertexBatch,
 }
 
 /// Compiles the used shader program
@@ -158,8 +158,9 @@ impl Canvas2D {
     pub fn new(width: u32, height: u32) -> Self {
         let program = compile_program();
 
-        let rects = DrawBatch::new(Primitive::Triangles, 512);
-        let lines = DrawBatch::new(Primitive::Lines, 512);
+        let rects = VertexBatch::new(Primitive::Triangles, 512);
+        let lines = VertexBatch::new(Primitive::Lines, 512);
+        let points = VertexBatch::new(Primitive::Points, 512);
 
         Canvas2D {
             width,
@@ -169,12 +170,8 @@ impl Canvas2D {
             point_size: 1.0,
             rects,
             lines,
-            shapes_count: 0,
+            points,
         }
-    }
-
-    /// Clears the canvas, sets it to given colors
-    pub fn clear(&self, _r: f32, _g: f32, _b: f32, _a: f32) {
     }
 
     /// Sets the point size (if available)
@@ -188,53 +185,40 @@ impl Canvas2D {
     }
 
     /// Draws a point
-    pub fn draw_point(&self, x: f32, y: f32) {
-        /*
-        let mut points = self.point_vertices.borrow_mut();
-        points.push(x);
-        points.push(y);
-        points.append(&mut self.draw_color.rgb_vec());
-        self
-        */
+    pub fn draw_point(&mut self, x: f32, y: f32) {
+        let c = &self.draw_color;
+        let data = vec![x, y, c.r, c.g, c.b];
+
+        self.points.append(&data);
+        if self.points.filled() {
+            self.points.draw();
+        }
     }
 
     /// Draws a line
     pub fn draw_line(&mut self, start_x: f32, start_y: f32, end_x: f32, end_y: f32) {
         let c = &self.draw_color;
         let data = vec![
-            start_x, start_y, self.zoffset(), c.r, c.g, c.b,
-            end_x, end_y, self.zoffset(), c.r, c.g, c.b,
+            start_x, start_y, c.r, c.g, c.b,
+            end_x, end_y, c.r, c.g, c.b,
         ];
 
         self.lines.append(&data);
         if self.lines.filled() {
             self.lines.draw();
         }
-
-        self.inc_shapes();
-
-        /*
-        let mut lines = self.line_vertices.borrow_mut();
-        lines.push(start_x);
-        lines.push(start_y);
-        lines.append(&mut self.draw_color.rgb_vec());
-        lines.push(end_x);
-        lines.push(end_y);
-        lines.append(&mut self.draw_color.rgb_vec());
-        self
-        */
     }
 
     /// Pushes the geometry for a rect, to be rendered
     pub fn draw_rect(&mut self, left: f32, top: f32, right: f32, bottom: f32) {
         let c = &self.draw_color;
         let data = vec![
-            left, top, self.zoffset(), c.r, c.g, c.b,
-            right, top, self.zoffset(), c.r, c.g, c.b,
-            right, bottom, self.zoffset(), c.r, c.g, c.b,
-            right, bottom, self.zoffset(), c.r, c.g, c.b,
-            left, bottom, self.zoffset(), c.r, c.g, c.b,
-            left, top, self.zoffset(), c.r, c.g, c.b,
+            left, top, c.r, c.g, c.b,
+            right, top, c.r, c.g, c.b,
+            right, bottom, c.r, c.g, c.b,
+            right, bottom, c.r, c.g, c.b,
+            left, bottom, c.r, c.g, c.b,
+            left, top, c.r, c.g, c.b,
         ];
 
         // not the most elegant solution, but should work okayish
@@ -242,17 +226,6 @@ impl Canvas2D {
         if self.rects.filled() {
             self.rects.draw();
         }
-
-        self.inc_shapes();
-    }
-
-    fn inc_shapes(&mut self) {
-        self.shapes_count += 1;
-    }
-
-    /// Returns the next z value
-    fn zoffset(&self) -> f32 {
-        1.0 / ((self.shapes_count + 1) as f32)
     }
 }
 
@@ -266,9 +239,8 @@ impl Bindable for Canvas2D {
 
     fn unbind(&mut self) -> &mut Self {
         self.rects.draw();
-
+        self.lines.draw();
         self.program.unbind();
-        self.shapes_count = 0;
         self
     }
 
