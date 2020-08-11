@@ -48,6 +48,7 @@ backtrace   = "0.3.46"
 cgmath      = "0.17.0"
 gl          = "0.14.0"
 glfw        = "0.37.0"
+image       = "0.23.8"
 notify      = "4.0.15"
 opensimplex = {path="src/opensimplex", version="0.1.0"}
 rand        = "0.7.3"
