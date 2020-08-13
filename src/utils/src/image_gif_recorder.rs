@@ -1,6 +1,6 @@
 //! ImageSetRecorder
 
-use image::{Delay, RgbImage, ImageFormat};
+use image::{RgbImage, ImageFormat};
 use std::{fmt, path::Path};
 
 #[derive(Debug)]

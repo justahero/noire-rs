@@ -1,6 +1,8 @@
 use gl::types::GLenum;
 
 use super::{Bindable, RenderError, Texture, RenderBuffer, Size};
+use image::DynamicImage;
+use std::ffi::c_void;
 
 #[derive(Clone)]
 pub enum Attachment {
@@ -90,6 +92,32 @@ pub fn blit(read_buffer: &FrameBuffer, write_buffer: &FrameBuffer, size: Size<us
     }
 
     Ok(())
+}
+
+/// Copies the content of the frame buffer (BACK) into an image.
+///
+/// Check the following article for more details on how to read pixel data from
+/// Framebuffer to store it in an image file
+/// https://tonyfinn.com/capturing-screenshots-with-rust-opengl.html
+///
+pub fn copy_frame_buffer_to_image(width: u32, height: u32) -> DynamicImage {
+    let mut image = DynamicImage::new_rgba8(width, height);
+    let pixel_data = image.as_mut_rgba8().unwrap();
+
+    unsafe {
+        let ptr = pixel_data.as_mut_ptr() as *mut c_void;
+
+        gl::PixelStorei(gl::PACK_ALIGNMENT, 1);
+        gl::ReadPixels(
+            0, 0,
+            width as i32, height as i32,
+            gl::RGBA,
+            gl::UNSIGNED_BYTE,
+            ptr,
+        );
+    }
+
+    image
 }
 
 impl FrameBuffer {

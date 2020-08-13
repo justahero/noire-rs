@@ -13,7 +13,7 @@ use opensimplex::OpenSimplexNoise;
 use utils::ImageSetRecorder;
 use noire::canvas::Canvas2D;
 use noire::math::{Color, PerlinNoise, random_f32, Rect, Vector2};
-use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform}};
+use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform, frame_buffer::copy_frame_buffer_to_image}};
 
 use std::{path::Path, time::Instant, ffi::c_void, fs::File, f64::consts::PI};
 use cgmath::{Vector3, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
@@ -33,34 +33,6 @@ fn line(canvas: &mut Canvas2D, l: &Vector2, r: &Vector2) {
     canvas.draw_line(l.x, l.y, r.x, r.y);
 }
 
-/// Check the following article for more details on how to read pixel data from
-/// Framebuffer to store it in an image file
-/// https://tonyfinn.com/capturing-screenshots-with-rust-opengl.html
-///
-/// TODO refactor
-/// * add result return type with appropriate error
-/// * move function to somewhere else
-///
-fn copy_frame_buffer_to_image(width: u32, height: u32) -> DynamicImage {
-    let mut image = DynamicImage::new_rgba8(width, height);
-    let pixel_data = image.as_mut_rgba8().unwrap();
-
-    unsafe {
-        let ptr = pixel_data.as_mut_ptr() as *mut c_void;
-
-        gl::PixelStorei(gl::PACK_ALIGNMENT, 1);
-        gl::ReadPixels(
-            0, 0,
-            width as i32, height as i32,
-            gl::RGBA,
-            gl::UNSIGNED_BYTE,
-            ptr,
-        );
-    }
-
-    image
-}
-
 fn main() {
     let window_size = Size::new(640, 640);
 
@@ -70,7 +42,7 @@ fn main() {
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
 
-    let mut canvas = Canvas2D::new(640, 640);
+    let mut canvas = Canvas2D::new(window_size.width, window_size.height);
     let noise = OpenSimplexNoise::new(0);
 
     let rez = 6.0;
@@ -186,7 +158,7 @@ fn main() {
 
         // Grab the content of the frame buffer
         if !image_recorder.complete() {
-            let image = copy_frame_buffer_to_image(640, 640).into_rgb();
+            let image = copy_frame_buffer_to_image(window_size.width, window_size.height).into_rgb();
             image_recorder.save_image(image).expect("Add Frame failed");
         }
 
