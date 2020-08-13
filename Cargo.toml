@@ -41,6 +41,10 @@ name = "marching-squares"
 path = "examples/07-marching-squares/main.rs"
 
 [[example]]
+name = "circle-noise"
+path = "examples/08-circle-noise/main.rs"
+
+[[example]]
 name = "filewatch"
 
 [dependencies]

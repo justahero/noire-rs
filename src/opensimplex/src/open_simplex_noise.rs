@@ -275,6 +275,11 @@ impl OpenSimplexNoise {
         value
     }
 
+    /// 4D Supersimplex noise, classic with f32 values
+    pub fn noise4_f32(&self, x: f32, y: f32, z: f32, w: f32) -> f32 {
+        self.noise4_classic(x as f64, y as f64, z as f64, w as f64) as f32
+    }
+
     /// 4D SuperSimplex noise, classic lattice orientation.
     ///
     pub fn noise4_classic(&self, x: f64, y: f64, z: f64, w: f64) -> f64 {
