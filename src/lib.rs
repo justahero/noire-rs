@@ -11,6 +11,7 @@ extern crate opensimplex;
 extern crate rand;
 extern crate rand_chacha;
 extern crate regex;
+extern crate utils;
 
 pub mod canvas;
 pub mod core;

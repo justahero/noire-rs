@@ -10,9 +10,11 @@ extern crate notify;
 use gl::types::*;
 
 use opensimplex::OpenSimplexNoise;
+use utils::ImageSetRecorder;
 use noire::canvas::Canvas2D;
 use noire::math::{Color, PerlinNoise, random_f32, Rect, Vector2};
 use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform}};
+
 use std::{path::Path, time::Instant, ffi::c_void, fs::File, f64::consts::PI};
 use cgmath::{Vector3, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
 use image::{RgbImage, ImageBuffer, DynamicImage, ImageFormat};
@@ -31,27 +33,10 @@ fn line(canvas: &mut Canvas2D, l: &Vector2, r: &Vector2) {
     canvas.draw_line(l.x, l.y, r.x, r.y);
 }
 
-/// Saves the content of the frame buffer (back) to a file named
-///
 /// Check the following article for more details on how to read pixel data from
 /// Framebuffer to store it in an image file
 /// https://tonyfinn.com/capturing-screenshots-with-rust-opengl.html
-/// TODO
-fn save_frame_buffer(width: u32, height: u32, filename: &String) -> std::io::Result<()>  {
-    let path = Path::new(filename);
-
-    // get pixel data from framebuffer (BACK)
-    let image = copy_frame_buffer_to_image(width, height);
-
-    // store the image to the file
-    // TODO fix the following line
-    let mut image_file = File::create(&filename)?;
-    image.write_to(&mut image_file, ImageFormat::Png).expect("Failed to save image");
-
-    Ok(())
-}
-
-/// Copies the content of the frame buffer (back) to an image.
+///
 /// TODO refactor
 /// * add result return type with appropriate error
 /// * move function to somewhere else
@@ -95,6 +80,8 @@ fn main() {
     let num_frames = 480;
     let increment = 0.04;
 
+    let mut image_recorder = ImageSetRecorder::new("./output", num_frames);
+
     let mut field: Vec<f32> = vec![0.0; (cols * rows) as usize];
 
     loop {
@@ -121,9 +108,6 @@ fn main() {
             let mut yoff = 0.0;
             for y in 0..rows {
                 let index = x + y * cols;
-
-                // (float)noise.eval(scale*x,scale*y,radius*cos(TWO_PI*t),radius*sin(TWO_PI*t));
-                // float col = map(ns,-1,1,0,255);
 
                 let r = noise.noise4_classic(
                     xoff,
@@ -201,11 +185,9 @@ fn main() {
         canvas.unbind();
 
         // Grab the content of the frame buffer
-        if fps_timer.total_frames() < num_frames {
-            let count = fps_timer.total_frames();
-            save_frame_buffer(size.width, size.height, &format!("./output/image-{:04}.png", count)).unwrap();
-        } else {
-            return;
+        if !image_recorder.complete() {
+            let image = copy_frame_buffer_to_image(640, 640).into_rgb();
+            image_recorder.save_image(image).expect("Add Frame failed");
         }
 
         window.swap_buffers();

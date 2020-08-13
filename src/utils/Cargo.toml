@@ -1,0 +1,11 @@
+[package]
+name = "utils"
+version = "0.1.0"
+authors = ["Sebastian Ziebell"]
+keywords = ["noire", "utililties"]
+description = "Rust port of the OpenSimplex algorithm"
+repository = "https://github.com/justahero/noire-rs/tree/main/src/utils"
+edition = "2018"
+
+[dependencies]
+image = "0.23.8"
