@@ -1,8 +1,6 @@
-use std::cell::RefCell;
-
 use crate::math::Color;
 use crate::render::{Primitive, Program, Shader, VertexBuffer};
-use crate::render::{Uniform, Bindable, VertexArrayObject, Drawable};
+use crate::render::{Uniform, Bindable, Drawable};
 
 static VERTEX_SHADER: &str = r#"
 #version 330

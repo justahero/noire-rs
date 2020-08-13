@@ -10,11 +10,16 @@ extern crate notify;
 use gl::types::*;
 
 use opensimplex::OpenSimplexNoise;
+use utils::ImageSetRecorder;
 use noire::canvas::Canvas2D;
 use noire::math::{Color, PerlinNoise, random_f32, Rect, Vector2};
-use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform}};
-use std::time::Instant;
+use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform, frame_buffer::copy_frame_buffer_to_image}};
+
+use std::{path::Path, time::Instant, ffi::c_void, fs::File, f64::consts::PI};
 use cgmath::{Vector3, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
+use image::{RgbImage, ImageBuffer, DynamicImage, ImageFormat};
+
+static TWO_PI: f64 = 2.0 * PI;
 
 fn lerp(v0: f32, v1: f32, t: f32) -> f32 {
     (1.0 - t) * v0 + t * v1
@@ -29,7 +34,7 @@ fn line(canvas: &mut Canvas2D, l: &Vector2, r: &Vector2) {
 }
 
 fn main() {
-    let window_size = Size::new(800, 800);
+    let window_size = Size::new(640, 640);
 
     let mut window = RenderWindow::create(&window_size, "Hello This is window").unwrap();
     window.enable(Capability::ProgramPointSize);
@@ -37,16 +42,17 @@ fn main() {
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
 
-    let mut canvas = Canvas2D::new(800, 800);
+    let mut canvas = Canvas2D::new(window_size.width, window_size.height);
     let noise = OpenSimplexNoise::new(0);
 
     let rez = 6.0;
     let cols = 1 + canvas.width / (rez as u32);
     let rows = 1 + canvas.height / (rez as u32);
 
+    let num_frames = 480;
     let increment = 0.04;
-    let zincrement = 0.0025;
-    let mut zoff = 0.0;
+
+    let mut image_recorder = ImageSetRecorder::new("./output", num_frames);
 
     let mut field: Vec<f32> = vec![0.0; (cols * rows) as usize];
 
@@ -54,7 +60,7 @@ fn main() {
         let elapsed = timer.elapsed_in_seconds() as f32;
 
         fps_timer.next_frame();
-        println!("FPS: {}", fps_timer.fps());
+        println!("Frame {} - FPS {}", fps_timer.total_frames(), fps_timer.fps());
 
         let size = window.get_framebuffer_size();
         window.reset_viewport();
@@ -66,13 +72,21 @@ fn main() {
         // render all points
         canvas.set_pointsize(rez * 0.35);
         let mut xoff = 0.0;
+
+        let t = 1.0 * (fps_timer.total_frames() as f64) / (num_frames as f64);
+        let radius = 1.5;
         for x in 0..cols {
             xoff += increment;
             let mut yoff = 0.0;
             for y in 0..rows {
                 let index = x + y * cols;
 
-                let r = noise.noise4_classic(xoff, yoff, 0.0, zoff) as f32;
+                let r = noise.noise4_classic(
+                    xoff,
+                    yoff,
+                    0.5 * (TWO_PI * t).sin(),
+                    0.5 * (TWO_PI * t).cos(),
+                ) as f32;
                 field[index as usize] = r;
 
                 canvas.set_color(Color::rgb(r, r,r ));
@@ -81,7 +95,6 @@ fn main() {
                 yoff += increment;
             }
         }
-        zoff += zincrement;
 
         // render all iso lines, the contour
         canvas.set_color(Color::rgb(1.0, 1.0, 1.0));
@@ -142,6 +155,12 @@ fn main() {
         }
 
         canvas.unbind();
+
+        // Grab the content of the frame buffer
+        if !image_recorder.complete() {
+            let image = copy_frame_buffer_to_image(window_size.width, window_size.height).into_rgb();
+            image_recorder.save_image(image).expect("Add Frame failed");
+        }
 
         window.swap_buffers();
         window.poll_events();
