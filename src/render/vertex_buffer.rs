@@ -167,9 +167,11 @@ impl VertexBuffer {
         }
     }
 
-    /// Constructs a new static VertexBuffer from the given vertex data
+    /// Creates a new VertexBuffer from given vertex array and components list
     ///
-    pub fn new(vertex_data: &VertexData) -> Self {
+    pub fn create(data: &[f32], components: &[u32]) -> Self {
+        let vertex_data = VertexData::new(data, &components, VertexType::Float);
+
         let id = unsafe { allocate_static_buffer(vertex_data.data) };
 
         Self {
@@ -178,13 +180,6 @@ impl VertexBuffer {
             components: vertex_data.components.clone(),
             vertex_type: vertex_data.vertex_type,
         }
-    }
-
-    /// Creates a new VertexBuffer from given vertex array and components list
-    ///
-    pub fn create(data: &[f32], components: &[u32]) -> Self {
-        let vertex_data = VertexData::new(data, &components, VertexType::Float);
-        Self::new(&vertex_data)
     }
 
     /// Copies vertex data from array into VertexBuffer
