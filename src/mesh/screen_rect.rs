@@ -1,4 +1,4 @@
-use crate::render::{Drawable, VertexArrayObject, VertexBuffer, Point2, Primitive, RenderError, Size, Program, ProgramError, Shader, ShaderType, Texture, Uniform, Bindable, Capability, RenderWindow, OpenGLWindow};
+use crate::render::{Drawable, VertexArrayObject, VertexBuffer, Point2, Primitive, RenderError, Size, Program, ProgramError, Shader, ShaderType, Texture, Uniform, Bindable, Capability, RenderWindow, OpenGLWindow, VertexAttributeDescriptor, vertex_buffer::VertexType};
 
 pub struct ScreenRect {
     /// holds all vertex information
@@ -77,8 +77,11 @@ impl ScreenRect {
     pub fn new() -> Result<Self, RenderError> {
         let mut vao = VertexArrayObject::new(Primitive::Triangles);
 
-        vao.add_vb(VertexBuffer::create(&create_vertices(), &[2]));
-        vao.add_vb(VertexBuffer::create(&create_texcoords(), &[2]));
+        let vertices = VertexAttributeDescriptor::new("position", VertexType::Float, 2, 0);
+        let texcoords = VertexAttributeDescriptor::new("texcoord", VertexType::Float, 2, 1);
+
+        vao.add_vb(VertexBuffer::create(&create_vertices(), vec![vertices]));
+        vao.add_vb(VertexBuffer::create(&create_texcoords(), vec![texcoords]));
 
         let program = create_program()?;
 

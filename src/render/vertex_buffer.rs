@@ -3,7 +3,7 @@ use std::{ptr, mem};
 use gl;
 use gl::types::*;
 
-use super::Bindable;
+use super::{VertexAttributeDescriptor, Bindable};
 
 pub trait VertexTypeSize {
     /// Returns the size of the vertex type in bytes
@@ -105,17 +105,19 @@ pub struct VertexBuffer {
     pub id: u32,
     /// Number of vertices, e.g. [(x,y,z,rg,b), (), ...]
     pub count: usize,
-    /// Number of components per vertex, e.g. (x,y,z),(r,g,b)
-    pub components: Vec<u32>,
-    /// The vertex component type
-    pub vertex_type: VertexType,
+    /// The list of vertex attributes descriptors
+    pub attributes: Vec<VertexAttributeDescriptor>,
+}
+
+fn stride(attributes: &Vec<VertexAttributeDescriptor>) -> u32 {
+    attributes.into_iter().map(|attr| attr.stride()).sum()
 }
 
 /// Generates a dynamic ArrayyBuffer for dynamic writes
 /// The function only allocates the memory, it has to be filled with vertex data.
 ///
-unsafe fn allocate_dynamic_buffer(count: usize, num_components: usize) -> u32 {
-    let total_size = count * num_components * mem::size_of::<f32>();
+unsafe fn allocate_dynamic_buffer(count: u32, attributes: &Vec<VertexAttributeDescriptor>) -> u32 {
+    let total_size = count * stride(&attributes);
 
     let mut id = 0;
     gl::GenBuffers(1, &mut id);
@@ -152,33 +154,26 @@ unsafe fn allocate_static_buffer(data: &[f32]) -> u32 {
 }
 
 impl VertexBuffer {
-    /// Creates a new empty Vertex Buffer with vertex layout but without any existing data
-    /// This function is useful to pre-allocate a large enough buffer that frequently updates vertex data.
+    /// Creates a new VertexBuffer from given vertex array and components list
     ///
-    pub fn dynamic(count: usize, components: Vec<u32>) -> Self {
-        let num_components = components.iter().sum::<u32>();
-        let id = unsafe { allocate_dynamic_buffer(count, num_components as usize) };
+    pub fn create(data: &[f32], attributes: Vec<VertexAttributeDescriptor>) -> Self {
+        let id = unsafe { allocate_static_buffer(data) };
+
+        Self {
+            id,
+            count: 0, // TODO fix this
+            attributes,
+        }
+    }
+
+    /// Creates a dynamic VertexBuffer with pre-allocated buffer
+    pub fn dynamic(count: usize, attributes: Vec<VertexAttributeDescriptor>) -> Self {
+        let id = unsafe { allocate_dynamic_buffer(count as u32, &attributes) };
 
         Self {
             id,
             count,
-            components: Vec::from(components),
-            vertex_type: VertexType::Float,
-        }
-    }
-
-    /// Creates a new VertexBuffer from given vertex array and components list
-    ///
-    pub fn create(data: &[f32], components: &[u32]) -> Self {
-        let vertex_data = VertexData::new(data, &components, VertexType::Float);
-
-        let id = unsafe { allocate_static_buffer(vertex_data.data) };
-
-        Self {
-            id,
-            count: vertex_data.count(),
-            components: vertex_data.components.clone(),
-            vertex_type: vertex_data.vertex_type,
+            attributes,
         }
     }
 
@@ -211,22 +206,13 @@ impl VertexBuffer {
 
     /// Returns the number of (Float) components
     pub fn num_components(&self) -> u32 {
-        self.components.iter().sum()
-    }
-
-    /// Returns the components part, e.g. (x,y,z,tx,ty,r,g,b) -> [3,2,3]
-    pub fn components(&self) -> &Vec<u32> {
-        &self.components
-    }
-
-    /// Returns the vertex type, in most cases Float
-    pub fn vertex_type(&self) -> VertexType {
-        self.vertex_type
+        // self.components.iter().sum()
+        self.attributes.iter().map(|ref attr| attr.components).sum()
     }
 
     /// Returns the stride of full vertex, number of bytes of all components
     pub fn stride(&self) -> u32 {
-        self.num_components() * self.vertex_type.size()
+        self.attributes.iter().map(|ref attr| attr.stride()).sum()
     }
 
     /// Returns the size in bytes of all vertex components, e.g. (x,y,z,nx,ny) = 5 * 4

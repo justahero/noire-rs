@@ -1,6 +1,6 @@
 use crate::math::Color;
 use crate::render::{Primitive, Program, Shader, VertexBuffer};
-use crate::render::{Uniform, Bindable, Drawable};
+use crate::render::{Uniform, Bindable, Drawable, vertex_buffer::{VertexType, VertexTypeSize}, VertexAttributeDescriptor};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -44,21 +44,21 @@ fn generate_vao(vb: &mut VertexBuffer) -> u32 {
 
     let mut index = 0;
     let mut offset = 0;
-    for &component in &vb.components {
+    for attribute in &vb.attributes {
         unsafe {
             gl::VertexAttribPointer(
                 index as u32,
-                component as i32,
-                vb.vertex_type().into(),
+                attribute.components as i32,
+                attribute.vertex_type.into(),
                 gl::FALSE,
                 vb.stride() as i32,
                 offset as *const gl::types::GLvoid,
             );
-            gl::EnableVertexAttribArray(index);
+            gl::EnableVertexAttribArray(index)
         }
 
         index += 1;
-        offset += component as usize * std::mem::size_of::<f32>();
+        offset += attribute.components * attribute.vertex_type.size();
     }
 
     unsafe { gl::BindVertexArray(0); }
@@ -76,7 +76,12 @@ struct VertexBatch {
 
 impl VertexBatch {
     pub fn new(primitive: Primitive, count: usize) -> Self {
-        let mut vb = VertexBuffer::dynamic(count, vec![2, 3]);
+        let attributes = vec![
+            VertexAttributeDescriptor::new("position", VertexType::Float, 2, 0),
+            VertexAttributeDescriptor::new("color", VertexType::Float, 3, 1),
+        ];
+
+        let mut vb = VertexBuffer::dynamic(count, attributes);
         let vao = generate_vao(&mut vb);
 
         VertexBatch {
@@ -99,14 +104,14 @@ impl VertexBatch {
     }
 
     fn bind(&self) {
-        for index in 0..self.vb.components.len() {
-            unsafe { gl::EnableVertexAttribArray(index as u32); }
+        for attribute in &self.vb.attributes {
+            unsafe { gl::EnableVertexAttribArray(attribute.location); }
         }
     }
 
     fn unbind(&self) {
-        for index in 0..self.vb.components.len() {
-            unsafe { gl::DisableVertexAttribArray(index as u32); }
+        for attribute in &self.vb.attributes {
+            unsafe { gl::DisableVertexAttribArray(attribute.location); }
         }
     }
 }

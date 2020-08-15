@@ -3,7 +3,7 @@ use std::ptr;
 use gl;
 use gl::types::*;
 
-use super::{IndexBuffer, VertexBuffer, Bindable, Drawable, Primitive};
+use super::{IndexBuffer, VertexBuffer, Bindable, Drawable, Primitive, VertexAttributeDescriptor, vertex_buffer::VertexType};
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
@@ -39,7 +39,11 @@ impl VertexArrayObject {
 
     /// Create a 2-dimensional rect, in range between -1..+1
     pub fn screen_rect() -> Self {
-        let vb = VertexBuffer::create(&VERTICES, &[2]);
+        let attributes = vec![
+            VertexAttributeDescriptor::new("position", VertexType::Float, 2, 0),
+        ];
+
+        let vb = VertexBuffer::create(&VERTICES, attributes);
         let ib = IndexBuffer::create(&INDICES).unwrap();
 
         let mut vao = VertexArrayObject::new(Primitive::TriangleStrip);
@@ -75,26 +79,20 @@ impl VertexArrayObject {
     fn setup_vertex_layout(&mut self) {
         unsafe { gl::BindVertexArray(self.id); }
 
-        let mut index = 0;
         for vb in self.vbs.iter_mut() {
             vb.bind();
-
-            let mut offset = 0;
-            for &component in &vb.components {
+            for attribute in &vb.attributes {
                 unsafe {
                     gl::VertexAttribPointer(
-                        index as u32,
-                        component as i32,
-                        vb.vertex_type().into(),
+                        attribute.location,
+                        attribute.components as i32,
+                        attribute.vertex_type.into(),
                         gl::FALSE,
                         vb.stride() as i32,
-                        offset as *const gl::types::GLvoid,
+                        attribute.offset as *const gl::types::GLvoid,
                     );
-                    gl::EnableVertexAttribArray(index);
+                    gl::EnableVertexAttribArray(attribute.location);
                 }
-
-                index += 1;
-                offset += component as usize * std::mem::size_of::<f32>();
             }
         }
 
@@ -114,15 +112,10 @@ impl Bindable for VertexArrayObject {
             gl::BindVertexArray(self.id);
         }
 
-        let mut index = 0;
         for vb in self.vbs.iter_mut() {
             vb.bind();
-
-            for _i in vb.components() {
-                unsafe {
-                    gl::EnableVertexAttribArray(index);
-                }
-                index += 1;
+            for attribute in &vb.attributes {
+                unsafe { gl::EnableVertexAttribArray(attribute.location); }
             }
         }
 
@@ -134,11 +127,11 @@ impl Bindable for VertexArrayObject {
 
     /// Unbinds / frees the resource
     fn unbind(&mut self) -> &mut Self {
-        for (i, vb) in self.vbs.iter_mut().enumerate() {
-            vb.unbind();
-            unsafe {
-                gl::DisableVertexAttribArray(i as u32);
+        for vb in self.vbs.iter_mut() {
+            for attribute in &vb.attributes {
+                unsafe { gl::DisableVertexAttribArray(attribute.location); }
             }
+            vb.unbind();
         }
         unsafe {
             gl::BindVertexArray(0);

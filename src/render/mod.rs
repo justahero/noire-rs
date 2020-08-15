@@ -14,6 +14,7 @@ pub use self::spot_light::Spotlight;
 pub use self::texture::Texture;
 pub use self::traits::{Bindable, Drawable};
 pub use self::vertex::VertexArrayObject;
+pub use self::vertex_attribute::*;
 pub use self::vertex_buffer::VertexBuffer;
 pub use self::window::{Fullscreen, Pos, RenderWindow, OpenGLWindow, Window};
 
@@ -29,6 +30,7 @@ pub mod spot_light;
 pub mod texture;
 pub mod traits;
 pub mod vertex;
+pub mod vertex_attribute;
 pub mod vertex_buffer;
 pub mod window;
 

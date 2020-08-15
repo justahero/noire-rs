@@ -2,7 +2,7 @@ use super::{Cube, Plane};
 
 use crate::math::Color;
 use crate::render::{Primitive, RenderError};
-use crate::render::{IndexBuffer, VertexBuffer, VertexArrayObject};
+use crate::render::{IndexBuffer, VertexBuffer, VertexArrayObject, VertexAttributeDescriptor, vertex_buffer::VertexType};
 
 /// A basic mesh structure that contains vertex data and some
 /// properties to be used in a scene
@@ -18,8 +18,15 @@ impl Mesh {
     pub fn create_cube(cube: Cube, color: Color) -> Result<Mesh, RenderError> {
         let mut vao = VertexArrayObject::new(Primitive::Triangles);
 
-        vao.add_vb(VertexBuffer::create(&cube.vertices, &[3]));
-        vao.add_vb(VertexBuffer::create(&cube.normals, &[3]));
+        let attributes = vec![
+            VertexAttributeDescriptor::new("position", VertexType::Float, 3, 0),
+        ];
+        vao.add_vb(VertexBuffer::create(&cube.vertices, attributes));
+
+        let attributes = vec![
+            VertexAttributeDescriptor::new("normal", VertexType::Float, 3, 1),
+        ];
+        vao.add_vb(VertexBuffer::create(&cube.normals, attributes));
         vao.add_ib(IndexBuffer::create(&cube.indices)?);
 
         Ok(Mesh {
@@ -32,8 +39,15 @@ impl Mesh {
     pub fn create_plane(plane: Plane, color: Color) -> Result<Mesh, RenderError> {
         let mut vao = VertexArrayObject::new(Primitive::Triangles);
 
-        vao.add_vb(VertexBuffer::create(&plane.vertices, &[3]));
-        vao.add_vb(VertexBuffer::create(&plane.normals, &[3]));
+        let attributes = vec![
+            VertexAttributeDescriptor::new("position", VertexType::Float, 3, 0),
+        ];
+        vao.add_vb(VertexBuffer::create(&plane.vertices, attributes));
+
+        let attributes = vec![
+            VertexAttributeDescriptor::new("normal", VertexType::Float, 3, 0),
+        ];
+        vao.add_vb(VertexBuffer::create(&plane.normals, attributes));
         vao.add_ib(IndexBuffer::create(&plane.indices)?);
 
         Ok(Mesh {
