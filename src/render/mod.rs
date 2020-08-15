@@ -250,11 +250,17 @@ impl From<Capability> for gl::types::GLenum {
 #[repr(u32)]
 pub enum CullMode {
     /// Cull Front face
-    Front = gl::FRONT,
+    Front,
     /// Cull Back face
-    Back = gl::BACK,
+    Back,
     /// Culls both Front and Back faces
-    Both = gl::FRONT_AND_BACK,
+    Both,
+}
+
+impl Default for CullMode {
+    fn default() -> Self {
+        CullMode::Back
+    }
 }
 
 impl From<CullMode> for gl::types::GLenum {
@@ -274,6 +280,40 @@ impl From<gl::types::GLenum> for CullMode {
             gl::BACK => CullMode::Back,
             gl::FRONT_AND_BACK => CullMode::Both,
             _ => panic!("Unknown cull mode found: {}", cull_mode),
+        }
+    }
+}
+
+/// Defines the front face order
+#[derive(Copy, Debug, Clone, PartialEq, Eq)]
+pub enum FrontFace {
+    /// Counter Clock wise
+    Ccw = 0,
+    /// Clock wise
+    Cw = 1,
+}
+
+impl Default for FrontFace {
+    fn default() -> Self {
+        FrontFace::Ccw
+    }
+}
+
+impl From<FrontFace> for gl::types::GLenum {
+    fn from(front_face: FrontFace) -> Self {
+        match front_face {
+            FrontFace::Ccw => gl::CCW,
+            FrontFace::Cw => gl::CW,
+        }
+    }
+}
+
+impl From<gl::types::GLenum> for FrontFace {
+    fn from(front_face: gl::types::GLenum) -> Self {
+        match front_face {
+            gl::CCW => FrontFace::Ccw,
+            gl::CW => FrontFace::Cw,
+            _ => panic!("Unknown front face found: {}", front_face),
         }
     }
 }
