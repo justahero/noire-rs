@@ -8,8 +8,6 @@ pub struct VertexAttributeDescriptor {
     pub vertex_type: VertexType,
     /// The number of components, e.g. (x, y, z) = 3
     pub components: u32,
-    /// The offset
-    pub offset: u64,
     /// The shader location index
     pub location: u32,
 }
@@ -20,7 +18,6 @@ impl VertexAttributeDescriptor {
             name: name.into(),
             vertex_type,
             components,
-            offset: 0,
             location,
         }
     }

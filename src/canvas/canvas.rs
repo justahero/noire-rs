@@ -42,22 +42,20 @@ fn generate_vao(vb: &mut VertexBuffer) -> u32 {
 
     vb.bind();
 
-    let mut index = 0;
     let mut offset = 0;
     for attribute in &vb.attributes {
         unsafe {
             gl::VertexAttribPointer(
-                index as u32,
+                attribute.location,
                 attribute.components as i32,
                 attribute.vertex_type.into(),
                 gl::FALSE,
                 vb.stride() as i32,
                 offset as *const gl::types::GLvoid,
             );
-            gl::EnableVertexAttribArray(index)
+            gl::EnableVertexAttribArray(attribute.location)
         }
 
-        index += 1;
         offset += attribute.components * attribute.vertex_type.size();
     }
 
