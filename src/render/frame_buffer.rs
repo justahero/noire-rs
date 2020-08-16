@@ -1,6 +1,6 @@
 use gl::types::GLenum;
 
-use super::{Bindable, RenderError, Texture, RenderBuffer, Size};
+use super::{Bindable, RenderError, Texture, RenderBuffer, Size, Format};
 use image::DynamicImage;
 use std::ffi::c_void;
 
@@ -68,24 +68,24 @@ fn status_error(error: u32) -> String {
 /// This function is also useful to copy data from a MSAA sampled framebuffer to a non-sampled FBO.
 ///
 /// For convenience, the blit function assumes the full size of the framebuffers are used.
-pub fn blit(read_buffer: &FrameBuffer, write_buffer: &FrameBuffer, size: Size<usize>) -> Result<(), RenderError> {
-    let mask  = gl::COLOR_BUFFER_BIT;
+pub fn blit(read_buffer: u32, write_buffer: u32, width: u32, height: u32) -> Result<(), RenderError> {
+    let mask = gl::COLOR_BUFFER_BIT;
 
     unsafe {
-        gl::BindFramebuffer(gl::READ_FRAMEBUFFER, read_buffer.id);
-        gl::BindFramebuffer(gl::DRAW_FRAMEBUFFER, write_buffer.id);
+        gl::BindFramebuffer(gl::READ_FRAMEBUFFER, read_buffer);
+        gl::BindFramebuffer(gl::DRAW_FRAMEBUFFER, write_buffer);
     }
 
     unsafe {
         gl::BlitFramebuffer(
             0,
             0,
-            size.width as i32,
-            size.height as i32,
+            width as i32,
+            height as i32,
             0,
             0,
-            size.width as i32,
-            size.height as i32,
+            width as i32,
+            height as i32,
             mask,
             gl::NEAREST,
         );
@@ -125,9 +125,7 @@ impl FrameBuffer {
     pub fn create() -> Result<Self, RenderError> {
         let mut id = 0;
 
-        unsafe {
-            gl::GenFramebuffers(1, &mut id);
-        }
+        unsafe { gl::GenFramebuffers(1, &mut id); }
 
         Ok(FrameBuffer { id })
     }

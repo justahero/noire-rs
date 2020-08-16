@@ -1,5 +1,11 @@
 use super::{Format, Bindable, RenderError, opengl::get_error, Size};
 
+unsafe fn generate_buffer() -> u32 {
+    let mut id = 0;
+    gl::GenRenderbuffers(1, &mut id);
+    id
+}
+
 /// A RenderBuffer is a buffer meant for offscreen rendering.
 /// It is a storage object (buffer) containing a single image of a renderable format
 ///
@@ -8,23 +14,27 @@ pub struct RenderBuffer {
     pub id: u32,
     /// The color / pixel format
     pub format: Format,
-    /// The MSAA sampling factor
-    pub msaa: u32,
+    /// The width of the Render Buffer
+    pub width: u32,
+    /// The height of the Render Buffer
+    pub height: u32,
 }
 
 impl RenderBuffer {
-    /// Creates a new RenderBuffer object.
-    /// It has not yet allocated any data storage.
-    pub fn new(format: Format, msaa: u32) -> Self {
-        let mut id = 0;
+    /// Creates a new RenderBuffer object with given format and dimensions
+    pub fn new(format: Format, width: u32, height: u32) -> Result<Self, RenderError> {
+        let id = unsafe { generate_buffer() };
 
-        unsafe { gl::GenRenderbuffers(1, &mut id); }
-
-        Self {
+        let mut buffer = Self {
             id,
-            msaa,
             format,
-        }
+            width,
+            height,
+        };
+
+        buffer.allocate(width, height)?;
+
+        Ok(buffer)
     }
 
     /// Allocate memory to hold 2 dimensional image / pixel data
@@ -35,12 +45,9 @@ impl RenderBuffer {
     pub fn allocate(&mut self, width: u32, height: u32) -> Result<(), RenderError> {
         self.bind();
 
-        let msaa = 0;
-
         unsafe {
-            gl::RenderbufferStorageMultisample(
+            gl::RenderbufferStorage(
                 gl::RENDERBUFFER,
-                msaa,
                 self.format.into(),
                 width as i32,
                 height as i32,
