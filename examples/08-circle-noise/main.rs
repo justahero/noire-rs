@@ -39,6 +39,18 @@ fn line(canvas: &mut Canvas2D, l: &Vector2, r: &Vector2) {
     canvas.draw_line(l.x, l.y, r.x, r.y);
 }
 
+fn random(noise: &OpenSimplexNoise, x: f32, y: f32, t: f32) -> (f32, f32) {
+    let d = dist(x, y, (WIDTH as f32) / 2.0, (HEIGHT as f32) / 2.0);
+    let intensity = map(d, 0.0, RADIUS as f32, 1.0, 0.0).powf(0.75);
+
+    let zoff = R * (TWO_PI * t).cos();
+    let woff = R * (TWO_PI * t).sin();
+    let xx = x + intensity * L * noise.noise4_f32(SCALE * x, SCALE * y, zoff, woff) as f32;
+    let yy = y + intensity * L * noise.noise4_f32(100.0 + SCALE * x, SCALE * y, zoff, woff) as f32;
+
+    (xx, yy)
+}
+
 struct Star {
     r: f32,
     the: f32,
@@ -60,18 +72,56 @@ impl Star {
 
     // render the star
     pub fn render(&self, canvas: &mut Canvas2D, noise: &OpenSimplexNoise, t: f32) {
-        let d = dist(self.x, self.y, (WIDTH / 2) as f32, (HEIGHT / 2) as f32);
-        let intensity = map(d, 0.0, RADIUS as f32, 1.0, 0.0).powf(0.75);
-
-        let zoff = R * (TWO_PI * t).cos();
-        let woff = R * (TWO_PI * t).sin();
-        let xx = self.x + intensity * L * noise.noise4_f32(SCALE * self.x, SCALE * self.y, zoff, woff) as f32;
-        let yy = self.y + intensity * L * noise.noise4_f32(100.0 + SCALE * self.x, SCALE * self.y, zoff, woff) as f32;
-
+        let (x, y) = random(noise, self.x, self.y, t);
         canvas.set_color(Color::rgb(1.0, 1.0, 1.0));
-        canvas.draw_point(xx, yy);
+        canvas.draw_point(x, y);
     }
 }
+
+pub struct Example {
+    /// The noise algorithm
+    noise: OpenSimplexNoise,
+    /// The list of stars to animate
+    stars: Vec<Star>,
+}
+
+impl Example {
+    pub fn new(num_stars: u32) -> Self {
+        let stars = (0..num_stars).into_iter().map(|_| Star::new()).collect();
+
+        Self {
+            noise: OpenSimplexNoise::new(0),
+            stars,
+        }
+    }
+
+    pub fn draw_stars(&self, canvas: &mut Canvas2D, t: f32) {
+        for star in &self.stars {
+            star.render(canvas, &self.noise, t);
+        }
+        self.draw_curve(canvas, t);
+    }
+
+    pub fn draw_curve(&self, canvas: &mut Canvas2D, t: f32) {
+        let m = 200;
+
+        let points: Vec<(f32, f32)> = (0..m).into_iter().map(|i| {
+            let theta: f32 = (i as f32) * TWO_PI / (m as f32);
+            let x = (WIDTH as f32) / 2.0 + RADIUS * theta.sin();
+            let y = (HEIGHT as f32) / 2.0 + RADIUS * theta.cos();
+
+            random(&self.noise, x, y, t)
+        }).collect();
+
+        for i in 0..points.len() {
+            let (px, py) = points[(i + 1) % points.len()];
+            let (cx, cy) = points[i];
+            canvas.set_color(Color::rgb(1.0, 1.0, 1.0));
+            canvas.draw_line(px, py, cx, cy);
+        }
+    }
+}
+
 
 /// Implements the following algorithm (at least it's the goal)
 /// https://gist.github.com/Bleuje/ae3662d67bea2e24092d64efe022ed4c#file-noisetraj-pde
@@ -85,9 +135,11 @@ fn main() {
     let mut fps_timer = FpsTimer::now();
 
     let mut canvas = Canvas2D::new(window_size.width, window_size.height);
-    let noise = OpenSimplexNoise::new(0);
 
     let mut image_recorder = ImageSetRecorder::new("./output", NUM_FRAMES);
+
+    // let mut field: Vec<Color> = vec![Color::rgb(0.0, 0.0, 0.0); (WIDTH * HEIGHT) as usize];
+    let example = Example::new(40_000);
 
     loop {
         let elapsed = timer.elapsed_in_seconds() as f32;
@@ -99,10 +151,9 @@ fn main() {
         window.reset_viewport();
         window.clear(0.4, 0.4, 0.4, 1.0);
 
-        // render to canvas
+
         canvas.bind();
-
-
+        example.draw_stars(&mut canvas, 0.0);
 
         canvas.unbind();
 
