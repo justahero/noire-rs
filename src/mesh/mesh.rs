@@ -45,7 +45,7 @@ impl Mesh {
         vao.add_vb(VertexBuffer::create(&plane.vertices, attributes));
 
         let attributes = vec![
-            VertexAttributeDescriptor::new("normal", VertexType::Float, 3, 0),
+            VertexAttributeDescriptor::new("normal", VertexType::Float, 3, 1),
         ];
         vao.add_vb(VertexBuffer::create(&plane.normals, attributes));
         vao.add_ib(IndexBuffer::create(&plane.indices)?);
