@@ -69,37 +69,6 @@ impl VertexTypeSize for VertexType {
 }
 
 #[derive(Debug)]
-pub struct VertexData<'a> {
-    /// Holds the list of vertex data
-    pub data: &'a [f32],
-    /// The vertex data type
-    pub vertex_type: VertexType,
-    /// The number of components, e.g. 3 for x,y,z
-    pub components: Vec<u32>,
-}
-
-impl <'a> VertexData<'a> {
-    pub fn new(data: &'a [f32], components: &[u32], vertex_type: VertexType) -> Self {
-        VertexData {
-            data,
-            vertex_type,
-            components: Vec::from(components),
-        }
-    }
-
-    /// Returns the vertex count of the data array
-    pub fn count(&self) -> usize {
-        self.data.len() / self.num_components()
-    }
-
-    /// Returns the number of different components
-    pub fn num_components(&self) -> usize {
-        let r: u32 = self.components.iter().sum();
-        r as usize
-    }
-}
-
-#[derive(Debug)]
 pub struct VertexBuffer {
     /// Id reference to Open GL allocated buffer
     pub id: u32,
