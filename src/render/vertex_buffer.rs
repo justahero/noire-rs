@@ -124,13 +124,12 @@ unsafe fn allocate_static_buffer(data: &[f32]) -> u32 {
 
 impl VertexBuffer {
     /// Creates a new VertexBuffer from given vertex array and components list
-    ///
     pub fn create(data: &[f32], attributes: Vec<VertexAttributeDescriptor>) -> Self {
         let id = unsafe { allocate_static_buffer(data) };
 
         Self {
             id,
-            count: 0, // TODO fix this
+            count: data.len() / stride(&attributes) as usize,
             attributes,
         }
     }
@@ -146,20 +145,15 @@ impl VertexBuffer {
         }
     }
 
-    /// Copies vertex data from array into VertexBuffer
-    pub fn write(&mut self, data: &[f32]) {
-        self.write_offset(data, 0);
-    }
-
     /// Copies array of vertex data into the VertexBuffer at specific offset
-    pub fn write_offset(&mut self, data: &[f32], offset: usize) {
+    pub fn write(&mut self, data: &[f32], offset: usize) {
         let size = data.len() * mem::size_of::<f32>();
         self.bind();
 
         unsafe {
             gl::BufferSubData(
                 gl::ARRAY_BUFFER,
-                (offset * self.component_size()) as GLintptr,
+                (offset * self.stride() as usize) as GLintptr,
                 size as GLsizeiptr,
                 mem::transmute(&data[0]),
             );
@@ -174,7 +168,7 @@ impl VertexBuffer {
     }
 
     /// Returns the number of (Float) components
-    pub fn num_components(&self) -> u32 {
+    pub fn components(&self) -> u32 {
         // self.components.iter().sum()
         self.attributes.iter().map(|ref attr| attr.components).sum()
     }
@@ -182,11 +176,6 @@ impl VertexBuffer {
     /// Returns the stride of full vertex, number of bytes of all components
     pub fn stride(&self) -> u32 {
         self.attributes.iter().map(|ref attr| attr.stride()).sum()
-    }
-
-    /// Returns the size in bytes of all vertex components, e.g. (x,y,z,nx,ny) = 5 * 4
-    pub fn component_size(&self) -> usize {
-        self.num_components() as usize * (mem::size_of::<f32>())
     }
 }
 

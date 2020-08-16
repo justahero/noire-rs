@@ -92,13 +92,13 @@ impl VertexBatch {
 
     /// Appends the vertex data
     pub fn append(&mut self, data: &[f32]) {
-        self.vb.write_offset(&data, self.count);
-        self.count += data.len() / self.vb.num_components() as usize;
+        self.vb.write(&data, self.count);
+        self.count += data.len() / self.vb.components() as usize;
     }
 
     /// Returns true if VertexBuffer is filled with vertex data to capacity
     pub fn filled(&self) -> bool {
-        self.count >= self.vb.size() - (self.vb.num_components() * self.vb.stride()) as usize
+        self.count >= self.vb.size() - self.vb.stride() as usize
     }
 
     fn bind(&self) {
