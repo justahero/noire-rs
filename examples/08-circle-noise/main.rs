@@ -122,7 +122,6 @@ impl Example {
     }
 }
 
-
 /// Implements the following algorithm (at least it's the goal)
 /// https://gist.github.com/Bleuje/ae3662d67bea2e24092d64efe022ed4c#file-noisetraj-pde
 fn main() {
@@ -149,21 +148,21 @@ fn main() {
 
         // let size = window.get_framebuffer_size();
         window.reset_viewport();
-        window.clear(0.4, 0.4, 0.4, 1.0);
+        window.clear(0.0, 0.0, 0.0, 1.0);
 
-
+        canvas.clear(Color::BLACK);
         canvas.bind();
-        example.draw_stars(&mut canvas, 0.0);
+
+        let t = (fps_timer.total_frames() as f32) / (NUM_FRAMES as f32);
+        example.draw_stars(&mut canvas, t);
 
         canvas.unbind();
 
-        /*
         // Grab the content of the frame buffer
         if !image_recorder.complete() {
             let image = copy_frame_buffer_to_image(window_size.width, window_size.height).into_rgb();
             image_recorder.save_image(image).expect("Add Frame failed");
         }
-        */
 
         window.swap_buffers();
         window.poll_events();
