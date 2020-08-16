@@ -1,6 +1,6 @@
 use crate::math::Color;
 use crate::render::{Primitive, Program, Shader, VertexBuffer};
-use crate::render::{Uniform, Bindable, Drawable, vertex_buffer::{VertexType, VertexTypeSize}, VertexAttributeDescriptor};
+use crate::render::{Uniform, Bindable, Drawable, vertex_buffer::VertexType, VertexAttributeDescriptor};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -56,7 +56,7 @@ fn generate_vao(vb: &mut VertexBuffer) -> u32 {
             gl::EnableVertexAttribArray(attribute.location)
         }
 
-        offset += attribute.components * attribute.vertex_type.size();
+        offset += attribute.stride();
     }
 
     unsafe { gl::BindVertexArray(0); }

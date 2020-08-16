@@ -15,7 +15,7 @@ pub use self::texture::Texture;
 pub use self::traits::{Bindable, Drawable};
 pub use self::vertex::VertexArrayObject;
 pub use self::vertex_attribute::*;
-pub use self::vertex_buffer::VertexBuffer;
+pub use self::vertex_buffer::*;
 pub use self::window::{Fullscreen, Pos, RenderWindow, OpenGLWindow, Window};
 
 pub mod capabilities;

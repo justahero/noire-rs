@@ -3,7 +3,7 @@ use std::ptr;
 use gl;
 use gl::types::*;
 
-use super::{IndexBuffer, VertexBuffer, Bindable, Drawable, Primitive, VertexAttributeDescriptor, vertex_buffer::{VertexTypeSize, VertexType}};
+use super::{IndexBuffer, VertexBuffer, Bindable, Drawable, Primitive, VertexAttributeDescriptor, VertexType};
 
 static VERTICES: [GLfloat; 8] = [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0, -1.0];
 static INDICES: [GLuint; 6] = [0, 1, 2, 2, 3, 1];
@@ -93,9 +93,9 @@ impl VertexArrayObject {
                         offset as *const gl::types::GLvoid,
                     );
                     gl::EnableVertexAttribArray(attribute.location);
-
-                    offset += attribute.components * attribute.vertex_type.size()
                 }
+
+                offset += attribute.stride();
             }
         }
 
