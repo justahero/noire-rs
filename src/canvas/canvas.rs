@@ -1,6 +1,6 @@
 use crate::math::Color;
 use crate::render::{Primitive, Program, Shader, VertexBuffer};
-use crate::render::{Uniform, Bindable, Drawable};
+use crate::render::{Uniform, Bindable, Drawable, vertex_buffer::VertexType, VertexAttributeDescriptor};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -42,23 +42,21 @@ fn generate_vao(vb: &mut VertexBuffer) -> u32 {
 
     vb.bind();
 
-    let mut index = 0;
     let mut offset = 0;
-    for &component in &vb.components {
+    for attribute in &vb.attributes {
         unsafe {
             gl::VertexAttribPointer(
-                index as u32,
-                component as i32,
-                vb.vertex_type().into(),
+                attribute.location,
+                attribute.components as i32,
+                attribute.vertex_type.into(),
                 gl::FALSE,
                 vb.stride() as i32,
                 offset as *const gl::types::GLvoid,
             );
-            gl::EnableVertexAttribArray(index);
+            gl::EnableVertexAttribArray(attribute.location)
         }
 
-        index += 1;
-        offset += component as usize * std::mem::size_of::<f32>();
+        offset += attribute.stride();
     }
 
     unsafe { gl::BindVertexArray(0); }
@@ -76,7 +74,12 @@ struct VertexBatch {
 
 impl VertexBatch {
     pub fn new(primitive: Primitive, count: usize) -> Self {
-        let mut vb = VertexBuffer::dynamic(count, vec![2, 3]);
+        let attributes = vec![
+            VertexAttributeDescriptor::new("position", VertexType::Float, 2, 0),
+            VertexAttributeDescriptor::new("color", VertexType::Float, 3, 1),
+        ];
+
+        let mut vb = VertexBuffer::dynamic(count, attributes);
         let vao = generate_vao(&mut vb);
 
         VertexBatch {
@@ -89,24 +92,24 @@ impl VertexBatch {
 
     /// Appends the vertex data
     pub fn append(&mut self, data: &[f32]) {
-        self.vb.write_offset(&data, self.count);
-        self.count += data.len() / self.vb.num_components() as usize;
+        self.vb.write(&data, self.count);
+        self.count += data.len() / self.vb.components() as usize;
     }
 
     /// Returns true if VertexBuffer is filled with vertex data to capacity
     pub fn filled(&self) -> bool {
-        self.count >= self.vb.size() - (self.vb.num_components() * self.vb.stride()) as usize
+        self.count >= self.vb.size() - self.vb.stride() as usize
     }
 
     fn bind(&self) {
-        for index in 0..self.vb.components.len() {
-            unsafe { gl::EnableVertexAttribArray(index as u32); }
+        for attribute in &self.vb.attributes {
+            unsafe { gl::EnableVertexAttribArray(attribute.location); }
         }
     }
 
     fn unbind(&self) {
-        for index in 0..self.vb.components.len() {
-            unsafe { gl::DisableVertexAttribArray(index as u32); }
+        for attribute in &self.vb.attributes {
+            unsafe { gl::DisableVertexAttribArray(attribute.location); }
         }
     }
 }

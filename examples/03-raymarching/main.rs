@@ -26,12 +26,6 @@ use noire::{core::{Timer, FpsTimer}, input::keyboard::*};
 use std::time::{Duration, Instant};
 use std::collections::VecDeque;
 
-const MAX_FPS_COUNT: u32 = 50;
-
-fn from_duration(d: Duration) -> f32 {
-    (d.as_secs() as f64 + d.subsec_nanos() as f64 * 1e-9) as f32
-}
-
 fn main() {
     let window_size = Size::new(600, 400);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
