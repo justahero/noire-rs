@@ -4,7 +4,7 @@ use regex::Regex;
 
 use std::fmt;
 use std::fs::File;
-use std::path::Path;
+use std::path::{self, Path};
 use std::cmp;
 use std::ffi::CString;
 use std::io::prelude::*;
@@ -145,7 +145,7 @@ fn compile_shader(source: &str, shader_type: &ShaderType) -> Result<u32, ShaderE
 
 impl Shader {
     /// Creates and compiles a shader from file
-    pub fn from_file(file_path: &str, shader_type: ShaderType) -> Result<Self, ShaderError> {
+    pub fn from_file(file_path: &path::PathBuf, shader_type: ShaderType) -> Result<Self, ShaderError> {
         let path = Path::new(file_path);
         let display = path.display();
         let mut source = String::new();

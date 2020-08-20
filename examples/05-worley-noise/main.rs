@@ -14,15 +14,17 @@ use noire::math::{Color, PerlinNoise, random_f32, Rect};
 use noire::{core::Timer, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform}};
 use std::time::Instant;
 use cgmath::{Vector3, Vector2, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
+use utils::app_dir;
 
 fn main() {
+    let app_dir = app_dir().unwrap();
     let window_size = Size::new(800, 800);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
     // create shader program
-    let vertex_file = String::from("./examples/05-worley-noise/shaders/vertex.glsl");
-    let fragment_file = String::from("./examples/05-worley-noise/shaders/fragment.glsl");
+    let vertex_file = app_dir.join("examples/05-worley-noise/shaders/vertex.glsl");
+    let fragment_file = app_dir.join("examples/05-worley-noise/shaders/fragment.glsl");
     let mut program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data

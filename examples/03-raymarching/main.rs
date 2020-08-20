@@ -25,8 +25,10 @@ use noire::{core::{Timer, FpsTimer}, input::keyboard::*};
 
 use std::time::{Duration, Instant};
 use std::collections::VecDeque;
+use utils::app_dir;
 
 fn main() {
+    let app_dir = app_dir().unwrap();
     let window_size = Size::new(600, 400);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
@@ -34,8 +36,8 @@ fn main() {
     println!("Context version: {:?}", window.window.get_context_version());
 
     // create shader program
-    let vertex_file = String::from("./examples/03-raymarching/shaders/vertex.glsl");
-    let fragment_file = String::from("./examples/03-raymarching/shaders/fragment.glsl");
+    let vertex_file = app_dir.join("examples/03-raymarching/shaders/vertex.glsl");
+    let fragment_file = app_dir.join("examples/03-raymarching/shaders/fragment.glsl");
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     let mut camera = Camera::new();

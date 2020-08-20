@@ -14,15 +14,17 @@ use noire::render::{IndexBuffer, VertexBuffer};
 use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
 
 use std::time::{Duration, Instant};
+use utils::app_dir;
 
 fn main() {
+    let app_dir = app_dir().unwrap();
     let window_size = Size::new(600, 600);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
 
     // create shader program
-    let vertex_file = String::from("./examples/02-triangles/shaders/vertex.glsl");
-    let fragment_file = String::from("./examples/02-triangles/shaders/fragment.glsl");
+    let vertex_file = app_dir.join("examples/02-triangles/shaders/vertex.glsl");
+    let fragment_file = app_dir.join("examples/02-triangles/shaders/fragment.glsl");
     let mut program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create vertex data
