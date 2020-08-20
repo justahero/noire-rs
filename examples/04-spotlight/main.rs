@@ -17,8 +17,10 @@ use noire::render::{FrameBuffer, Program, Spotlight, Texture, Uniform};
 use noire::render::traits::*;
 use noire::render::{Capability, CullMode, Point2, Size};
 use noire::{core::Timer, render::{OpenGLWindow, RenderWindow, Window}};
+use utils::app_dir;
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let app_dir = app_dir().unwrap();
     let window_size = Size::new(1024, 1024);
     let mut window = RenderWindow::create(&window_size, "Hello This is window")
         .expect("Failed to create Render Window");
@@ -27,13 +29,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     window.enable(Capability::CullFace);
     window.set_cullmode(CullMode::Back);
 
-    let vertex_file = String::from("./examples/04-spotlight/shaders/light_vertex.glsl");
-    let fragment_file = String::from("./examples/04-spotlight/shaders/light_fragment.glsl");
+    let vertex_file = app_dir.join("examples/04-spotlight/shaders/light_vertex.glsl");
+    let fragment_file = app_dir.join("examples/04-spotlight/shaders/light_fragment.glsl");
     let mut light_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     // create shader program
-    let vertex_file = String::from("./examples/04-spotlight/shaders/scene_vertex.glsl");
-    let fragment_file = String::from("./examples/04-spotlight/shaders/scene_fragment.glsl");
+    let vertex_file = app_dir.join("examples/04-spotlight/shaders/scene_vertex.glsl");
+    let fragment_file = app_dir.join("examples/04-spotlight/shaders/scene_fragment.glsl");
     let mut scene_program: Program = Program::compile_from_files(&vertex_file, &fragment_file).unwrap();
 
     let mut cube = Node::new(Mesh::create_cube(Cube::create(1.4), Color::rgb(0.15, 0.15, 0.2)).unwrap());

@@ -6,7 +6,7 @@ use gl::types::*;
 use std::fmt;
 use std::ptr;
 use std::str;
-use std::time::{SystemTime};
+use std::{path, time::{SystemTime}};
 
 use crate::math::color::Color;
 
@@ -370,7 +370,7 @@ pub fn link_program(vertex_shader: Shader, pixel_shader: Shader) -> std::result:
     Ok(program)
 }
 
-fn compile_from_files(vertex_file: &str, fragment_file: &str) -> std::result::Result<Program, ProgramError> {
+fn compile_from_files(vertex_file: &path::PathBuf, fragment_file: &path::PathBuf) -> std::result::Result<Program, ProgramError> {
     let vertex_shader = Shader::from_file(vertex_file, ShaderType::Vertex)?;
     let fragment_shader = Shader::from_file(fragment_file, ShaderType::Fragment)?;
 
@@ -382,7 +382,7 @@ impl Program {
     ///
     /// `vertex_file` - The file path of the vertex shader source
     /// `fragment_file` - The file path of the fragment shader source
-    pub fn compile_from_files(vertex_file: &str, fragment_file: &str) -> std::result::Result<Program, ProgramError> {
+    pub fn compile_from_files(vertex_file: &path::PathBuf, fragment_file: &path::PathBuf) -> std::result::Result<Program, ProgramError> {
         compile_from_files(vertex_file, fragment_file)
     }
 
