@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Textures & Frame Buffers
     let depth_texture_size = Size::new(1024, 1024);
 
-    let mut shadow_texture = Texture::create_depth_texture().unwrap();
+    let mut shadow_texture = Texture::create_depth_texture();
     shadow_texture.bind();
     shadow_texture.set_size(&depth_texture_size).unwrap();
     shadow_texture.clamp_to_edge();

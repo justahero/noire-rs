@@ -1,7 +1,21 @@
-use std::ptr;
+use std::{fmt, ptr};
 use gl;
 
 use super::{Bindable, Format, PixelType, RenderError, Size};
+
+#[derive(Debug)]
+pub enum TextureError {
+    GenerationFailed,
+}
+
+impl fmt::Display for TextureError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            TextureError::GenerationFailed => "Call to GenTextures failed",
+        };
+        write!(f, "{}", s)
+    }
+}
 
 /// Specific the Format of the Pixel Data
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -58,55 +72,41 @@ pub struct Texture {
 /// A Texture object
 impl Texture {
     /// Creates a new Texture object
-    pub fn create2d() -> Result<Self, RenderError> {
+    pub fn create_2d(width: u32, height: u32) -> Self {
         let mut id = 0;
         let target = gl::TEXTURE_2D;
 
         unsafe {
             gl::GenTextures(1, &mut id);
-            gl::BindTexture(target, id);
         }
 
-        let texture = Texture {
+        Texture {
             id,
             target,
             format: Format::RGB,
             pixel_format: PixelFormat::RGB,
-            size: Size::default(),
+            size: Size::new(width, height),
             pixel_type: PixelType::UnsignedByte,
-        };
-
-        unsafe {
-            gl::BindTexture(target, 0);
         }
-
-        Ok(texture)
     }
 
     /// Creates a Texture with a depth level
-    pub fn create_depth_texture() -> Result<Self, RenderError> {
+    pub fn create_depth_texture() -> Self {
         let mut id = 0;
         let target = gl::TEXTURE_2D;
 
         unsafe {
             gl::GenTextures(1, &mut id);
-            gl::BindTexture(target, id);
         }
 
-        let texture = Texture {
+        Texture {
             id,
             target,
             format: Format::DepthComponent,
             pixel_format: PixelFormat::DepthComponent,
             size: Size::default(),
             pixel_type: PixelType::Float,
-        };
-
-        unsafe {
-            gl::BindTexture(target, 0);
         }
-
-        Ok(texture)
     }
 
     /// Sets the size of the Texture
@@ -120,8 +120,6 @@ impl Texture {
     ///
     /// Returns either reference to self or an Error message
     pub fn set_size(&mut self, size: &Size<u32>) -> Result<&mut Self, RenderError> {
-        // debug_assert!(self.bound());
-
         self.size = *size;
 
         let format: gl::types::GLenum = self.format.into();
