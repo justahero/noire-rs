@@ -13,7 +13,7 @@ use gl::types::*;
 use opensimplex::OpenSimplexNoise;
 use noire::canvas::Canvas2D;
 use noire::math::{Color, random_f32, Rect, Vector2, map};
-use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform, frame_buffer::copy_frame_buffer_to_image}};
+use noire::{core::{FpsTimer, Timer}, render::{OpenGLWindow, RenderWindow, Size, Window, Capability, Program, VertexArrayObject, Bindable, Drawable, Uniform, frame_buffer::copy_frame_buffer_to_image, MotionRenderPass}};
 
 use std::{path::Path, time::Instant, ffi::c_void, fs::File, f32::consts::PI};
 use cgmath::{Vector3, Matrix3, InnerSpace, Rad, Matrix4, Vector4, Deg};
@@ -134,6 +134,7 @@ fn main() {
     let mut fps_timer = FpsTimer::now();
 
     let mut canvas = Canvas2D::new(window_size.width, window_size.height);
+    let mut render_pass = MotionRenderPass::new(window_size.width, window_size.height);
 
     let mut image_recorder = ImageSetRecorder::new("./output", NUM_FRAMES);
 
@@ -150,6 +151,7 @@ fn main() {
         window.reset_viewport();
         window.clear(0.0, 0.0, 0.0, 1.0);
 
+        render_pass.set_render_target();
         canvas.clear(Color::BLACK);
         canvas.bind();
 
@@ -157,6 +159,9 @@ fn main() {
         example.draw_stars(&mut canvas, t);
 
         canvas.unbind();
+
+        render_pass.reset();
+        render_pass.draw();
 
         // Grab the content of the frame buffer
         if !image_recorder.complete() {
