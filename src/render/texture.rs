@@ -83,17 +83,20 @@ pub struct Texture {
     pub height: u32,
     /// The data type of the pixel data
     pub pixel_type: PixelType,
+    /// The unit to set the texture to in a shader
+    pub unit: u32,
 }
 
 /// A Texture object
 impl Texture {
     /// Creates a new Texture object
-    pub fn create_2d(width: u32, height: u32, format: Format) -> Result<Self, TextureError> {
+    pub fn create_2d(width: u32, height: u32, format: Format, unit: u32) -> Result<Self, TextureError> {
         Texture::create(
             gl::TEXTURE_2D,
             width,
             height,
             format,
+            unit,
             PixelFormat::RGBA,
             PixelType::UnsignedByte
         )
@@ -106,6 +109,7 @@ impl Texture {
             width,
             height,
             Format::DepthComponent,
+            0,
             PixelFormat::DepthComponent,
             PixelType::Float,
         )
@@ -126,6 +130,7 @@ impl Texture {
         width: u32,
         height: u32,
         format: Format,
+        unit: u32,
         pixel_format: PixelFormat,
         pixel_type: PixelType
     ) -> Result<Self, TextureError> {
@@ -168,6 +173,7 @@ impl Texture {
             height,
             target,
             format,
+            unit,
             pixel_format,
             pixel_type,
         })
@@ -216,7 +222,7 @@ impl Bindable for Texture {
         // debug_assert!(!self.bound());
 
         unsafe {
-            gl::ActiveTexture(gl::TEXTURE0);
+            gl::ActiveTexture(gl::TEXTURE0 + self.unit);
             gl::BindTexture(self.target, self.id);
         }
         self

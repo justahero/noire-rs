@@ -1,5 +1,5 @@
 
-use super::{Program, FrameBuffer, Shader, VertexArrayObject, Bindable, Texture, Drawable, Format};
+use super::{Program, FrameBuffer, Shader, VertexArrayObject, Bindable, Texture, Drawable, Format, Uniform};
 use std::collections::VecDeque;
 
 static VERTEX_SHADER: &str = r#"
@@ -18,21 +18,27 @@ void main() {
 static FRAGMENT_SHADER: &str = r#"
 #version 330
 
-const float sampleSize = 3.0;
+uniform float sampleSize;
 
 uniform sampler2D u_texture0;
 uniform sampler2D u_texture1;
 uniform sampler2D u_texture2;
+uniform sampler2D u_texture3;
+uniform sampler2D u_texture4;
+uniform sampler2D u_texture5;
 
 in vec2 vTexcoords;
 out vec4 out_color;
 
 void main() {
-    vec4 c0 = texture(u_texture0, vTexcoords) / sampleSize;
-    vec4 c1 = texture(u_texture1, vTexcoords) / sampleSize;
-    vec4 c2 = texture(u_texture2, vTexcoords) / sampleSize;
+    vec4 c0 = texture(u_texture0, vTexcoords) * 1.0 / sampleSize;
+    vec4 c1 = texture(u_texture1, vTexcoords) * 1.0 / sampleSize;
+    vec4 c2 = texture(u_texture2, vTexcoords) * 1.0 / sampleSize;
+    vec4 c3 = texture(u_texture3, vTexcoords) * 1.0 / sampleSize;
+    vec4 c4 = texture(u_texture4, vTexcoords) * 1.0 / sampleSize;
+    vec4 c5 = texture(u_texture5, vTexcoords) * 1.0 / sampleSize;
 
-    out_color = c0 + c1 + c2;
+    out_color = c0 + c1 + c2 + c3 + c4 + c5;
 }
 "#;
 
@@ -59,7 +65,7 @@ pub struct MotionRenderPass {
 
 impl MotionRenderPass {
     /// The number of maximum frame buffers to sample canvas scene.
-    pub const MAX_FRAME_BUFFERS: u32 = 3;
+    pub const MAX_SAMPLES: u32 = 6;
 
     /// Creates a new instance of the render pass.
     ///
@@ -72,9 +78,9 @@ impl MotionRenderPass {
         let vao = VertexArrayObject::screen_rect();
         let mut render_targets = VecDeque::new();
 
-        (0..Self::MAX_FRAME_BUFFERS).for_each(|_i| {
+        (0..Self::MAX_SAMPLES).for_each(|unit| {
             let mut frame_buffer = FrameBuffer::create().unwrap();
-            let mut texture = Texture::create_2d(width, height, Format::RGB).unwrap();
+            let mut texture = Texture::create_2d(width, height, Format::RGB, unit).unwrap();
             texture.bind();
             frame_buffer.attach_texture(0, &texture).unwrap();
             render_targets.push_back((texture, frame_buffer));
@@ -87,6 +93,11 @@ impl MotionRenderPass {
             vao,
             render_targets,
         }
+    }
+
+    /// Returns the number of used samples / render textures
+    pub fn num_samples(&self) -> u32 {
+        Self::MAX_SAMPLES
     }
 
     /// Returns the current
@@ -133,13 +144,10 @@ impl MotionRenderPass {
 impl Bindable for MotionRenderPass {
     fn bind(&mut self) -> &mut Self {
         self.program.bind();
+        self.program.uniform("sampleSize", Uniform::Float(Self::MAX_SAMPLES as f32));
 
         for (unit, (texture, _)) in self.render_targets.iter_mut().enumerate() {
-            unsafe {
-                gl::ActiveTexture(gl::TEXTURE0 + (unit as u32));
-                gl::BindTexture(texture.target, texture.id);
-            }
-
+            texture.bind();
             self.program.sampler(&format!("u_texture{}", unit), unit as u32, texture);
         }
 
