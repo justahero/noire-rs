@@ -164,10 +164,12 @@ fn main() {
         render_pass.draw();
 
         // Grab the content of the frame buffer
+        /*
         if !image_recorder.complete() {
             let image = copy_frame_buffer_to_image(window_size.width, window_size.height).into_rgb();
             image_recorder.save_image(image).expect("Add Frame failed");
         }
+        */
 
         window.swap_buffers();
         window.poll_events();

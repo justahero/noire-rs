@@ -32,6 +32,7 @@ impl From<Attachment> for gl::types::GLenum {
 ///
 /// * Introduction into Framebuffers: https://open.gl/framebuffers
 /// * OpenGL Framebuffer: https://www.khronos.org/opengl/wiki/Framebuffer
+#[derive(Debug)]
 pub struct FrameBuffer {
     pub id: u32,
 }

@@ -67,6 +67,7 @@ fn generate_texture() -> u32 {
 }
 
 /// A texture struct
+#[derive(Debug)]
 pub struct Texture {
     /// OpenGL id
     pub id: u32,
@@ -87,12 +88,12 @@ pub struct Texture {
 /// A Texture object
 impl Texture {
     /// Creates a new Texture object
-    pub fn create_2d(width: u32, height: u32) -> Result<Self, TextureError> {
+    pub fn create_2d(width: u32, height: u32, format: Format) -> Result<Self, TextureError> {
         Texture::create(
             gl::TEXTURE_2D,
             width,
             height,
-            Format::RGBA,
+            format,
             PixelFormat::RGBA,
             PixelType::UnsignedByte
         )

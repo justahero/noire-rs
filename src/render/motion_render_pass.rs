@@ -1,5 +1,5 @@
 
-use super::{Program, FrameBuffer, Shader, VertexArrayObject, Bindable, Texture, Drawable};
+use super::{Program, FrameBuffer, Shader, VertexArrayObject, Bindable, Texture, Drawable, Format};
 use std::collections::VecDeque;
 
 static VERTEX_SHADER: &str = r#"
@@ -18,6 +18,8 @@ void main() {
 static FRAGMENT_SHADER: &str = r#"
 #version 330
 
+const float sampleSize = 3.0;
+
 uniform sampler2D u_texture0;
 uniform sampler2D u_texture1;
 uniform sampler2D u_texture2;
@@ -26,9 +28,9 @@ in vec2 vTexcoords;
 out vec4 out_color;
 
 void main() {
-    vec4 c0 = texture(u_texture0, vTexcoords) / 3.0;
-    vec4 c1 = texture(u_texture1, vTexcoords) / 3.0;
-    vec4 c2 = texture(u_texture2, vTexcoords) / 3.0;
+    vec4 c0 = texture(u_texture0, vTexcoords) / sampleSize;
+    vec4 c1 = texture(u_texture1, vTexcoords) / sampleSize;
+    vec4 c2 = texture(u_texture2, vTexcoords) / sampleSize;
 
     out_color = c0 + c1 + c2;
 }
@@ -72,10 +74,10 @@ impl MotionRenderPass {
 
         (0..Self::MAX_FRAME_BUFFERS).for_each(|_i| {
             let mut frame_buffer = FrameBuffer::create().unwrap();
-            let mut texture = Texture::create_2d(width, height).unwrap();
+            let mut texture = Texture::create_2d(width, height, Format::RGB).unwrap();
             texture.bind();
             frame_buffer.attach_texture(0, &texture).unwrap();
-            render_targets.push_front((texture, frame_buffer));
+            render_targets.push_back((texture, frame_buffer));
         });
 
         Self {
@@ -107,7 +109,6 @@ impl MotionRenderPass {
     pub fn reset(&mut self) {
         let (_, frame_buffer) = self.render_targets.front_mut().unwrap();
         frame_buffer.unbind();
-        FrameBuffer::BACK.bind();
     }
 
     /// Renders the scene with motion blur pass by sampling the last few rendered frames.
@@ -133,10 +134,14 @@ impl Bindable for MotionRenderPass {
     fn bind(&mut self) -> &mut Self {
         self.program.bind();
 
-        (0..self.render_targets.len()).for_each(|unit| {
-            let (texture, _) = self.render_targets.front_mut().unwrap();
+        for (unit, (texture, _)) in self.render_targets.iter_mut().enumerate() {
+            unsafe {
+                gl::ActiveTexture(gl::TEXTURE0 + (unit as u32));
+                gl::BindTexture(texture.target, texture.id);
+            }
+
             self.program.sampler(&format!("u_texture{}", unit), unit as u32, texture);
-        });
+        }
 
         self
     }
