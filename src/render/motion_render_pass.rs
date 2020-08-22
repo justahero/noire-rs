@@ -1,18 +1,16 @@
 
-use super::{Program, FrameBuffer, Shader, VertexArrayObject, Bindable, Texture, Uniform, Drawable};
+use super::{Program, FrameBuffer, Shader, VertexArrayObject, Bindable, Texture, Drawable};
 use std::collections::VecDeque;
 
 static VERTEX_SHADER: &str = r#"
 #version 330
-
-uniform vec2 u_resolution;
 
 layout (location = 0) in vec2 position;
 
 out vec2 vTexcoords;
 
 void main() {
-    vTexcoords = position;
+    vTexcoords = 0.5 + position * 0.5;
     gl_Position = vec4(position, 0.0, 1.0);
 }
 "#;
@@ -21,12 +19,18 @@ static FRAGMENT_SHADER: &str = r#"
 #version 330
 
 uniform sampler2D u_texture0;
+uniform sampler2D u_texture1;
+uniform sampler2D u_texture2;
 
 in vec2 vTexcoords;
 out vec4 out_color;
 
 void main() {
-    out_color = vec4(vec3(1.0), 1.0);
+    vec4 c0 = texture(u_texture0, vTexcoords) / 3.0;
+    vec4 c1 = texture(u_texture1, vTexcoords) / 3.0;
+    vec4 c2 = texture(u_texture2, vTexcoords) / 3.0;
+
+    out_color = c0 + c1 + c2;
 }
 "#;
 
@@ -40,9 +44,9 @@ fn compile_program(vertex: &str, fragment: &str) -> Program {
 
 pub struct MotionRenderPass {
     /// The width of the render texture / frame buffer
-    width: u32,
+    pub width: u32,
     /// The height of the render texture / frame buffer
-    height: u32,
+    pub height: u32,
     /// The program to render the pass
     program: Program,
     /// The squad rectangle to render the full canvas.
@@ -53,7 +57,7 @@ pub struct MotionRenderPass {
 
 impl MotionRenderPass {
     /// The number of maximum frame buffers to sample canvas scene.
-    pub const MAX_FRAME_BUFFERS: u32 = 1;
+    pub const MAX_FRAME_BUFFERS: u32 = 3;
 
     /// Creates a new instance of the render pass.
     ///
@@ -92,6 +96,8 @@ impl MotionRenderPass {
     /// Sets the current frame buffer as render target
     ///
     pub fn set_render_target(&mut self) {
+        self.cycle_render_target();
+
         let (_, frame_buffer) = self.render_targets.front_mut().unwrap();
         frame_buffer.bind();
     }
@@ -115,15 +121,22 @@ impl MotionRenderPass {
 
         self.unbind();
     }
+
+    /// Cycles the frame buffers / textures in the queue
+    fn cycle_render_target(&mut self) {
+        let item = self.render_targets.pop_back().unwrap();
+        self.render_targets.push_front(item);
+    }
 }
 
 impl Bindable for MotionRenderPass {
     fn bind(&mut self) -> &mut Self {
         self.program.bind();
-        self.program.uniform("u_resolution", Uniform::Float2(self.width as f32, self.height as f32));
 
-        let (texture, _) = self.render_targets.front_mut().unwrap();
-        self.program.sampler("u_texture0", 0, texture);
+        (0..self.render_targets.len()).for_each(|unit| {
+            let (texture, _) = self.render_targets.front_mut().unwrap();
+            self.program.sampler(&format!("u_texture{}", unit), unit as u32, texture);
+        });
 
         self
     }
