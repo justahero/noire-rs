@@ -1,11 +1,13 @@
 use gl::types::GLenum;
 
-use super::{Bindable, RenderError, Texture, RenderBuffer, Size};
+use super::{Bindable, RenderError, Texture, RenderBuffer};
 use image::DynamicImage;
 use std::ffi::c_void;
+use crate::math::Color;
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 pub enum Attachment {
+    Back,
     Color(u32),
     Depth,
     Stencil,
@@ -15,6 +17,7 @@ pub enum Attachment {
 impl From<Attachment> for gl::types::GLenum {
     fn from(attachment: Attachment) -> Self {
         match attachment {
+            Attachment::Back => gl::BACK,
             Attachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
             Attachment::Depth => gl::DEPTH_ATTACHMENT,
             Attachment::Stencil => gl::STENCIL_ATTACHMENT,
@@ -68,8 +71,8 @@ fn status_error(error: u32) -> String {
 /// This function is also useful to copy data from a MSAA sampled framebuffer to a non-sampled FBO.
 ///
 /// For convenience, the blit function assumes the full size of the framebuffers are used.
-pub fn blit(read_buffer: &FrameBuffer, write_buffer: &FrameBuffer, size: Size<usize>) -> Result<(), RenderError> {
-    let mask  = gl::COLOR_BUFFER_BIT;
+pub fn blit(read_buffer: &FrameBuffer, write_buffer: &FrameBuffer, width: u32, height: u32) -> Result<(), RenderError> {
+    let mask = gl::COLOR_BUFFER_BIT;
 
     unsafe {
         gl::BindFramebuffer(gl::READ_FRAMEBUFFER, read_buffer.id);
@@ -80,12 +83,12 @@ pub fn blit(read_buffer: &FrameBuffer, write_buffer: &FrameBuffer, size: Size<us
         gl::BlitFramebuffer(
             0,
             0,
-            size.width as i32,
-            size.height as i32,
+            width as i32,
+            height as i32,
             0,
             0,
-            size.width as i32,
-            size.height as i32,
+            width as i32,
+            height as i32,
             mask,
             gl::NEAREST,
         );
@@ -121,13 +124,13 @@ pub fn copy_frame_buffer_to_image(width: u32, height: u32) -> DynamicImage {
 }
 
 impl FrameBuffer {
+    pub const BACK: FrameBuffer = FrameBuffer { id: 0 };
+
     /// Create a new instance of a Frame Buffer
     pub fn create() -> Result<Self, RenderError> {
         let mut id = 0;
 
-        unsafe {
-            gl::GenFramebuffers(1, &mut id);
-        }
+        unsafe { gl::GenFramebuffers(1, &mut id); }
 
         Ok(FrameBuffer { id })
     }
@@ -136,6 +139,14 @@ impl FrameBuffer {
     /// Returns a result with possible error message
     pub fn valid(&self) -> Result<(), RenderError> {
         check_status()
+    }
+
+    /// Clears the frame buffer color part
+    pub fn clear(&self, color: Color) {
+        unsafe {
+            gl::BindFramebuffer(gl::FRAMEBUFFER, self.id);
+            gl::ClearBufferfv(gl::COLOR, 0, &color.rgba_array()[0]);
+        }
     }
 
     /// Set Texture to this Framebuffer
@@ -232,8 +243,11 @@ impl Bindable for FrameBuffer {
 
 impl Drop for FrameBuffer {
     fn drop(&mut self) {
-        unsafe {
-            gl::DeleteFramebuffers(1, &self.id);
+        if self.id != 0 {
+            unsafe {
+                gl::DeleteFramebuffers(1, &self.id);
+            }
+            self.id = 0;
         }
     }
 }
