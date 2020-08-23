@@ -99,5 +99,6 @@ impl Drop for RenderBuffer {
         unsafe {
             gl::DeleteRenderbuffers(1, &self.id);
         }
+        self.id = 0;
     }
 }
