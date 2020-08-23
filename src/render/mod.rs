@@ -217,11 +217,13 @@ impl From<PixelType> for gl::types::GLenum {
 #[repr(u32)]
 pub enum Capability {
     /// Enable or disable depth tests
-    DepthTest = gl::DEPTH_TEST,
+    DepthTest,
     /// Back side culling faces / polygons
-    CullFace = gl::CULL_FACE,
+    CullFace,
     /// Enables to set gl_PointSize in shader
-    ProgramPointSize = gl::PROGRAM_POINT_SIZE,
+    ProgramPointSize,
+    /// Enables MSAA multi sampling
+    MultiSample,
 }
 
 impl From<gl::types::GLenum> for Capability {
@@ -230,6 +232,7 @@ impl From<gl::types::GLenum> for Capability {
             gl::DEPTH_TEST => Capability::DepthTest,
             gl::CULL_FACE => Capability::CullFace,
             gl::PROGRAM_POINT_SIZE => Capability::ProgramPointSize,
+            gl::MULTISAMPLE => Capability::MultiSample,
             _ => panic!("Unknown capability found: {}", value),
         }
     }
@@ -241,6 +244,7 @@ impl From<Capability> for gl::types::GLenum {
             Capability::DepthTest => gl::DEPTH_TEST,
             Capability::CullFace => gl::CULL_FACE,
             Capability::ProgramPointSize => gl::PROGRAM_POINT_SIZE,
+            Capability::MultiSample => gl::MULTISAMPLE,
         }
     }
 }
