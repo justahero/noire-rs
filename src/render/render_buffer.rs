@@ -54,33 +54,11 @@ impl RenderBuffer {
         Ok(())
     }
 
-    /// Returns the width of the Renderbuffer
-    pub fn width(&self) -> u32 {
-        let mut width = 0;
-
-        unsafe {
-            gl::GetRenderbufferParameteriv(gl::RENDERBUFFER, gl::RENDERBUFFER_WIDTH, &mut width);
-        }
-
-        width as u32
-    }
-
-    /// Returns the height of the Renderbuffer
-    pub fn height(&self) -> u32 {
-        let mut height = 0;
-
-        unsafe {
-            gl::GetRenderbufferParameteriv(gl::RENDERBUFFER, gl::RENDERBUFFER_HEIGHT, &mut height);
-        }
-
-        height as u32
-    }
-
     /// Returns the dimensions of the Renderbuffer
     pub fn size(&self) -> Size<u32> {
         Size {
-            width: self.width(),
-            height: self.height(),
+            width: self.width,
+            height: self.height,
         }
     }
 }
