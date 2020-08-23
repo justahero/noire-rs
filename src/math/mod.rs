@@ -35,13 +35,13 @@ pub fn random_f32(max_value: f32) -> f32 {
 #[macro_export]
 macro_rules! color {
     ($r:expr) => {
-        Color::new($r, $r, $r, 1.0)
+        Color::rgba($r, $r, $r, 1.0)
     };
     ($r:expr, $g:expr, $b:expr) => {
-        Color::new($r, $g, $b, 1.0)
+        Color::rgb($r, $g, $b)
     };
     ($r:expr, $g:expr, $b:expr, $a:expr) => {
-        Color::new($r, $g, $b, $a)
+        Color::rgba($r, $g, $b, $a)
     };
 }
 

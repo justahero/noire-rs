@@ -26,7 +26,8 @@ impl Color {
         a: 1.0,
     };
 
-    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
+    #[inline(always)]
+    pub fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
         Color {
             r,
             g,
@@ -35,6 +36,7 @@ impl Color {
         }
     }
 
+    #[inline(always)]
     pub fn rgb(r: f32, g: f32, b: f32) -> Self {
         Color {
             r,
@@ -45,16 +47,19 @@ impl Color {
     }
 
     /// Returns color as array with RGBA components
+    #[inline(always)]
     pub fn rgba_array(&self) -> [f32; 4] {
         [self.r, self.g, self.b, self.a]
     }
 
     /// Returns the rgb values as vec
+    #[inline(always)]
     pub fn rgb_vec(&self) -> Vec<f32> {
         vec![self.r, self.g, self.b]
     }
 
     /// Returns color as array with RGB components
+    #[inline(always)]
     pub fn rgb_array(&self) -> [f32; 3] {
         [self.r, self.g, self.b]
     }
