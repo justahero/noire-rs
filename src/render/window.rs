@@ -176,6 +176,7 @@ fn init_glfw(resizable: bool) -> Result<Glfw, WindowError> {
     glfw.window_hint(glfw::WindowHint::OpenGlProfile(
         glfw::OpenGlProfileHint::Core,
     ));
+    glfw.window_hint(glfw::WindowHint::Samples(Some(4)));
 
     Ok(glfw)
 }
