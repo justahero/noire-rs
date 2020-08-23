@@ -22,14 +22,14 @@ use utils::ImageSetRecorder;
 
 static TWO_PI: f32 = 2.0 * PI;
 static RADIUS: f32 = 280.0;
-static NUM_FRAMES: u32 = 180;
+static NUM_FRAMES: u32 = 360;
 const WIDTH: u32 = 640;
 const HEIGHT: u32 = 640;
 
-static ANGLE: f32 = 0.4;
-static R: f32 = 1.05;
-static L: f32 = 200.0;
-static SCALE: f32 = 0.008;
+static ANGLE: f32 = 0.3;
+static R: f32 = 1.12;
+static L: f32 = 180.0;
+static SCALE: f32 = 0.0065;
 
 fn dist(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
     ((x2 - x1).powi(2) + (y2 - y1).powi(2)).sqrt()
@@ -138,7 +138,6 @@ fn main() {
 
     let mut image_recorder = ImageSetRecorder::new("./output", NUM_FRAMES);
 
-    // let mut field: Vec<Color> = vec![Color::rgb(0.0, 0.0, 0.0); (WIDTH * HEIGHT) as usize];
     let example = Example::new(40_000);
 
     loop {
@@ -164,12 +163,10 @@ fn main() {
         render_pass.draw();
 
         // Grab the content of the frame buffer
-        /*
-        if !image_recorder.complete() {
+        if !image_recorder.complete() && fps_timer.total_frames() >= render_pass.num_samples() as usize {
             let image = copy_frame_buffer_to_image(window_size.width, window_size.height).into_rgb();
             image_recorder.save_image(image).expect("Add Frame failed");
         }
-        */
 
         window.swap_buffers();
         window.poll_events();

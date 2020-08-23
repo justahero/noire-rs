@@ -31,6 +31,7 @@ in vec2 vTexcoords;
 out vec4 out_color;
 
 void main() {
+    // TODO find nicer decay values.
     vec4 c0 = texture(u_texture0, vTexcoords) * 1.0 / sampleSize;
     vec4 c1 = texture(u_texture1, vTexcoords) * 1.0 / sampleSize;
     vec4 c2 = texture(u_texture2, vTexcoords) * 1.0 / sampleSize;
@@ -100,7 +101,7 @@ impl MotionRenderPass {
         Self::MAX_SAMPLES
     }
 
-    /// Returns the current
+    /// Returns the current frame buffer
     pub fn current_framebuffer(&self) -> &FrameBuffer {
         let (_, frame_buffer) = self.render_targets.front().unwrap();
         frame_buffer
