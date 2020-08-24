@@ -431,7 +431,10 @@ impl Program {
     /// * `unit` - The unit slot to attach the texture
     /// * `texture` - The texture reference to use
     pub fn sampler(&mut self, name: &str, unit: u32, texture: &mut Texture) -> &mut Self {
-        texture.bind();
+        unsafe {
+            gl::ActiveTexture(gl::TEXTURE0 + unit);
+            gl::BindTexture(texture.target, texture.id);
+        }
         self.uniform(name, Uniform::Integer(unit as i32));
         self
     }
