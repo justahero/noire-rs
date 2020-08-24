@@ -42,7 +42,7 @@ fn check_status() -> Result<(), RenderError> {
         let result = gl::CheckFramebufferStatus(gl::FRAMEBUFFER) as u32;
 
         if result != gl::FRAMEBUFFER_COMPLETE {
-            return Err(RenderError{ message: status_error(result) });
+            return Err(RenderError::new(status_error(result)));
         }
     }
 
@@ -72,7 +72,7 @@ fn status_error(error: u32) -> String {
 ///
 /// For convenience, the blit function assumes the full size of the framebuffers are used.
 pub fn blit(read_buffer: &FrameBuffer, write_buffer: &FrameBuffer, width: u32, height: u32) -> Result<(), RenderError> {
-    let mask = gl::COLOR_BUFFER_BIT;
+    let mask = gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT;
 
     unsafe {
         gl::BindFramebuffer(gl::READ_FRAMEBUFFER, read_buffer.id);
@@ -123,6 +123,12 @@ pub fn copy_frame_buffer_to_image(width: u32, height: u32) -> DynamicImage {
     image
 }
 
+impl Default for FrameBuffer {
+    fn default() -> Self {
+        FrameBuffer { id: 0 }
+    }
+}
+
 impl FrameBuffer {
     pub const BACK: FrameBuffer = FrameBuffer { id: 0 };
 
@@ -155,12 +161,12 @@ impl FrameBuffer {
     ///
     /// * `texture` - The texture to attach
     /// * `index` - The color attachment slot
-    pub fn attach_texture(&mut self, texture: &Texture, index: u32) -> Result<(), RenderError> {
+    pub fn attach_texture(&mut self, index: u32, texture: &Texture) -> Result<(), RenderError> {
         self.set_texture(Attachment::Color(index), texture.target, texture.id)
     }
 
     /// Detaches the texture from the Framebuffer
-    pub fn detach_texture(&mut self, texture: &Texture, index: u32) -> Result<(), RenderError> {
+    pub fn detach_texture(&mut self, index: u32, texture: &Texture) -> Result<(), RenderError> {
         self.set_texture(Attachment::Color(index), texture.target, 0)
     }
 
@@ -170,7 +176,6 @@ impl FrameBuffer {
     }
 
     /// Detaches any Renderbuffer from this Framebuffer
-    /// **Note**, for now it only uses the first color attachment slot
     pub fn detach_renderbuffer(&mut self, attachment: Attachment) -> Result<(), RenderError> {
         self.set_renderbuffer(attachment, 0)
     }
@@ -205,7 +210,12 @@ impl FrameBuffer {
         self.bind();
 
         unsafe {
-            gl::FramebufferRenderbuffer(gl::FRAMEBUFFER, attachment.into(), gl::RENDERBUFFER, id);
+            gl::FramebufferRenderbuffer(
+                gl::FRAMEBUFFER,
+                attachment.into(),
+                gl::RENDERBUFFER,
+                id
+            );
         }
 
         check_status()?;
