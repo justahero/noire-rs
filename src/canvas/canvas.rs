@@ -1,6 +1,6 @@
 use crate::math::Color;
 use crate::render::{Primitive, Program, Shader, VertexBuffer};
-use crate::render::{Uniform, Bindable, Drawable, vertex_buffer::VertexType, VertexAttributeDescriptor};
+use crate::render::{Uniform, Bindable, Drawable, vertex_buffer::VertexType, VertexAttributeDescriptor, FrameBuffer};
 
 static VERTEX_SHADER: &str = r#"
 #version 330
@@ -147,31 +147,52 @@ pub struct Canvas2D {
 }
 
 /// Compiles the used shader program
-fn compile_program() -> Program {
-    let vertex_shader = Shader::create_vertex(&VERTEX_SHADER).unwrap();
-    let fragment_shader = Shader::create_fragment(&FRAGMENT_SHADER).unwrap();
+fn compile_program(vertex: &str, fragment: &str) -> Program {
+    let vertex_shader = Shader::create_vertex(vertex).unwrap();
+    let fragment_shader = Shader::create_fragment(fragment).unwrap();
 
     Program::create(vertex_shader, fragment_shader).unwrap()
 }
 
-impl Canvas2D {
-    /// Create a new instance of the canvas
-    pub fn new(width: u32, height: u32) -> Self {
-        let program = compile_program();
+impl Default for Canvas2D {
+    fn default() -> Self {
+        let program = compile_program(VERTEX_SHADER, FRAGMENT_SHADER);
 
         let rects = VertexBatch::new(Primitive::Triangles, 512);
         let lines = VertexBatch::new(Primitive::Lines, 512);
         let points = VertexBatch::new(Primitive::Points, 512);
 
         Canvas2D {
-            width,
-            height,
+            width: 512,
+            height: 512,
             program,
             draw_color: Color::BLACK,
             point_size: 1.0,
             rects,
             lines,
             points,
+        }
+    }
+}
+
+impl Canvas2D {
+    /// Default back frame buffer
+    pub const BACK: FrameBuffer = FrameBuffer::BACK;
+
+    /// Create a new instance of the canvas
+    pub fn new(width: u32, height: u32) -> Self {
+        Canvas2D {
+            width,
+            height,
+            ..Default::default()
+        }
+    }
+
+    /// Clears the canvas to the given color
+    pub fn clear(&mut self, color: Color) {
+        unsafe {
+            gl::ClearColor(color.r, color.g, color.b, color.a);
+            gl::Clear(gl::COLOR_BUFFER_BIT);
         }
     }
 
