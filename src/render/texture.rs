@@ -1,7 +1,25 @@
-use std::ptr;
+use std::{fmt, ptr};
 use gl;
 
-use super::{Bindable, Format, PixelType, RenderError, Size};
+use super::{Bindable, Format, PixelType, Size, opengl::get_error};
+
+#[derive(Debug)]
+pub enum TextureError {
+    GenerationFailed,
+    ImageSizeFailed(u32, u32),
+    MipMapFailed,
+}
+
+impl fmt::Display for TextureError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            TextureError::GenerationFailed => "Call to GenTextures failed".to_string(),
+            TextureError::ImageSizeFailed(width, height) => format!("Failed to set size ({}x{}) failed", width, height),
+            TextureError::MipMapFailed => "Failed to generate mip map levels".to_string(),
+        };
+        write!(f, "{}", s)
+    }
+}
 
 /// Specific the Format of the Pixel Data
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -39,7 +57,17 @@ impl From<gl::types::GLenum> for PixelFormat {
     }
 }
 
+/// Calls the OpenGL function to generate new texture id
+fn generate_texture() -> u32 {
+    let mut id = 0;
+    unsafe {
+        gl::GenTextures(1, &mut id);
+    }
+    id
+}
+
 /// A texture struct
+#[derive(Debug)]
 pub struct Texture {
     /// OpenGL id
     pub id: u32,
@@ -49,64 +77,42 @@ pub struct Texture {
     pub format: Format,
     /// Texture pixel format
     pub pixel_format: PixelFormat,
-    /// The size of the Texture in pixels
-    pub size: Size<u32>,
+    /// The width of the Texture in pixels
+    pub width: u32,
+    /// The height of the Texture in pixels
+    pub height: u32,
     /// The data type of the pixel data
     pub pixel_type: PixelType,
+    /// The unit to set the texture to in a shader
+    pub unit: u32,
 }
 
 /// A Texture object
 impl Texture {
     /// Creates a new Texture object
-    pub fn create2d() -> Result<Self, RenderError> {
-        let mut id = 0;
-        let target = gl::TEXTURE_2D;
-
-        unsafe {
-            gl::GenTextures(1, &mut id);
-            gl::BindTexture(target, id);
-        }
-
-        let texture = Texture {
-            id,
-            target,
-            format: Format::RGB,
-            pixel_format: PixelFormat::RGB,
-            size: Size::default(),
-            pixel_type: PixelType::UnsignedByte,
-        };
-
-        unsafe {
-            gl::BindTexture(target, 0);
-        }
-
-        Ok(texture)
+    pub fn create_2d(width: u32, height: u32, format: Format, unit: u32) -> Result<Self, TextureError> {
+        Texture::create(
+            gl::TEXTURE_2D,
+            width,
+            height,
+            format,
+            unit,
+            PixelFormat::RGBA,
+            PixelType::UnsignedByte
+        )
     }
 
-    /// Creates a Texture with a depth level
-    pub fn create_depth_texture() -> Result<Self, RenderError> {
-        let mut id = 0;
-        let target = gl::TEXTURE_2D;
-
-        unsafe {
-            gl::GenTextures(1, &mut id);
-            gl::BindTexture(target, id);
-        }
-
-        let texture = Texture {
-            id,
-            target,
-            format: Format::DepthComponent,
-            pixel_format: PixelFormat::DepthComponent,
-            size: Size::default(),
-            pixel_type: PixelType::Float,
-        };
-
-        unsafe {
-            gl::BindTexture(target, 0);
-        }
-
-        Ok(texture)
+    /// Creates a depth texture with given width and height
+    pub fn create_depth(width: u32, height: u32) -> Result<Self, TextureError> {
+        Texture::create(
+            gl::TEXTURE_2D,
+            width,
+            height,
+            Format::DepthComponent,
+            0,
+            PixelFormat::DepthComponent,
+            PixelType::Float,
+        )
     }
 
     /// Sets the size of the Texture
@@ -119,30 +125,63 @@ impl Texture {
     /// * `size` - the Size of the texture, best to provide a multiple of 2
     ///
     /// Returns either reference to self or an Error message
-    pub fn set_size(&mut self, size: &Size<u32>) -> Result<&mut Self, RenderError> {
-        // debug_assert!(self.bound());
+    fn create(
+        target: gl::types::GLenum,
+        width: u32,
+        height: u32,
+        format: Format,
+        unit: u32,
+        pixel_format: PixelFormat,
+        pixel_type: PixelType
+    ) -> Result<Self, TextureError> {
+        let id = generate_texture();
 
-        self.size = *size;
+        get_error().map_err(|_e| TextureError::GenerationFailed)?;
 
-        let format: gl::types::GLenum = self.format.into();
+        unsafe {
+            gl::BindTexture(target, id);
+        }
 
         unsafe {
             gl::TexImage2D(
-                self.target,
+                target,
                 0,
                 format as i32,
-                size.width as i32,
-                size.height as i32,
+                width as i32,
+                height as i32,
                 0,
-                self.pixel_format.into(),
-                self.pixel_type.into(),
+                pixel_format.into(),
+                pixel_type.into(),
                 ptr::null(),
             );
-
-            gl::GenerateMipmap(self.target);
         }
 
-        Ok(self)
+        get_error().map_err(|_e| TextureError::ImageSizeFailed(width, height))?;
+
+        unsafe {
+            gl::TexParameteri(target, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+            gl::TexParameteri(target, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
+        }
+
+        unsafe {
+            gl::GenerateMipmap(target);
+        }
+
+        Ok(Texture {
+            id,
+            width,
+            height,
+            target,
+            format,
+            unit,
+            pixel_format,
+            pixel_type,
+        })
+    }
+
+    /// Return the size of the texture
+    pub fn size(&self) -> Size<u32> {
+        Size::new(self.width, self.height)
     }
 
     /// Enable linear interpolation
@@ -183,7 +222,7 @@ impl Bindable for Texture {
         // debug_assert!(!self.bound());
 
         unsafe {
-            gl::ActiveTexture(gl::TEXTURE0);
+            gl::ActiveTexture(gl::TEXTURE0 + self.unit);
             gl::BindTexture(self.target, self.id);
         }
         self

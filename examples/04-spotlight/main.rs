@@ -68,9 +68,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Textures & Frame Buffers
     let depth_texture_size = Size::new(1024, 1024);
 
-    let mut shadow_texture = Texture::create_depth_texture().unwrap();
+    let mut shadow_texture = Texture::create_depth(depth_texture_size.width, depth_texture_size.height).unwrap();
     shadow_texture.bind();
-    shadow_texture.set_size(&depth_texture_size).unwrap();
+    // shadow_texture.set_size(&depth_texture_size).unwrap();
     shadow_texture.clamp_to_edge();
     shadow_texture.nearest();
     shadow_texture.unbind();
@@ -89,7 +89,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         //----------------------------------------------------------
         // render light first
         shadow_frame_buffer.bind();
-        window.set_viewport(&Point2::default(), &shadow_texture.size);
+        window.set_viewport(&Point2::default(), &shadow_texture.size());
         window.clear(0.0, 0.0, 0.0, 1.0);
         window.clear_depth(1.0);
         window.set_cullmode(CullMode::Front);
