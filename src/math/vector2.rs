@@ -2,7 +2,7 @@ use std::ops::{Add, Sub, AddAssign, MulAssign, Mul};
 
 pub type Point2 = Vector2;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct Vector2 {
     pub x: f32,
     pub y: f32,

@@ -11,12 +11,26 @@ use gl::types::*;
 use noire::core::{FpsTimer, Timer};
 use noire::render::{Bindable, Drawable, Primitive, Program, Shader, VertexArrayObject};
 use noire::render::{IndexBuffer, VertexBuffer};
-use noire::render::{OpenGLWindow, RenderWindow, Size, Window};
+use noire::{math::Vector2, render::{OpenGLWindow, RenderWindow, Size, Window}};
 
 use std::time::{Duration, Instant};
 use utils::app_dir;
 
 const NUM_FRAMES: u32 = 360;
+
+#[derive(Debug)]
+pub struct Ball {
+    /// position of the ball
+    pub position: Vector2,
+}
+
+impl Ball {
+    pub fn new(x: f32, y: f32) -> Self {
+        Self {
+            position: Vector2::new(x, y),
+        }
+    }
+}
 
 fn main() {
     let app_dir = app_dir().unwrap();
