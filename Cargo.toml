@@ -45,6 +45,10 @@ name = "circle-noise"
 path = "examples/08-circle-noise/main.rs"
 
 [[example]]
+name = "metaballs"
+path = "examples/09-metaballs/main.rs"
+
+[[example]]
 name = "filewatch"
 
 [dependencies]
