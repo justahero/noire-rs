@@ -11,12 +11,16 @@ use gl::types::*;
 use noire::core::{FpsTimer, Timer};
 use noire::render::{Bindable, Drawable, Primitive, Program, Shader, VertexArrayObject};
 use noire::render::{IndexBuffer, VertexBuffer};
-use noire::{math::Vector2, render::{OpenGLWindow, RenderWindow, Size, Window, Uniform}};
+use noire::{math::{random_f32, Vector2}, render::{OpenGLWindow, RenderWindow, Size, Window, Uniform}};
 
 use std::time::{Duration, Instant};
 use utils::app_dir;
 use cgmath::Vector3;
 
+const WIDTH: u32 = 640;
+const HEIGHT: u32 = 640;
+
+const NUM_BALLS: u32 = 10;
 const NUM_FRAMES: u32 = 360;
 
 #[derive(Debug)]
@@ -45,7 +49,7 @@ impl Ball {
 
 fn main() {
     let app_dir = app_dir().unwrap();
-    let window_size = Size::new(640, 640);
+    let window_size = Size::new(WIDTH, HEIGHT);
     let mut window = RenderWindow::create(&window_size, "Metaballs").unwrap();
 
     // create shader program
@@ -56,8 +60,9 @@ fn main() {
     // create vertex data
     let mut vao = VertexArrayObject::screen_rect();
 
-    let mut balls = Vec::new();
-    balls.push(Ball::new(20.0, 20.0, 10.0));
+    let mut balls: Vec<Ball> = (0..NUM_BALLS).into_iter().map(|_| {
+        Ball::new(random_f32(WIDTH as f32), random_f32(HEIGHT as f32), random_f32(10.0))
+    }).collect();
 
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
