@@ -63,7 +63,7 @@ fn main() {
         program.uniform("u_resolution", size.into());
         program.uniform("u_depth", depth.into());
         program.uniform("u_time", elapsed.into());
-        // program.uniform("u_featurePoints[0]", Uniform::Vec3Array(points.clone()));
+
         let verts = points
             .iter()
             .map(|v| [v.x, v.y, v.z])

@@ -11,10 +11,11 @@ use gl::types::*;
 use noire::core::{FpsTimer, Timer};
 use noire::render::{Bindable, Drawable, Primitive, Program, Shader, VertexArrayObject};
 use noire::render::{IndexBuffer, VertexBuffer};
-use noire::{math::Vector2, render::{OpenGLWindow, RenderWindow, Size, Window}};
+use noire::{math::Vector2, render::{OpenGLWindow, RenderWindow, Size, Window, Uniform}};
 
 use std::time::{Duration, Instant};
 use utils::app_dir;
+use cgmath::Vector3;
 
 const NUM_FRAMES: u32 = 360;
 
@@ -22,13 +23,23 @@ const NUM_FRAMES: u32 = 360;
 pub struct Ball {
     /// position of the ball
     pub position: Vector2,
+    /// velocity
+    pub velocity: Vector2,
+    /// radius of the ball
+    pub radius: f32,
 }
 
 impl Ball {
-    pub fn new(x: f32, y: f32) -> Self {
+    pub fn new(x: f32, y: f32, radius: f32) -> Self {
         Self {
             position: Vector2::new(x, y),
+            velocity: Vector2::new(0.0, 0.0),
+            radius,
         }
+    }
+
+    pub fn vec3(&self) -> [f32; 3] {
+        [self.position.x, self.position.y, self.radius]
     }
 }
 
@@ -44,6 +55,9 @@ fn main() {
 
     // create vertex data
     let mut vao = VertexArrayObject::screen_rect();
+
+    let mut balls = Vec::new();
+    balls.push(Ball::new(20.0, 20.0, 10.0));
 
     let timer = Timer::now();
     let mut fps_timer = FpsTimer::now();
@@ -62,6 +76,12 @@ fn main() {
         program.bind();
         program.uniform("u_resolution", size.into());
         program.uniform("u_time", elapsed.into());
+
+        let vertices = balls
+            .iter()
+            .map(|b| b.vec3())
+            .collect::<Vec<[f32; 3]>>();
+        program.uniform("u_balls", vertices.into());
 
         // animate the points
         let t = (fps_timer.total_frames() as f32) / (NUM_FRAMES as f32);
