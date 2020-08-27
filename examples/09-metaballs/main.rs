@@ -74,9 +74,9 @@ fn main() {
 
     let mut balls: Vec<Ball> = (0..NUM_BALLS).into_iter().map(|_| {
         let pos = Vector2::new(random_f32(WIDTH as f32), random_f32(HEIGHT as f32));
-        let mut vel = Vector2::random() * (1.0 + random_f32(4.0));
+        let vel = Vector2::random() * (2.0 + random_f32(2.5));
 
-        let radius = 8.0 + random_f32(10.0);
+        let radius = 5.0 + random_f32(15.0);
         Ball::new(
             pos.x, pos.y,
             vel.x, vel.y,
