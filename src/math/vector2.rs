@@ -1,4 +1,6 @@
 use std::ops::{Add, Sub, AddAssign, MulAssign, Mul};
+use super::random_f32;
+use cgmath::Deg;
 
 pub type Point2 = Vector2;
 
@@ -20,9 +22,15 @@ fn rotate(v: &Vector2, angle: cgmath::Rad<f32>) -> Vector2 {
 }
 
 impl Vector2 {
-    /// Construct a new vector
+    /// Construct a new Vector2
     pub fn new(x: f32, y: f32) -> Self {
         Self { x, y }
+    }
+
+    /// Generates a Vector2 with random orientation in unit length
+    pub fn random() -> Self {
+        let v = Vector2::new(1.0, 0.0);
+        rotate(&v, Deg(random_f32(360.0)).into())
     }
 
     /// Normalizes the vector to unit length
@@ -75,6 +83,17 @@ impl AddAssign for Vector2 {
         *self = Self {
             x: self.x + rhs.x,
             y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Mul<f32> for Vector2 {
+    type Output = Vector2;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        Self::Output {
+            x: self.x * rhs,
+            y: self.y * rhs,
         }
     }
 }
