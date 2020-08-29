@@ -22,7 +22,7 @@ void main() {
     for (int i = 0; i < u_balls.length; i++) {
         float d = distance(u_balls[i].xy, pixel);
         float radius = u_balls[i].z;
-        sum += 5 * radius / d;
+        sum += 2 * radius / d;
     }
 
     sum = clamp(sum, 0, 255);
