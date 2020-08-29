@@ -109,9 +109,9 @@ pub enum Uniform {
     Mat3(Matrix3<f32>),
     Mat4(Matrix4<f32>),
     Vec2(Vector2<f32>),
-    Vec2Array(Vec<Vector2<f32>>),
+    Vec2Array(Vec<[f32; 2]>),
     Vec3(Vector3<f32>),
-    Vec3Array(Vec<Vector3<f32>>),
+    Vec3Array(Vec<[f32; 3]>),
     Point3(Point3<f32>),
     Size(f32, f32),
 }
@@ -152,8 +152,8 @@ impl From<Vector2<f32>> for Uniform {
     }
 }
 
-impl From<Vec<Vector2<f32>>> for Uniform {
-    fn from(vertices: Vec<Vector2<f32>>) -> Self {
+impl From<Vec<[f32; 2]>> for Uniform {
+    fn from(vertices: Vec<[f32; 2]>) -> Self {
         Uniform::Vec2Array(vertices)
     }
 }
@@ -164,8 +164,8 @@ impl From<Vector3<f32>> for Uniform {
     }
 }
 
-impl From<Vec<Vector3<f32>>> for Uniform {
-    fn from(vertices: Vec<Vector3<f32>>) -> Self {
+impl From<Vec<[f32; 3]>> for Uniform {
+    fn from(vertices: Vec<[f32; 3]>) -> Self {
         Uniform::Vec3Array(vertices)
     }
 }
@@ -469,7 +469,7 @@ impl Program {
         }
     }
 
-    pub fn uniform2fv(location: i32, vertices: &Vec<Vector2<f32>>) {
+    pub fn uniform2fv(location: i32, vertices: &Vec<[f32; 2]>) {
         unsafe {
             gl::Uniform2fv(location, vertices.len() as i32, vertices.as_ptr() as *const _);
         }
@@ -481,7 +481,7 @@ impl Program {
         }
     }
 
-    pub fn uniform3fv(location: i32, vertices: &Vec<Vector3<f32>>) {
+    pub fn uniform3fv(location: i32, vertices: &Vec<[f32; 3]>) {
         unsafe {
             gl::Uniform3fv(location, vertices.len() as i32, vertices.as_ptr() as *const _);
         }
