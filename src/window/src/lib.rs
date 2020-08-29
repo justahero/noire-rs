@@ -1,10 +1,10 @@
 pub mod window;
 
-pub use window::{
-    Window,
-    WindowId,
-    WindowOptions,
-};
+pub use window::*;
+
+pub mod prelude {
+    pub use crate::{};
+}
 
 use winit::{
     event,
