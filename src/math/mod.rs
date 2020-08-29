@@ -27,7 +27,7 @@ pub fn clamp(value: f32, min: f32, max: f32) -> f32 {
     min.max(value.min(max))
 }
 
-/// Generates an unsigned int between 0 and given max value
+/// Generates a random value between 0.0 and the given max value
 pub fn random_f32(max_value: f32) -> f32 {
     thread_rng().gen_range(0.0, max_value)
 }

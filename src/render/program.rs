@@ -483,7 +483,7 @@ impl Program {
 
     pub fn uniform3fv(location: i32, vertices: &Vec<[f32; 3]>) {
         unsafe {
-            gl::Uniform3fv(location, vertices.len() as i32, vertices.as_ptr() as *const _);
+            gl::Uniform3fv(location, (vertices.len())as i32, vertices.as_ptr() as *const _);
         }
     }
 
