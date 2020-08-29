@@ -62,4 +62,5 @@ opensimplex = {path="src/opensimplex", version="0.1.0"}
 rand        = "0.7.3"
 rand_chacha = "0.2.2"
 regex       = "1.3.6"
+renderer    = {path="src/renderer", version="0.1.0"}
 utils       = {path="src/utils", version="0.1.0"}
