@@ -1,0 +1,11 @@
+[package]
+name = "noire_window"
+version = "0.1.0"
+edition = "2018"
+authors = ["Sebastin Ziebell"]
+description = "Window creation and handling for Noire"
+license = "MIT"
+
+[dependencies]
+winit = { version = "0.22.2", default-features = false }
+uuid = { version = "0.8.1", features = ["v4", "serde"] }
