@@ -6,6 +6,10 @@ authors = ["Sebastin Ziebell"]
 description = "Window creation and handling for Noire"
 license = "MIT"
 
+[[example]]
+name = "helloworld"
+path = "examples/helloworld.rs"
+
 [dependencies]
-winit = { version = "0.22.2", default-features = false }
+winit = { version = "0.22.2", package = "cart-tmp-winit", default-features = false }
 uuid = { version = "0.8.1", features = ["v4", "serde"] }

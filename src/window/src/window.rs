@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct WindowId(Uuid);
 
 impl WindowId {
@@ -17,32 +17,37 @@ impl Default for WindowId {
 }
 
 #[derive(Debug)]
+/// Description of how a Window instance should be created
 pub struct Window {
     /// The id reference to the window
     pub id: WindowId,
     /// The title of the Window
     pub title: String,
+    /// Width of the Window
+    pub width: u32,
+    /// Height of the Window
+    pub height: u32,
 }
 
-/// Default options create a new window
-pub struct WindowOptions {
-    pub title: String,
-}
-
-impl Default for WindowOptions {
-    fn default() -> Self {
+impl Window {
+    /// Creates a new Window description
+    pub fn new(id: WindowId, title: &str, width: u32, height: u32) -> Self {
         Self {
-            title: String::from("Hello World"),
+            id,
+            title: title.to_string(),
+            width,
+            height,
         }
     }
 }
 
-impl Window {
-    /// Creates a new Window
-    pub fn create(id: WindowId, options: WindowOptions) -> Self {
+impl Default for Window {
+    fn default() -> Self {
         Self {
-            id,
-            title: options.title,
+            id: WindowId::primary(),
+            title: String::from("Hello World"),
+            width: 1280,
+            height: 720,
         }
     }
 }
