@@ -42,6 +42,7 @@ impl Windows {
         // initialize window
         winit_window.set_title(&window.title);
         winit_window.set_inner_size(winit::dpi::PhysicalSize::new(window.width, window.height));
+        winit_window.set_resizable(window.resizable);
 
         // store instance of the Window
         self.winit_windows.insert(winit_window.id(), winit_window);

@@ -1,0 +1,10 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2018"
+authors = ["Sebastian Ziebell"]
+license = "MIT"
+
+[dependencies]
+window = { path = "../window", version = "0.1"}
+log = "0.4.11"

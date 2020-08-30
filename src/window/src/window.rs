@@ -27,6 +27,8 @@ pub struct Window {
     pub width: u32,
     /// Height of the Window
     pub height: u32,
+    /// Marks the Window as resizable when true
+    pub resizable: bool,
 }
 
 impl Window {
@@ -37,6 +39,7 @@ impl Window {
             title: title.to_string(),
             width,
             height,
+            .. Default::default()
         }
     }
 }
@@ -48,6 +51,7 @@ impl Default for Window {
             title: String::from("Hello World"),
             width: 1280,
             height: 720,
+            resizable: false,
         }
     }
 }
