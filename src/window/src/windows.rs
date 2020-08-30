@@ -23,16 +23,7 @@ impl Default for Windows {
 }
 
 impl Windows {
-    pub fn create(&mut self, window: Window, event_loop: &winit::event_loop::EventLoopWindowTarget<()>) {
-        #[cfg(target_os = "windows")]
-        let winit_window = {
-            use winit::platform::windows::WindowBuilderExtWindows;
-            winit::window::WindowBuilder::new()
-                .with_drag_and_drop(false)
-                .build(&event_loop)
-                .unwrap()
-        };
-        #[cfg(not(target_os = "windows"))]
+    pub fn create(&mut self, window: Window, event_loop: &winit::event_loop::EventLoopWindowTarget<()>) -> WinitWindowId {
         let winit_window = {
             winit::window::WindowBuilder::new()
                 .build(&event_loop)
@@ -44,9 +35,13 @@ impl Windows {
         winit_window.set_inner_size(winit::dpi::PhysicalSize::new(window.width, window.height));
         winit_window.set_resizable(window.resizable);
 
+        let window_id = winit_window.id().clone();
+
         // store instance of the Window
         self.winit_windows.insert(winit_window.id(), winit_window);
         self.windows.insert(window.id, window);
+
+        window_id
     }
 
     /// Returns the mutable instance to access winit Window by internal id

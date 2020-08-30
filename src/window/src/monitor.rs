@@ -55,12 +55,12 @@ impl From<MonitorHandle> for Monitor {
 
 impl Monitor {
     /// Due to the way winit enumerates monitors, the event loop is given here to access them
-    pub fn available(event_loop: &EventLoopWindowTarget<()>) -> Vec<Monitor> {
-        event_loop.available_monitors().map(|h| h.into()).collect()
+    pub fn available(window: &winit::window::Window) -> Vec<Monitor> {
+        window.available_monitors().map(|h| h.into()).collect()
     }
 
     /// Returns the primary monitor
-    pub fn primary(event_loop: &EventLoopWindowTarget<()>) -> Monitor {
-        event_loop.primary_monitor().into()
+    pub fn primary(window: &winit::window::Window) -> Monitor {
+        window.primary_monitor().into()
     }
 }
