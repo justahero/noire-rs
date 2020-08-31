@@ -1,0 +1,9 @@
+[package]
+name = "renderer"
+version = "0.1.0"
+edition = "2018"
+authors = ["Sebastian Ziebell"]
+license = "MIT"
+
+[dependencies]
+wgpu = "0.6.0"

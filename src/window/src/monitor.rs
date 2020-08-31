@@ -1,4 +1,4 @@
-use winit::{monitor::MonitorHandle, event_loop::EventLoopWindowTarget};
+use winit::monitor::MonitorHandle;
 
 /// A Video mode describes a fullscreen resolution
 #[derive(Debug)]
