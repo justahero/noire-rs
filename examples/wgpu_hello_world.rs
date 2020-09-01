@@ -1,4 +1,4 @@
-use renderer::{WindowMode, WindowSettings};
+use renderer::{Renderer, WindowMode, WindowSettings};
 use winit::{event_loop::ControlFlow, event::{WindowEvent, Event}};
 
 extern crate noire;
