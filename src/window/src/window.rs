@@ -17,7 +17,16 @@ impl Default for WindowId {
 }
 
 #[derive(Debug)]
+pub enum WindowMode {
+    Windowed,
+    BorderlessFullscreen,
+    Fullscreen,
+}
+
+#[derive(Debug)]
 /// Description of how a Window instance should be created
+/// The Window implements the Builder pattern, specific attributes can be
+/// set independently
 pub struct Window {
     /// The id reference to the window
     pub id: WindowId,
@@ -29,6 +38,8 @@ pub struct Window {
     pub height: u32,
     /// Marks the Window as resizable when true
     pub resizable: bool,
+    /// The window mode, fullscreen / windowed
+    pub window_mode: WindowMode,
 }
 
 impl Window {
@@ -42,6 +53,25 @@ impl Window {
             .. Default::default()
         }
     }
+
+    /// Sets the title of the Window
+    pub fn with_title(mut self, title: &str) -> Self {
+        self.title = title.to_string();
+        self
+    }
+
+    /// Sets the dimensions of the Window
+    pub fn with_size(mut self, width: u32, height: u32) -> Self {
+        self.width = width;
+        self.height = height;
+        self
+    }
+
+    /// Sets the Window mode
+    pub fn with_mode(mut self, mode: WindowMode) -> Self {
+        self.window_mode = mode;
+        self
+    }
 }
 
 impl Default for Window {
@@ -52,6 +82,7 @@ impl Default for Window {
             width: 1280,
             height: 720,
             resizable: false,
+            window_mode: WindowMode::Windowed,
         }
     }
 }
