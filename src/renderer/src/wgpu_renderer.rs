@@ -1,3 +1,5 @@
+use winit::window::Window as WinitWindow;
+
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct WgpuRenderer {
     /// The WGPU instance, used to create Adapters or Surfaces
@@ -6,21 +8,33 @@ pub struct WgpuRenderer {
     pub device: wgpu::Device,
     /// Handle to a command queue on the (graphics) device
     pub queue: wgpu::Queue,
-}
-
-pub(crate) async fn get_adapter(instance: &wgpu::Instance) -> Option<wgpu::Adapter> {
-    instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::HighPerformance,
-            compatible_surface: None,
-        })
-        .await
+    /// Default surface
+    pub surface: wgpu::Surface,
+    /// The width of the surface
+    pub width: u32,
+    /// The height of the surface
+    pub height: u32,
 }
 
 impl WgpuRenderer {
-    pub async fn new() -> Self {
+    pub async fn new(window: &WinitWindow) -> Self {
         let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
-        let adapter = get_adapter(&instance).await.expect("Unable to find GPU!");
+
+        // setup basic swap chain here for now
+        // TODO move to a more appropriate place, especially when resize events occur
+        let surface = unsafe { instance.create_surface(window) };
+
+        let width = window.inner_size().width;
+        let height = window.inner_size().height;
+
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                power_preference: wgpu::PowerPreference::HighPerformance,
+                compatible_surface: Some(&surface),
+            })
+            .await
+            .expect("Unable to find GPU!");
+
 
         // TODO maybe disable it here
         let trace_path = Some(std::path::Path::new("wgpu_trace"));
@@ -37,12 +51,13 @@ impl WgpuRenderer {
             .await
             .expect("Failed to request device.");
 
-        // setup basic
-
         Self {
             instance,
             device,
             queue,
+            surface,
+            width,
+            height,
         }
     }
 }

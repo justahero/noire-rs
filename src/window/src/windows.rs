@@ -62,8 +62,8 @@ impl Windows {
     }
 
     /// Returns the mutable instance to access winit Window by internal id
-    pub fn get_mut_window(&mut self, window_id: &WinitWindowId) -> Option<&mut WinitWindow> {
-        self.winit_windows.get_mut(window_id)
+    pub fn get_window(&self, window_id: &WinitWindowId) -> Option<&WinitWindow> {
+        self.winit_windows.get(window_id)
     }
 }
 

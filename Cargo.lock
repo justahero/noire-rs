@@ -1467,6 +1467,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "renderer"
 version = "0.1.0"
 dependencies = [
+ "cart-tmp-winit 0.22.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "wgpu 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

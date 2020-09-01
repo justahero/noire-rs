@@ -10,10 +10,12 @@ fn main() {
     let window = Window::default()
         .with_title("Test")
         .with_mode(WindowMode::BorderlessFullscreen);
-    let _id = windows.create(window, &event_loop);
-    // let winit_window = windows.get_mut_window(&id).unwrap();
-
-    // let renderer = WgpuRenderer::new();
+        
+    let id = windows.create(window, &event_loop);
+    {
+        let winit_window = windows.get_window(&id).unwrap();
+        let _renderer = WgpuRenderer::new(&winit_window);
+    }
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Wait;
@@ -23,8 +25,9 @@ fn main() {
                 event: WindowEvent::CloseRequested,
                 ..
             } => *control_flow = ControlFlow::Exit,
-            Event::RedrawRequested(window_id) => {
-                windows.get_mut_window(&window_id).unwrap().request_redraw();
+            Event::RedrawRequested(_window_id) => {
+                let winit_window = windows.get_window(&id).unwrap();
+                winit_window.request_redraw();
             }
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::KeyboardInput{ ref input, .. } => {
