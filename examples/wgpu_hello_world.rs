@@ -1,8 +1,9 @@
 use window::{Window, Windows, WindowMode};
-use renderer::WgpuRenderer;
 use winit::{event_loop::ControlFlow, event::{WindowEvent, Event, self}};
+use renderer::{WgpuContext, WgpuRenderer};
 
 extern crate noire;
+extern crate pollster;
 
 fn main() {
     let event_loop = winit::event_loop::EventLoop::new();
@@ -14,6 +15,12 @@ fn main() {
     let id = windows.create(window, &event_loop);
 
     // TODO a basic Wgpu based renderer is a lot of effort to set up.
+    let renderer = {
+        let winit_window = windows.get_window(&id).unwrap();
+        pollster::block_on(WgpuRenderer::new(&winit_window))
+    };
+
+    let _context = WgpuContext::new(renderer.device.clone());
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Wait;

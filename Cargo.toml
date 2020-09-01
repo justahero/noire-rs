@@ -60,6 +60,7 @@ glfw        = "0.37.0"
 image       = "0.23.8"
 notify      = "4.0.15"
 opensimplex = {path="src/opensimplex", version="0.1.0"}
+pollster    = "0.2.0"
 rand        = "0.7.3"
 rand_chacha = "0.2.2"
 renderer    = {path="src/renderer", version="0.1.0"}

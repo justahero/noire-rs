@@ -1,11 +1,12 @@
 use winit::window::Window as WinitWindow;
+use std::sync::Arc;
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct WgpuRenderer {
     /// The WGPU instance, used to create Adapters or Surfaces
     pub instance: wgpu::Instance,
     /// The link / connection to the graphics device, useful to create objects
-    pub device: wgpu::Device,
+    pub device: Arc<wgpu::Device>,
     /// Handle to a command queue on the (graphics) device
     pub queue: wgpu::Queue,
     /// Default surface
@@ -35,7 +36,6 @@ impl WgpuRenderer {
             .await
             .expect("Unable to find GPU!");
 
-
         // TODO maybe disable it here
         let trace_path = Some(std::path::Path::new("wgpu_trace"));
 
@@ -53,7 +53,7 @@ impl WgpuRenderer {
 
         Self {
             instance,
-            device,
+            device: Arc::new(device),
             queue,
             surface,
             width,

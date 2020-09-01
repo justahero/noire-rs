@@ -1016,6 +1016,7 @@ dependencies = [
  "image 0.23.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "notify 4.0.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "opensimplex 0.1.0",
+ "pollster 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand_chacha 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1225,6 +1226,11 @@ dependencies = [
  "deflate 0.8.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "miniz_oxide 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "pollster"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "ppv-lite86"
@@ -2009,6 +2015,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum pin-utils 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
 "checksum pkg-config 0.3.18 (registry+https://github.com/rust-lang/crates.io-index)" = "d36492546b6af1463394d46f0c834346f31548646f6ba10849802c9c9a27ac33"
 "checksum png 0.16.7 (registry+https://github.com/rust-lang/crates.io-index)" = "dfe7f9f1c730833200b134370e1d5098964231af8450bce9b78ee3ab5278b970"
+"checksum pollster 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "9824e18e85003f0b5a38fa1932ae8be8c2aac9447c2f28ab6f9704dbe0a1ab58"
 "checksum ppv-lite86 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)" = "237a5ed80e274dbc66f86bd59c1e25edc039660be53194b5fe0a482e0f2612ea"
 "checksum proc-macro-crate 0.1.5 (registry+https://github.com/rust-lang/crates.io-index)" = "1d6ea3c4595b96363c13943497db34af4460fb474a95c43f4446ad341b8c9785"
 "checksum proc-macro-hack 0.5.18 (registry+https://github.com/rust-lang/crates.io-index)" = "99c605b9a0adc77b7211c6b1f722dcb613d68d66859a44f3d485a6da332b0598"
