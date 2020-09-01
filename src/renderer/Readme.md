@@ -5,3 +5,4 @@ This crate uses the [wgpu](https://github.com/gfx-rs/wgpu-rs/) crate, an idiomat
 ## References
 
 * Learn WGPU: https://sotrh.github.io/learn-wgpu/#what-is-wgpu
+  * Setup swap chain: https://sotrh.github.io/learn-wgpu/beginner/tutorial2-swapchain/#state-new

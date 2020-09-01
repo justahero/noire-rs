@@ -34,3 +34,7 @@ cargo run --example triangles
 ```
 
 The latter example also supports live editing of the shader files, check shader files, open files in `./examples/triangles/shaders` in your text editor, edit and save it. If the new shader code compiles successfully, changes are applied immediately or otherwise error logs are displayed in the terminal.
+
+## Other Frameworks / Projects
+
+* [Coffee 2D game engine](https://github.com/hecrj/coffee)
