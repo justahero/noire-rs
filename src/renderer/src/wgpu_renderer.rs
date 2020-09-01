@@ -60,4 +60,18 @@ impl WgpuRenderer {
             height,
         }
     }
+
+    /// Creates a new swap chain
+    /// TODO move from here, it does not seem a good place
+    pub fn create_swapchain(&self, surface: &wgpu::Surface) -> wgpu::SwapChain {
+        let descriptor = wgpu::SwapChainDescriptor {
+            usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+            format: wgpu::TextureFormat::Bgra8Unorm,
+            width: self.width,
+            height: self.height,
+            present_mode: wgpu::PresentMode::Mailbox,
+        };
+
+        self.device.create_swap_chain(surface, &descriptor)
+    }
 }
