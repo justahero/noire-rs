@@ -80,5 +80,7 @@ pub fn get_video_mode(monitor: &MonitorHandle) -> Option<VideoMode> {
 
     println!("VIDEO MODES: {:?}", video_modes);
 
+    todo!("Please implement");
+
     None
 }
