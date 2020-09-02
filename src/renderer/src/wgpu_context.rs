@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use crate::{RenderPass, WgpuInto};
+use crate::WgpuInto;
 
 /// The WGPU Context that wraps the (graphics) device and creates WGPU objects
 ///
@@ -30,9 +30,26 @@ impl WgpuContext {
     }
 
     /// Begins a new render pass,
-    pub fn begin_pass(&mut self, swap_chain: &wgpu::SwapChain) {
+    pub fn begin_pass(&mut self, frame: &wgpu::SwapChainTexture) {
         let encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
 
+        let color = wgpu::Color { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
+
+        let color_descriptor = wgpu::RenderPassColorAttachmentDescriptor {
+            attachment: &frame.view,
+            resolve_target: None,
+            ops: wgpu::Operations {
+                load: wgpu::LoadOp::Clear(color),
+                store: true,
+            },
+        };
+
+        let descriptor = wgpu::RenderPassDescriptor {
+            color_attachments: &[color_descriptor],
+            depth_stencil_attachment: None,
+        };
+
+        // encoder.begin_render_pass(&descriptor);
     }
 
     pub fn finish(&mut self) {
