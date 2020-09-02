@@ -30,8 +30,8 @@ impl WgpuContext {
     }
 
     /// Begins a new render pass,
-    pub fn begin_pass(&mut self, frame: &wgpu::SwapChainTexture) {
-        let encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
+    pub fn begin_pass(&mut self, frame: &wgpu::SwapChainTexture, queue: &mut wgpu::Queue) {
+        let mut encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
 
         let color = wgpu::Color { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
 
@@ -49,7 +49,13 @@ impl WgpuContext {
             depth_stencil_attachment: None,
         };
 
-        // encoder.begin_render_pass(&descriptor);
+        // The render pass is part of the encoder, has to drop at the end
+        {
+            let render_pass = encoder.begin_render_pass(&descriptor);
+            // TODO set up render pass
+        }
+
+        queue.submit(Some(encoder.finish()));
     }
 
     pub fn finish(&mut self) {

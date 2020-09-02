@@ -1,17 +1,18 @@
 use window::{Window, Windows, WindowMode};
 use winit::{event_loop::ControlFlow, event::{WindowEvent, Event, self}};
-use renderer::{WgpuContext, WgpuRenderer, RenderPass};
+use renderer::{WgpuContext, WgpuRenderer};
 
 extern crate noire;
 extern crate futures;
 extern crate wgpu;
 
 fn render(
+    renderer: &mut WgpuRenderer,
     context: &mut WgpuContext,
     swap_chain: &mut wgpu::SwapChain,
 ) {
     let swap_texture = swap_chain.get_current_frame().unwrap().output;
-    context.begin_pass(&swap_texture);
+    context.begin_pass(&swap_texture, &mut renderer.queue);
     context.finish();
 }
 
@@ -25,7 +26,7 @@ fn main() {
 
     let winit_id: winit::window::WindowId = windows.create(window, &event_loop);
 
-    let renderer = {
+    let mut renderer = {
         let winit_window = windows.get_winit_window(&winit_id).unwrap();
         futures::executor::block_on(WgpuRenderer::new(&winit_window))
     };
@@ -48,7 +49,7 @@ fn main() {
                 ..
             } => *control_flow = ControlFlow::Exit,
             Event::RedrawRequested(_window_id) => {
-                render(&mut context, &mut swap_chain);
+                render(&mut renderer, &mut context, &mut swap_chain);
             }
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::KeyboardInput{ ref input, .. } => {
