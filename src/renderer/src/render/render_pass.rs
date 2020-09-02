@@ -1,5 +1,5 @@
 pub struct RenderPass<'a> {
-    encoder: &'a wgpu::CommandEncoder,
+    pub encoder: &'a wgpu::CommandEncoder,
 }
 
 impl<'a> RenderPass<'a> {
