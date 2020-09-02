@@ -2,6 +2,8 @@ use renderer::{Renderer, WindowMode, WindowSettings};
 use winit::{event_loop::ControlFlow, event::{WindowEvent, Event}};
 
 extern crate noire;
+extern crate futures;
+extern crate wgpu;
 
 fn main() {
     let event_loop = winit::event_loop::EventLoop::new();
@@ -14,6 +16,7 @@ fn main() {
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Wait;
 
+        // TODO handle Window resize event
         match event {
             Event::MainEventsCleared => {
                 window.request_redraw();
