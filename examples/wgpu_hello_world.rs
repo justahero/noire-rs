@@ -11,23 +11,26 @@ fn main() {
     let window = Window::default()
         .with_title("Test")
         .with_mode(WindowMode::Windowed);
-        
-    let id = windows.create(window, &event_loop);
+    let window_id = window.id.clone();
+
+    let winit_id: winit::window::WindowId = windows.create(window, &event_loop);
 
     // TODO a basic Wgpu based renderer is a lot of effort to set up.
     let renderer = {
-        let winit_window = windows.get_window(&id).unwrap();
+        let winit_window = windows.get_winit_window(&winit_id).unwrap();
         pollster::block_on(WgpuRenderer::new(&winit_window))
     };
 
-    let _context = WgpuContext::new(renderer.device.clone());
+    let mut context = WgpuContext::new(renderer.device.clone());
+    let window = windows.get_window(&window_id).unwrap();
+    let swap_chain = context.create_swapchain(window, &renderer.surface);
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Wait;
 
         match event {
             Event::MainEventsCleared => {
-                let winit_window = windows.get_window(&id).unwrap();
+                let winit_window = windows.get_winit_window(&winit_id).unwrap();
                 winit_window.request_redraw();
             }
             Event::WindowEvent {

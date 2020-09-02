@@ -9,7 +9,7 @@ use crate::{Window, WindowId, WindowMode};
 pub struct Windows {
     /// Lookup table to find a winit Window by winit internal window id
     pub winit_windows: HashMap<WinitWindowId, WinitWindow>,
-    /// Lookup table to find find winit Window by WindowId
+    /// Lookup table to find find Window by WindowId
     pub windows: HashMap<WindowId, Window>,
 }
 
@@ -61,9 +61,14 @@ impl Windows {
         window_id
     }
 
-    /// Returns the mutable instance to access winit Window by internal id
-    pub fn get_window(&self, window_id: &WinitWindowId) -> Option<&WinitWindow> {
+    /// Returns a reference to the winit Window by internal id
+    pub fn get_winit_window(&self, window_id: &WinitWindowId) -> Option<&WinitWindow> {
         self.winit_windows.get(window_id)
+    }
+
+    /// Returns a reference to the Window description
+    pub fn get_window(&self, window_id: &WindowId) -> Option<&Window> {
+        self.windows.get(window_id)
     }
 }
 
