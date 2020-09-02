@@ -20,6 +20,8 @@ pub struct Window {
     pub height: u32,
     /// Marks the Window as resizable when true
     pub resizable: bool,
+    /// True when vertical sync is set, limit frame refresh to display to avoid tearing
+    pub vsync: bool,
     /// The window mode, fullscreen / windowed
     pub window_mode: WindowMode,
 }
@@ -62,6 +64,7 @@ impl Default for Window {
             width: 1280,
             height: 720,
             resizable: false,
+            vsync: true,
             window_mode: WindowMode::Windowed,
         }
     }
