@@ -59,7 +59,7 @@ impl WgpuContext {
     }
 
     pub fn finish(&mut self) {
-
+        
     }
 
     /// Creates a new Command Encoder

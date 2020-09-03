@@ -16,23 +16,13 @@ impl Color {
     pub const BLACK: Self = Color { r: 0.0, g: 0.0, b: 0.0, a: 1.0 };
 
     #[inline(always)]
-    pub fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
-        Color {
-            r,
-            g,
-            b,
-            a,
-        }
+    pub const fn rgba(r: f32, g: f32, b: f32, a: f32) -> Self {
+        Color { r, g, b, a }
     }
 
     #[inline(always)]
-    pub fn rgb(r: f32, g: f32, b: f32) -> Self {
-        Color {
-            r,
-            g,
-            b,
-            a: 1.0
-        }
+    pub const fn rgb(r: f32, g: f32, b: f32) -> Self {
+        Color { r, g, b, a: 1.0 }
     }
 
     /// Returns color as array with RGBA components
@@ -51,5 +41,11 @@ impl Color {
     #[inline(always)]
     pub fn rgb_array(&self) -> [f32; 3] {
         [self.r, self.g, self.b]
+    }
+}
+
+impl Default for Color {
+    fn default() -> Self {
+        Color::WHITE
     }
 }
