@@ -7,12 +7,12 @@ extern crate futures;
 extern crate wgpu;
 
 fn render(
-    renderer: &mut WgpuRenderer,
+    queue: &mut wgpu::Queue,
     context: &mut WgpuContext,
     swap_chain: &mut wgpu::SwapChain,
 ) {
     let swap_texture = swap_chain.get_current_frame().unwrap().output;
-    context.begin_pass(&swap_texture, &mut renderer.queue);
+    context.begin_pass(&swap_texture, queue);
     context.finish();
 }
 
@@ -49,7 +49,7 @@ fn main() {
                 ..
             } => *control_flow = ControlFlow::Exit,
             Event::RedrawRequested(_window_id) => {
-                render(&mut renderer, &mut context, &mut swap_chain);
+                render(&mut renderer.queue, &mut context, &mut swap_chain);
             }
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::KeyboardInput{ ref input, .. } => {

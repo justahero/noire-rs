@@ -24,13 +24,12 @@ pub struct RenderPassDepthStencilAttachment {
     pub stencil_ops: Option<Operations<f32>>,
 }
 
+#[derive(Debug)]
 pub struct RenderPassDescriptor {
     /// The color attachments of this render pass
     pub color_attachments: Vec<RenderPassColorAttachment>,
     /// The depth and stencil attach of the render pass, if set
     pub depth_stencil_attachment: Option<RenderPassDepthStencilAttachment>,
-}
-
-impl RenderPassDescriptor {
-    // TODO
+    /// Number of samples for the render pass
+    pub samples: u32,
 }

@@ -10,7 +10,7 @@ pub mod prelude {
     pub use crate::{};
 }
 
-use winit::{
+pub use winit::{
     event::{DeviceEvent, WindowEvent},
     event_loop::{ControlFlow, EventLoop, EventLoopWindowTarget},
 };
