@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use crate::{Shader, ShaderStage};
+
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct Renderer {
     /// The WGPU instance, used to create Adapters or Surfaces
@@ -41,5 +43,14 @@ impl Renderer {
             device: Arc::new(device),
             queue,
         }
+    }
+
+    /// Creates a new shader
+    pub fn create_shader(
+        &self,
+        source: &str,
+        stage: ShaderStage,
+    ) -> Shader {
+        Shader::compile(source, stage, &self.device).expect("Failed to compile shader")
     }
 }

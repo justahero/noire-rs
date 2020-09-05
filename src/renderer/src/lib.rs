@@ -1,3 +1,5 @@
+extern crate shaderc;
+
 mod converter;
 mod render;
 mod renderer;

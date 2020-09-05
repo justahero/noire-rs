@@ -5,6 +5,7 @@ edition = "2018"
 authors = ["Sebastian Ziebell"]
 
 [dependencies]
+shaderc = { version = "0.6.2" }
 uuid = { version = "0.8.1", features = ["v4", "serde"] }
 wgpu = "0.6.0"
 winit = "0.23.0"
