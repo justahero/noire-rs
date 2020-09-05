@@ -1,4 +1,4 @@
-use renderer;
+use renderer::{self, Shader};
 use shaderc;
 
 const VERTEX_SHADER: &str = r#"
@@ -12,23 +12,8 @@ void main() {
 "#;
 
 fn main() {
-    /*
-    // prepare to compile shader
-    let mut compiler = shaderc::Compiler::new().unwrap();
-    let mut options = shaderc::CompileOptions::new().unwrap();
-    options.add_macro_definition("main", Some("main"));
-    options.set_auto_bind_uniforms(true);
-    options.set_optimization_level(shaderc::OptimizationLevel::Performance);
-    options.set_source_language(shaderc::SourceLanguage::GLSL);
-    options.set_suppress_warnings();
-    let binary = compiler.compile_into_spirv(
-        VERTEX_SHADER,
-        renderer::ShaderStage::Vertex.into(),
-        "vertex_shader.glsl",
-        "main",
-        Some(&options)
-    ).unwrap();
-    */
+    let shader = Shader::compile(VERTEX_SHADER, renderer::ShaderStage::Vertex)
+        .expect("Failed to compile shader");
 
-    let shader = Shader::compile(VERTEX_SHADER, renderer::ShaderStage::Vertex).expect("Failed to compile shader");
+    println!("{}", shader.stage);
 }

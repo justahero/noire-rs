@@ -1,10 +1,9 @@
-use once_cell::{sync::Lazy, unsync::OnceCell};
-
 use std::fmt;
 use fmt::Display;
 
 type ShaderResult = Result<Shader, ShaderError>;
 
+#[derive(Debug)]
 pub enum CompilerError {
     /// The compiler could not be loaded
     CompilerNotLoaded,
@@ -25,11 +24,22 @@ impl Display for CompilerError {
     }
 }
 
+#[derive(Debug)]
 pub enum ShaderError {
     /// The source kind of the shader is not supported
     UnsupportedShaderKind(shaderc::ShaderKind),
     /// Wraps any CompilerError values
     CompileError(String),
+}
+
+impl Display for ShaderError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            ShaderError::UnsupportedShaderKind(kind) => format!("Unsupported shader kind '{:?}' found", kind),
+            ShaderError::CompileError(error) => format!("Failed to compile shader: {}", error),
+        };
+        write!(f, "{}", s)
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -75,19 +85,8 @@ pub struct Shader {
     source: shaderc::CompilationArtifact,
 }
 
-// Lazily initializes the Compiler instance once, then returns it
-// Allocating a new shaderc::Compiler is a resource intensive task, therefore the
-// instance is instantiated once and reused afterwards.
-pub fn compiler<'a>() -> Result<&'a shaderc::Compiler, CompilerError> {
-    static INSTANCE: OnceCell<shaderc::Compiler> = OnceCell::new();
-    let instance = INSTANCE.get_or_try_init(|| {
-        shaderc::Compiler::new().ok_or(CompilerError::CompilerNotLoaded)
-    })?;
-    Ok(instance)
-}
-
 fn compile_shader(source_text: &str, stage: ShaderStage) -> Result<shaderc::CompilationArtifact, CompilerError> {
-    let compiler = compiler()?;
+    let mut compiler = shaderc::Compiler::new().ok_or(CompilerError::CompilerNotLoaded)?;
     let mut options = shaderc::CompileOptions::new().unwrap();
     options.add_macro_definition("main", Some("main"));
     options.set_auto_bind_uniforms(true);
@@ -106,7 +105,7 @@ fn compile_shader(source_text: &str, stage: ShaderStage) -> Result<shaderc::Comp
 
 impl Shader {
     /// Initializes a new shader
-    pub fn comple(source: &str, stage: ShaderStage) -> ShaderResult {
+    pub fn compile(source: &str, stage: ShaderStage) -> ShaderResult {
         let artifact = compile_shader(source, stage)
             .map_err(|e| ShaderError::CompileError(e.to_string()))?;
 

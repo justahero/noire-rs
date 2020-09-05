@@ -1051,7 +1051,6 @@ name = "renderer"
 version = "0.1.0"
 dependencies = [
  "cart-tmp-winit",
- "once_cell",
  "shaderc",
  "wgpu",
  "window",
