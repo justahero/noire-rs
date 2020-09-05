@@ -1,5 +1,24 @@
-use std::sync::Arc;
+use std::{borrow::Cow, sync::Arc};
 use crate::WgpuInto;
+
+/// TODO remove from here
+const VERTEX_SHADER: &str = r#"
+#version 450
+
+in vec2 position;
+
+void main() {
+    gl_Position = vec4(position, 0.0, 1.0);
+}
+"#;
+
+const FRAGMENT_SHADER: &str = r#"
+#version 450
+
+void main() {
+    out_color = vec4(1.0);
+}
+"#;
 
 /// The WGPU Context that wraps the (graphics) device and creates WGPU objects
 ///
@@ -51,8 +70,30 @@ impl WgpuContext {
 
         // The render pass is part of the encoder, has to drop at the end
         {
-            let render_pass = encoder.begin_render_pass(&descriptor);
+            // let render_pass = encoder.begin_render_pass(&descriptor);
             // TODO set up render pass
+            /*
+            let render_pipeline_layout = self.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: None,
+                bind_group_layouts: &[],
+                push_constant_ranges: &[],
+            });
+
+            let shader_module = {
+                wgpu::ShaderModuleSource::SpirV(VERTEX_SHADER)
+            };
+
+            let vertex_stage = wgpu::ProgrammableStageDescriptor {
+                module: shader_module,
+                entry_point: "main",
+            };
+
+            let render_pipeline = self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                label: None,
+                layout: Some(&render_pipeline_layout),
+                vertex_stage,
+            });
+            */
         }
 
         queue.submit(Some(encoder.finish()));
