@@ -75,12 +75,10 @@ impl Windows {
 /// Function to get the current video mode resolution of the current desktop.
 /// It enumerates video modes and tries to find the best suitable video mode for the screen resolution.
 pub fn get_video_mode(monitor: &MonitorHandle) -> Option<VideoMode> {
-    let size = monitor.size();
+    let _size = monitor.size();
     let video_modes = monitor.video_modes().collect::<Vec<_>>();
 
     println!("VIDEO MODES: {:?}", video_modes);
 
     todo!("Please implement");
-
-    None
 }

@@ -1,16 +1,35 @@
-use once_cell::sync::OnceCell;
+use once_cell::{sync::Lazy, unsync::OnceCell};
 
-use std::{fmt, convert::TryFrom};
+use std::fmt;
+use fmt::Display;
 
 type ShaderResult = Result<Shader, ShaderError>;
 
-pub enum ShaderError {
-    /// The source kind of the shader is not supported
-    UnsupportedShaderKind(shaderc::ShaderKind),
+pub enum CompilerError {
     /// The compiler could not be loaded
     CompilerNotLoaded,
     /// The compiler did not compile the shader correctly
     CompilationFailed(String),
+    /// Cannot access the Compiler
+    AccessBlocked,
+}
+
+impl Display for CompilerError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            CompilerError::AccessBlocked => String::from("Access to Compiler is blocked"),
+            CompilerError::CompilerNotLoaded => String::from("Failed to load compiler"),
+            CompilerError::CompilationFailed(error) => format!("Failed to compile shader: {}", error),
+        };
+        write!(f, "{}", s)
+    }
+}
+
+pub enum ShaderError {
+    /// The source kind of the shader is not supported
+    UnsupportedShaderKind(shaderc::ShaderKind),
+    /// Wraps any CompilerError values
+    CompileError(String),
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -59,15 +78,15 @@ pub struct Shader {
 // Lazily initializes the Compiler instance once, then returns it
 // Allocating a new shaderc::Compiler is a resource intensive task, therefore the
 // instance is instantiated once and reused afterwards.
-pub fn compiler<'a>() -> Result<&'a shaderc::Compiler, ShaderError> {
+pub fn compiler<'a>() -> Result<&'a shaderc::Compiler, CompilerError> {
     static INSTANCE: OnceCell<shaderc::Compiler> = OnceCell::new();
     let instance = INSTANCE.get_or_try_init(|| {
-        shaderc::Compiler::new().ok_or(ShaderError::CompilerNotLoaded)
+        shaderc::Compiler::new().ok_or(CompilerError::CompilerNotLoaded)
     })?;
     Ok(instance)
 }
 
-fn compile_shader(source_text: &str, stage: ShaderStage) -> Result<shaderc::CompilationArtifact, ShaderError> {
+fn compile_shader(source_text: &str, stage: ShaderStage) -> Result<shaderc::CompilationArtifact, CompilerError> {
     let compiler = compiler()?;
     let mut options = shaderc::CompileOptions::new().unwrap();
     options.add_macro_definition("main", Some("main"));
@@ -81,14 +100,16 @@ fn compile_shader(source_text: &str, stage: ShaderStage) -> Result<shaderc::Comp
         &format!("{}_shader.glsl", stage.to_string()),
         "main",
         Some(&options)
-    ).map_err(|e| ShaderError::CompilationFailed(e.to_string()))?;
+    ).map_err(|e| CompilerError::CompilationFailed(e.to_string()))?;
     Ok(binary)
 }
 
 impl Shader {
     /// Initializes a new shader
     pub fn comple(source: &str, stage: ShaderStage) -> ShaderResult {
-        let artifact = compile_shader(source, stage)?;
+        let artifact = compile_shader(source, stage)
+            .map_err(|e| ShaderError::CompileError(e.to_string()))?;
+
         Ok(Self {
             stage,
             source: artifact,
