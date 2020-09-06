@@ -106,12 +106,17 @@ fn compile_shader(source_text: &str, stage: ShaderStage) -> Result<shaderc::Comp
 impl Shader {
     /// Initializes a new shader
     pub fn compile(source: &str, stage: ShaderStage) -> ShaderResult {
-        let artifact = compile_shader(source, stage)
+        let source = compile_shader(source, stage)
             .map_err(|e| ShaderError::CompileError(e.to_string()))?;
 
         Ok(Self {
             stage,
-            source: artifact,
+            source,
         })
+    }
+
+    /// Returns the shader as vec of u8.
+    pub fn as_bytes(&self) -> &[u8] {
+        self.source.as_binary_u8()
     }
 }

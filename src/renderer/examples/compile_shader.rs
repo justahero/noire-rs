@@ -1,4 +1,4 @@
-use renderer::{self, Shader};
+use renderer::{self, Shader, ShaderLayout};
 use shaderc;
 
 const VERTEX_SHADER: &str = r#"
@@ -15,5 +15,9 @@ fn main() {
     let shader = Shader::compile(VERTEX_SHADER, renderer::ShaderStage::Vertex)
         .expect("Failed to compile shader");
 
-    println!("{}", shader.stage);
+    println!("Shader {}", shader.stage);
+
+    let shader_layout = ShaderLayout::from_shader(&shader);
+
+    println!("Layout {:?}", shader_layout)
 }

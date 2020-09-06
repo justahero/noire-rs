@@ -7,6 +7,7 @@ license = "MIT"
 
 [dependencies]
 shaderc = { version = "0.6.2" }
-wgpu    = "0.6.0"
-window  = { path = "../window", version = "0.1.0" }
-winit   = { version = "0.22.2", package = "cart-tmp-winit", default-features = false }
+spirv-reflect = "0.2.3"
+wgpu = "0.6.0"
+window = { path = "../window", version = "0.1.0" }
+winit = { version = "0.22.2", package = "cart-tmp-winit", default-features = false }

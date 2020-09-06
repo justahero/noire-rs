@@ -1052,6 +1052,7 @@ version = "0.1.0"
 dependencies = [
  "cart-tmp-winit",
  "shaderc",
+ "spirv-reflect",
  "wgpu",
  "window",
 ]
@@ -1113,6 +1114,20 @@ name = "smallvec"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbee7696b84bbf3d89a1c2eccff0850e3047ed46bfcd2e92c29a2d074d57e252"
+
+[[package]]
+name = "spirv-reflect"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cecc7af6a7d3ca6d15f4d6b5077df89c77ad1f4b314d0cabee221656d041dad7"
+dependencies = [
+ "bitflags",
+ "cc",
+ "num-traits",
+ "serde",
+ "serde_derive",
+ "spirv_headers",
+]
 
 [[package]]
 name = "spirv_cross"
