@@ -1576,6 +1576,7 @@ name = "renderer"
 version = "0.1.0"
 dependencies = [
  "shaderc 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "spirv-reflect 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "uuid 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "wgpu 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "winit 0.23.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1694,6 +1695,19 @@ dependencies = [
  "wayland-client 0.28.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "wayland-cursor 0.28.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "wayland-protocols 0.28.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "spirv-reflect"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cc 1.0.50 (registry+https://github.com/rust-lang/crates.io-index)",
+ "num-traits 0.2.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.115 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde_derive 1.0.115 (registry+https://github.com/rust-lang/crates.io-index)",
+ "spirv_headers 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2361,6 +2375,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum slab 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "c111b5bd5695e56cffe5129854aa230b39c93a305372fdbb2668ca2394eea9f8"
 "checksum smallvec 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "fbee7696b84bbf3d89a1c2eccff0850e3047ed46bfcd2e92c29a2d074d57e252"
 "checksum smithay-client-toolkit 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)" = "2ec5c077def8af49f9b5aeeb5fcf8079c638c6615c3a8f9305e2dea601de57f7"
+"checksum spirv-reflect 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "cecc7af6a7d3ca6d15f4d6b5077df89c77ad1f4b314d0cabee221656d041dad7"
 "checksum spirv_cross 0.21.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b631bd956108f3e34a4fb7e39621711ac15ce022bc567da2d953c6df13f00e00"
 "checksum spirv_headers 1.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "1f5b132530b1ac069df335577e3581765995cba5a13995cdbbdbc8fb057c532c"
 "checksum storage-map 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "418bb14643aa55a7841d5303f72cf512cfb323b8cc221d51580500a1ca75206c"
