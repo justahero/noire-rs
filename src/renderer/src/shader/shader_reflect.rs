@@ -1,6 +1,6 @@
 use spirv_reflect::{types::{ReflectDescriptorBinding, ReflectDescriptorSet, ReflectInterfaceVariable}, ShaderModule};
 
-use crate::{BindGroupDescriptor, BindingDescriptor, Shader, VertexAttributeDescriptor};
+use crate::{BindGroupDescriptor, BindingDescriptor, Shader, VertexAttributeDescriptor, WgpuInto};
 
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///
@@ -78,6 +78,7 @@ pub(crate) fn reflect_vertex_attribute(variable: &ReflectInterfaceVariable) -> V
     VertexAttributeDescriptor {
         location: variable.location,
         offset: 0,
+        format: variable.format.wgpu_into(),
     }
 }
 

@@ -1,5 +1,5 @@
 use std::{borrow::Cow, sync::Arc};
-use crate::{Shader, WgpuInto, ShaderStage, RasterizationStateDescriptor};
+use crate::{Shader, WgpuInto, ShaderStage, RasterizationStateDescriptor, PrimitiveTopology, DepthStencilStateDescriptor};
 use wgpu::ShaderModuleSource;
 
 /// TODO remove from here
@@ -103,7 +103,16 @@ impl WgpuContext {
                 vertex_stage,
                 fragment_stage: Some(fragment_stage),
                 rasterization_state: Some(rasterization_state),
+                primitive_topology: PrimitiveTopology::TriangleStrip.into(),
                 color_states: &[],
+                depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
+                vertex_state: wgpu::VertexStateDescriptor {
+                    index_format: wgpu::IndexFormat::Uint16,
+                    vertex_buffers: &[],
+                },
+                sample_count: 1,
+                sample_mask: !0,
+                alpha_to_coverage_enabled: false,
             });
         }
 

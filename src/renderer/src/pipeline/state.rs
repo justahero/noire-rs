@@ -116,3 +116,30 @@ impl From<ColorWrite> for wgpu::ColorWrite {
         wgpu::ColorWrite::from_bits(val.bits()).unwrap()
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum CompareFunction {
+    Never,
+    Less,
+    Equal,
+    LessEqual,
+    Greater,
+    NotEqual,
+    GreaterEqual,
+    Always,
+}
+
+impl From<CompareFunction> for wgpu::CompareFunction {
+    fn from(val: CompareFunction) -> Self {
+        match val {
+            CompareFunction::Never => wgpu::CompareFunction::Never,
+            CompareFunction::Less => wgpu::CompareFunction::Less,
+            CompareFunction::Equal => wgpu::CompareFunction::Equal,
+            CompareFunction::LessEqual => wgpu::CompareFunction::LessEqual,
+            CompareFunction::Greater => wgpu::CompareFunction::Greater,
+            CompareFunction::NotEqual => wgpu::CompareFunction::NotEqual,
+            CompareFunction::GreaterEqual => wgpu::CompareFunction::GreaterEqual,
+            CompareFunction::Always => wgpu::CompareFunction::Always,
+        }
+    }
+}

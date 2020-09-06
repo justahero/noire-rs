@@ -1,3 +1,5 @@
+use crate::TextureFormat;
+
 pub mod bind_group;
 pub mod binding;
 pub mod pipeline;
@@ -77,6 +79,7 @@ impl From<RasterizationStateDescriptor> for wgpu::RasterizationStateDescriptor {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub enum PrimitiveTopology {
     PointList,
     LineList,
@@ -93,6 +96,115 @@ impl From<PrimitiveTopology> for wgpu::PrimitiveTopology {
             PrimitiveTopology::LineStrip => wgpu::PrimitiveTopology::LineStrip,
             PrimitiveTopology::TriangleList => wgpu::PrimitiveTopology::TriangleList,
             PrimitiveTopology::TriangleStrip => wgpu::PrimitiveTopology::TriangleStrip,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct DepthStencilStateDescriptor {
+    pub format: TextureFormat,
+    pub depth_write_enabled: bool,
+    pub depth_compare: CompareFunction,
+    pub stencil: StencilStateDescriptor,
+}
+
+impl Default for DepthStencilStateDescriptor {
+    fn default() -> Self {
+        DepthStencilStateDescriptor {
+            format: TextureFormat::Depth32Float,
+            depth_write_enabled: true,
+            depth_compare: CompareFunction::Less,
+            stencil: StencilStateDescriptor {
+                front: StencilStateFaceDescriptor::IGNORE,
+                back: StencilStateFaceDescriptor::IGNORE,
+                read_mask: 0,
+                write_mask: 0,
+            }
+        }
+    }
+}
+
+impl From<DepthStencilStateDescriptor> for wgpu::DepthStencilStateDescriptor {
+    fn from(val: DepthStencilStateDescriptor) -> Self {
+        wgpu::DepthStencilStateDescriptor {
+            format: val.format.into(),
+            depth_write_enabled: val.depth_write_enabled,
+            depth_compare: val.depth_compare.into(),
+            stencil: val.stencil.into(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct StencilStateDescriptor {
+    pub front: StencilStateFaceDescriptor,
+    pub back: StencilStateFaceDescriptor,
+    pub read_mask: u32,
+    pub write_mask: u32,
+}
+
+impl From<StencilStateDescriptor> for wgpu::StencilStateDescriptor {
+    fn from(val: StencilStateDescriptor) -> Self {
+        wgpu::StencilStateDescriptor {
+            front: val.front.into(),
+            back: val.back.into(),
+            read_mask: val.read_mask,
+            write_mask: val.write_mask,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct StencilStateFaceDescriptor {
+    pub compare: CompareFunction,
+    pub fail_op: StencilOperation,
+    pub depth_fail_op: StencilOperation,
+    pub pass_op: StencilOperation,
+}
+
+impl StencilStateFaceDescriptor {
+    pub const IGNORE: Self = Self {
+        compare: CompareFunction::Always,
+        fail_op: StencilOperation::Keep,
+        depth_fail_op: StencilOperation::Keep,
+        pass_op: StencilOperation::Keep,
+    };
+}
+
+impl From<StencilStateFaceDescriptor> for wgpu::StencilStateFaceDescriptor {
+    fn from(val: StencilStateFaceDescriptor) -> Self {
+        wgpu::StencilStateFaceDescriptor {
+            compare: val.compare.into(),
+            fail_op: val.fail_op.into(),
+            depth_fail_op: val.depth_fail_op.into(),
+            pass_op: val.pass_op.into(),
+        }
+    }
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum StencilOperation {
+    Keep,
+    Zero,
+    Replace,
+    Invert,
+    IncrementClamp,
+    DecrementClamp,
+    IncrementWrap,
+    DecrementWrap,
+}
+
+impl From<StencilOperation> for wgpu::StencilOperation {
+    fn from(val: StencilOperation) -> Self {
+        match val {
+            StencilOperation::Keep => wgpu::StencilOperation::Keep,
+            StencilOperation::Zero => wgpu::StencilOperation::Zero,
+            StencilOperation::Replace => wgpu::StencilOperation::Replace,
+            StencilOperation::Invert => wgpu::StencilOperation::Invert,
+            StencilOperation::IncrementClamp => wgpu::StencilOperation::IncrementClamp,
+            StencilOperation::DecrementClamp => wgpu::StencilOperation::DecrementClamp,
+            StencilOperation::IncrementWrap => wgpu::StencilOperation::IncrementWrap,
+            StencilOperation::DecrementWrap => wgpu::StencilOperation::DecrementWrap,
         }
     }
 }
