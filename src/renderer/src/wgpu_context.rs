@@ -1,5 +1,6 @@
 use std::{borrow::Cow, sync::Arc};
-use crate::WgpuInto;
+use crate::{Shader, WgpuInto, ShaderStage, RasterizationStateDescriptor};
+use wgpu::ShaderModuleSource;
 
 /// TODO remove from here
 const VERTEX_SHADER: &str = r#"
@@ -50,7 +51,7 @@ impl WgpuContext {
 
     /// Begins a new render pass,
     pub fn begin_pass(&mut self, frame: &wgpu::SwapChainTexture, queue: &mut wgpu::Queue) {
-        let mut encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
+        let encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
 
         let color = wgpu::Color { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
 
@@ -72,28 +73,38 @@ impl WgpuContext {
         {
             // let render_pass = encoder.begin_render_pass(&descriptor);
             // TODO set up render pass
-            /*
             let render_pipeline_layout = self.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: None,
                 bind_group_layouts: &[],
                 push_constant_ranges: &[],
             });
 
-            let shader_module = {
-                wgpu::ShaderModuleSource::SpirV(VERTEX_SHADER)
-            };
+            let vertex_shader = Shader::compile(&VERTEX_SHADER, ShaderStage::Vertex).unwrap();
+            let vertex_shader_module = self.device.create_shader_module(ShaderModuleSource::SpirV(Cow::from(vertex_shader.as_dwords())));
 
             let vertex_stage = wgpu::ProgrammableStageDescriptor {
-                module: shader_module,
+                module: &vertex_shader_module,
                 entry_point: "main",
             };
+
+            let fragment_shader = Shader::compile(&FRAGMENT_SHADER, ShaderStage::Fragment).unwrap();
+            let fragment_shader_module = self.device.create_shader_module(ShaderModuleSource::SpirV(Cow::from(fragment_shader.as_dwords())));
+
+            let fragment_stage = wgpu::ProgrammableStageDescriptor {
+                module: &fragment_shader_module,
+                entry_point: "main",
+            };
+
+            let rasterization_state: wgpu::RasterizationStateDescriptor = RasterizationStateDescriptor::default().into();
 
             let render_pipeline = self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: None,
                 layout: Some(&render_pipeline_layout),
                 vertex_stage,
+                fragment_stage: Some(fragment_stage),
+                rasterization_state: Some(rasterization_state),
+                color_states: &[],
             });
-            */
         }
 
         queue.submit(Some(encoder.finish()));

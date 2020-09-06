@@ -6,6 +6,7 @@ authors = ["Sebastian Ziebell"]
 license = "MIT"
 
 [dependencies]
+bitflags = "1.2.1"
 shaderc = { version = "0.6.2" }
 spirv-reflect = "0.2.3"
 wgpu = "0.6.0"

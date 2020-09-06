@@ -119,4 +119,9 @@ impl Shader {
     pub fn as_bytes(&self) -> &[u8] {
         self.source.as_binary_u8()
     }
+
+    /// Returns the shader as vec of u32.
+    pub fn as_dwords(&self) -> &[u32] {
+        self.source.as_binary()
+    }
 }
