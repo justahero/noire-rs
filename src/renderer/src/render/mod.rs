@@ -21,6 +21,15 @@ impl<V: Default> Default for LoadOp<V> {
     }
 }
 
+impl<T> From<LoadOp<T>> for wgpu::LoadOp<T> {
+    fn from(val: LoadOp<T>) -> Self {
+        match val {
+            LoadOp::Clear(c) => wgpu::LoadOp::Clear(c),
+            LoadOp::Load => wgpu::LoadOp::Load,
+        }
+    }
+}
+
 /// Operatios for an attachment aspect
 #[derive(Debug)]
 pub struct Operations<V> {
@@ -35,6 +44,15 @@ impl<V: Default> Default for Operations<V> {
         Self {
             load: Default::default(),
             store: true,
+        }
+    }
+}
+
+impl<T> From<Operations<T>> for wgpu::Operations<T> {
+    fn from(val: Operations<T>) -> Self {
+        Self {
+            load: val.load.into(),
+            store: val.store,
         }
     }
 }

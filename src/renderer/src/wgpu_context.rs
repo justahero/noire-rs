@@ -1,6 +1,7 @@
 use std::{borrow::Cow, sync::Arc};
-use crate::{Shader, WgpuInto, ShaderStage, RasterizationStateDescriptor, PrimitiveTopology, DepthStencilStateDescriptor};
-use wgpu::ShaderModuleSource;
+use crate::{Shader, WgpuInto, ShaderStage, RasterizationStateDescriptor, PrimitiveTopology, DepthStencilStateDescriptor, BlendDescriptor};
+use wgpu::{ShaderModuleSource, ColorWrite};
+use window::Window;
 
 /// TODO remove from here
 const VERTEX_SHADER: &str = r#"
@@ -50,8 +51,10 @@ impl WgpuContext {
     }
 
     /// Begins a new render pass,
-    pub fn begin_pass(&mut self, frame: &wgpu::SwapChainTexture, queue: &mut wgpu::Queue) {
+    pub fn begin_pass(&mut self, window: &Window, frame: &wgpu::SwapChainTexture, queue: &mut wgpu::Queue) {
         let encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
+
+        let swapchain_descriptor: wgpu::SwapChainDescriptor = window.wgpu_into();
 
         let color = wgpu::Color { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
 
@@ -97,6 +100,13 @@ impl WgpuContext {
 
             let rasterization_state: wgpu::RasterizationStateDescriptor = RasterizationStateDescriptor::default().into();
 
+            let color_states = wgpu::ColorStateDescriptor {
+                format: swapchain_descriptor.format,
+                color_blend: BlendDescriptor::REPLACE.into(),
+                alpha_blend: BlendDescriptor::REPLACE.into(),
+                write_mask: ColorWrite::ALL,
+            };
+
             let render_pipeline = self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: None,
                 layout: Some(&render_pipeline_layout),
@@ -104,7 +114,7 @@ impl WgpuContext {
                 fragment_stage: Some(fragment_stage),
                 rasterization_state: Some(rasterization_state),
                 primitive_topology: PrimitiveTopology::TriangleStrip.into(),
-                color_states: &[],
+                color_states: &[color_states],
                 depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
                 vertex_state: wgpu::VertexStateDescriptor {
                     index_format: wgpu::IndexFormat::Uint16,
@@ -115,11 +125,14 @@ impl WgpuContext {
                 alpha_to_coverage_enabled: false,
             });
         }
-
-        queue.submit(Some(encoder.finish()));
     }
 
-    pub fn finish(&mut self) {
+    pub fn finish(&mut self, queue: &mut wgpu::Queue) {
+        let mut buffers = Vec::new();
+        if let Some(encoder) = self.encoder.take() {
+            buffers.push(encoder.finish());
+            queue.submit(buffers.drain(..));
+        }
     }
 
     /// Creates a new Command Encoder

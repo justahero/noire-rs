@@ -35,6 +35,14 @@ impl From<BlendDescriptor> for wgpu::BlendDescriptor {
     }
 }
 
+impl BlendDescriptor {
+    pub const REPLACE: Self = Self {
+        src_factor: BlendFactor::One,
+        dst_factor: BlendFactor::Zero,
+        operation: BlendOperation::Add,
+    };
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum BlendFactor {
     Zero,

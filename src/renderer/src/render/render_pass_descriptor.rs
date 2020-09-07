@@ -5,7 +5,7 @@ pub enum TextureAttachment {
 }
 
 #[derive(Debug)]
-pub struct RenderPassColorAttachment {
+pub struct RenderPassColorAttachmentDescriptor {
     /// The color attachment
     pub attachment: TextureAttachment,
     /// The resolve target for this color attachment, if set
@@ -15,7 +15,7 @@ pub struct RenderPassColorAttachment {
 }
 
 #[derive(Debug)]
-pub struct RenderPassDepthStencilAttachment {
+pub struct RenderPassDepthStencilAttachmentDescriptor {
     /// The view or texture attachment
     pub attachment: TextureAttachment,
     /// What operation will be performed on the depth part of the attachment
@@ -27,9 +27,9 @@ pub struct RenderPassDepthStencilAttachment {
 #[derive(Debug)]
 pub struct RenderPassDescriptor {
     /// The color attachments of this render pass
-    pub color_attachments: Vec<RenderPassColorAttachment>,
+    pub color_attachments: Vec<RenderPassColorAttachmentDescriptor>,
     /// The depth and stencil attach of the render pass, if set
-    pub depth_stencil_attachment: Option<RenderPassDepthStencilAttachment>,
+    pub depth_stencil_attachment: Option<RenderPassDepthStencilAttachmentDescriptor>,
     /// Number of samples for the render pass
     pub samples: u32,
 }
