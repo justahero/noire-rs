@@ -1,9 +1,9 @@
 use crate::{
     BlendDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
     Shader, ShaderStage, WgpuInto,
-Color};
+Color, RenderPassDescriptor};
 use std::{borrow::Cow, sync::Arc};
-use wgpu::{ColorWrite, ShaderModuleSource};
+use wgpu::{ColorWrite, ShaderModuleSource, CommandEncoder};
 use window::Window;
 
 /// TODO remove from here
@@ -97,7 +97,7 @@ impl WgpuContext {
             let vertex_shader_module =
                 self.device
                     .create_shader_module(ShaderModuleSource::SpirV(Cow::from(
-                        vertex_shader.as_dwords(),
+                        vertex_shader.as_binary(),
                     )));
 
             let vertex_stage = wgpu::ProgrammableStageDescriptor {
@@ -109,7 +109,7 @@ impl WgpuContext {
             let fragment_shader_module =
                 self.device
                     .create_shader_module(ShaderModuleSource::SpirV(Cow::from(
-                        fragment_shader.as_dwords(),
+                        fragment_shader.as_binary(),
                     )));
 
             let fragment_stage = wgpu::ProgrammableStageDescriptor {
