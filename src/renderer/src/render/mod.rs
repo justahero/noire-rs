@@ -56,3 +56,9 @@ impl<T> From<Operations<T>> for wgpu::Operations<T> {
         }
     }
 }
+
+impl From<Color> for wgpu::Color {
+    fn from(c: Color) -> Self {
+        wgpu::Color { r: c.r as f64, g: c.g as f64, b: c.b as f64, a: c.a as f64 }
+    }
+}

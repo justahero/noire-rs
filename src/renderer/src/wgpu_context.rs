@@ -1,7 +1,7 @@
 use crate::{
     BlendDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
     Shader, ShaderStage, WgpuInto,
-};
+Color};
 use std::{borrow::Cow, sync::Arc};
 use wgpu::{ColorWrite, ShaderModuleSource};
 use window::Window;
@@ -68,12 +68,7 @@ impl WgpuContext {
 
         let swapchain_descriptor: wgpu::SwapChainDescriptor = window.wgpu_into();
 
-        let color = wgpu::Color {
-            r: 0.0,
-            g: 0.0,
-            b: 0.0,
-            a: 0.0,
-        };
+        let color: wgpu::Color = Color::BLACK.into();
 
         let color_descriptor = wgpu::RenderPassColorAttachmentDescriptor {
             attachment: &frame.view,
