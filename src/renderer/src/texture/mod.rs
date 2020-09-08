@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 #[derive(Debug, Clone, Copy)]
 pub enum TextureFormat {
     // 8 bit formats, unpacked
@@ -56,5 +58,23 @@ pub enum TextureFormat {
 impl From<TextureFormat> for wgpu::TextureFormat {
     fn from(format: TextureFormat) -> Self {
         todo!()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct TextureId(Uuid);
+
+impl TextureId {
+    pub fn new() -> Self {
+        TextureId(Uuid::new_v4())
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct SamplerId(Uuid);
+
+impl SamplerId {
+    pub fn new() -> Self {
+        SamplerId(Uuid::new_v4())
     }
 }

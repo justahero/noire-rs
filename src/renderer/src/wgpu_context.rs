@@ -1,6 +1,9 @@
+use crate::{
+    BlendDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
+    Shader, ShaderStage, WgpuInto,
+};
 use std::{borrow::Cow, sync::Arc};
-use crate::{Shader, WgpuInto, ShaderStage, RasterizationStateDescriptor, PrimitiveTopology, DepthStencilStateDescriptor, BlendDescriptor};
-use wgpu::{ShaderModuleSource, ColorWrite};
+use wgpu::{ColorWrite, ShaderModuleSource};
 use window::Window;
 
 /// TODO remove from here
@@ -45,18 +48,32 @@ impl WgpuContext {
 
     /// Creates a new Swap chain object
     /// TODO refactor function, parameter dependencies are a bit weird
-    pub fn create_swapchain(&mut self, window: &window::Window, surface: &wgpu::Surface) -> wgpu::SwapChain {
+    pub fn create_swapchain(
+        &mut self,
+        window: &window::Window,
+        surface: &wgpu::Surface,
+    ) -> wgpu::SwapChain {
         let descriptor = window.wgpu_into();
         self.device.create_swap_chain(surface, &descriptor)
     }
 
     /// Begins a new render pass,
-    pub fn begin_pass(&mut self, window: &Window, frame: &wgpu::SwapChainTexture, queue: &mut wgpu::Queue) {
-        let encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
+    pub fn begin_pass(
+        &mut self,
+        window: &Window,
+        frame: &wgpu::SwapChainTexture,
+        queue: &mut wgpu::Queue,
+    ) {
+        let mut encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
 
         let swapchain_descriptor: wgpu::SwapChainDescriptor = window.wgpu_into();
 
-        let color = wgpu::Color { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
+        let color = wgpu::Color {
+            r: 0.0,
+            g: 0.0,
+            b: 0.0,
+            a: 0.0,
+        };
 
         let color_descriptor = wgpu::RenderPassColorAttachmentDescriptor {
             attachment: &frame.view,
@@ -74,16 +91,20 @@ impl WgpuContext {
 
         // The render pass is part of the encoder, has to drop at the end
         {
-            // let render_pass = encoder.begin_render_pass(&descriptor);
-            // TODO set up render pass
-            let render_pipeline_layout = self.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: None,
-                bind_group_layouts: &[],
-                push_constant_ranges: &[],
-            });
+            let render_pipeline_layout =
+                self.device
+                    .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                        label: None,
+                        bind_group_layouts: &[],
+                        push_constant_ranges: &[],
+                    });
 
             let vertex_shader = Shader::compile(&VERTEX_SHADER, ShaderStage::Vertex).unwrap();
-            let vertex_shader_module = self.device.create_shader_module(ShaderModuleSource::SpirV(Cow::from(vertex_shader.as_dwords())));
+            let vertex_shader_module =
+                self.device
+                    .create_shader_module(ShaderModuleSource::SpirV(Cow::from(
+                        vertex_shader.as_dwords(),
+                    )));
 
             let vertex_stage = wgpu::ProgrammableStageDescriptor {
                 module: &vertex_shader_module,
@@ -91,14 +112,19 @@ impl WgpuContext {
             };
 
             let fragment_shader = Shader::compile(&FRAGMENT_SHADER, ShaderStage::Fragment).unwrap();
-            let fragment_shader_module = self.device.create_shader_module(ShaderModuleSource::SpirV(Cow::from(fragment_shader.as_dwords())));
+            let fragment_shader_module =
+                self.device
+                    .create_shader_module(ShaderModuleSource::SpirV(Cow::from(
+                        fragment_shader.as_dwords(),
+                    )));
 
             let fragment_stage = wgpu::ProgrammableStageDescriptor {
                 module: &fragment_shader_module,
                 entry_point: "main",
             };
 
-            let rasterization_state: wgpu::RasterizationStateDescriptor = RasterizationStateDescriptor::default().into();
+            let rasterization_state: wgpu::RasterizationStateDescriptor =
+                RasterizationStateDescriptor::default().into();
 
             let color_states = wgpu::ColorStateDescriptor {
                 format: swapchain_descriptor.format,
@@ -107,23 +133,28 @@ impl WgpuContext {
                 write_mask: ColorWrite::ALL,
             };
 
-            let render_pipeline = self.device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                label: None,
-                layout: Some(&render_pipeline_layout),
-                vertex_stage,
-                fragment_stage: Some(fragment_stage),
-                rasterization_state: Some(rasterization_state),
-                primitive_topology: PrimitiveTopology::TriangleStrip.into(),
-                color_states: &[color_states],
-                depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
-                vertex_state: wgpu::VertexStateDescriptor {
-                    index_format: wgpu::IndexFormat::Uint16,
-                    vertex_buffers: &[],
-                },
-                sample_count: 1,
-                sample_mask: !0,
-                alpha_to_coverage_enabled: false,
-            });
+            let render_pipeline =
+                self.device
+                    .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                        label: None,
+                        layout: Some(&render_pipeline_layout),
+                        vertex_stage,
+                        fragment_stage: Some(fragment_stage),
+                        rasterization_state: Some(rasterization_state),
+                        primitive_topology: PrimitiveTopology::TriangleStrip.into(),
+                        color_states: &[color_states],
+                        depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
+                        vertex_state: wgpu::VertexStateDescriptor {
+                            index_format: wgpu::IndexFormat::Uint16,
+                            vertex_buffers: &[],
+                        },
+                        sample_count: 1,
+                        sample_mask: !0,
+                        alpha_to_coverage_enabled: false,
+                    });
+
+            let mut render_pass = encoder.begin_render_pass(&descriptor);
+            render_pass.set_pipeline(&render_pipeline);
         }
     }
 

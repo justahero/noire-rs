@@ -9,6 +9,7 @@ license = "MIT"
 bitflags = "1.2.1"
 shaderc = { version = "0.6.2" }
 spirv-reflect = "0.2.3"
+uuid = { version = "0.8.1", features = ["v4", "serde"] }
 wgpu = "0.6.0"
 window = { path = "../window", version = "0.1.0" }
 winit = { version = "0.22.2", package = "cart-tmp-winit", default-features = false }

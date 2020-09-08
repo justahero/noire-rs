@@ -1,7 +1,8 @@
-use crate::{Color, Operations};
+use crate::{Color, Operations, TextureId, SamplerId};
 
 #[derive(Debug)]
 pub enum TextureAttachment {
+    Input(String),
 }
 
 #[derive(Debug)]
