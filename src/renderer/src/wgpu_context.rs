@@ -62,7 +62,6 @@ impl WgpuContext {
         &mut self,
         window: &Window,
         frame: &wgpu::SwapChainTexture,
-        queue: &mut wgpu::Queue,
     ) {
         let mut encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
 

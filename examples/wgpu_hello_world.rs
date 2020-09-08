@@ -13,7 +13,7 @@ fn render(
     swap_chain: &mut wgpu::SwapChain,
 ) {
     let swap_texture = swap_chain.get_current_frame().unwrap().output;
-    context.begin_pass(window, &swap_texture, queue);
+    context.begin_pass(window, &swap_texture);
     context.finish(queue);
 }
 
