@@ -7,6 +7,17 @@ pub struct ColorStateDescriptor {
     pub write_mask: ColorWrite,
 }
 
+impl Default for ColorStateDescriptor {
+    fn default() -> Self {
+        Self {
+            format: TextureFormat::Rgba8UnormSrgb,
+            color_blend: BlendDescriptor::REPLACE,
+            alpha_blend: BlendDescriptor::REPLACE,
+            write_mask: ColorWrite::ALL,
+        }
+    }
+}
+
 impl From<ColorStateDescriptor> for wgpu::ColorStateDescriptor {
     fn from(val: ColorStateDescriptor) -> Self {
         wgpu::ColorStateDescriptor {
