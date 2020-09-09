@@ -1,3 +1,7 @@
+pub mod swapchain_descriptor;
+
+pub use swapchain_descriptor::*;
+
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Copy)]

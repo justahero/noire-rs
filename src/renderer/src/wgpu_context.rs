@@ -10,9 +10,12 @@ use window::Window;
 const VERTEX_SHADER: &str = r#"
 #version 450
 
-layout(location = 0) in vec2 position;
+out gl_PerVertex {
+    vec4 gl_Position;
+};
 
 void main() {
+    vec2 position = vec2(gl_VertexIndex, (gl_VertexIndex & 1) * 2) - 1;
     gl_Position = vec4(position, 0.0, 1.0);
 }
 "#;
@@ -20,10 +23,10 @@ void main() {
 const FRAGMENT_SHADER: &str = r#"
 #version 450
 
-layout(location = 0) out vec4 out_color;
+layout(location = 0) out vec4 outColor;
 
 void main() {
-    out_color = vec4(1.0);
+    outColor = vec4(1.0);
 }
 "#;
 
@@ -111,7 +114,7 @@ impl WgpuContext {
                 RasterizationStateDescriptor::default().into();
 
             // TODO replace with custom struct "ColorStateDescriptor"
-            let color_states = wgpu::ColorStateDescriptor {
+            let color_state = wgpu::ColorStateDescriptor {
                 format: swapchain_descriptor.format,
                 color_blend: BlendDescriptor::REPLACE.into(),
                 alpha_blend: BlendDescriptor::REPLACE.into(),
@@ -127,7 +130,7 @@ impl WgpuContext {
                         fragment_stage: Some(fragment_stage),
                         rasterization_state: Some(rasterization_state),
                         primitive_topology: PrimitiveTopology::TriangleStrip.into(),
-                        color_states: &[color_states],
+                        color_states: &[color_state],
                         depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
                         vertex_state: wgpu::VertexStateDescriptor {
                             index_format: wgpu::IndexFormat::Uint16,

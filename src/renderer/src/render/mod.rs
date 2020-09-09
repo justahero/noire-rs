@@ -62,3 +62,20 @@ impl From<Color> for wgpu::Color {
         wgpu::Color { r: c.r as f64, g: c.g as f64, b: c.b as f64, a: c.a as f64 }
     }
 }
+
+#[derive(Debug, Copy, Clone)]
+pub enum PresentMode {
+    Immediate = 0,
+    Mailbox = 1,
+    Fifo = 2,
+}
+
+impl From<PresentMode> for wgpu::PresentMode {
+    fn from(mode: PresentMode) -> Self {
+        match mode {
+            PresentMode::Immediate => wgpu::PresentMode::Immediate,
+            PresentMode::Mailbox => wgpu::PresentMode::Mailbox,
+            PresentMode::Fifo => wgpu::PresentMode::Fifo,
+        }
+    }
+}
