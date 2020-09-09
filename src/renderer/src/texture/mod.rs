@@ -1,3 +1,9 @@
+pub mod swapchain_descriptor;
+
+pub use swapchain_descriptor::*;
+
+use uuid::Uuid;
+
 #[derive(Debug, Clone, Copy)]
 pub enum TextureFormat {
     // 8 bit formats, unpacked
