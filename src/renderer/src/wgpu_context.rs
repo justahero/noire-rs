@@ -1,9 +1,9 @@
 use crate::{
-    BlendDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
-    Shader, ShaderStage, WgpuInto, Color
+    DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
+    Shader, ShaderStage, Color
 , SwapChainDescriptor, ColorStateDescriptor};
 use std::{borrow::Cow, sync::Arc};
-use wgpu::{ColorWrite, ShaderModuleSource};
+use wgpu::ShaderModuleSource;
 use window::Window;
 
 /// TODO remove from here
@@ -110,8 +110,7 @@ impl WgpuContext {
                 entry_point: "main",
             };
 
-            let rasterization_state: wgpu::RasterizationStateDescriptor =
-                RasterizationStateDescriptor::default().into();
+            let rasterization_state = RasterizationStateDescriptor::default();
 
             let color_state = ColorStateDescriptor::format(swapchain_descriptor.format);
 
@@ -122,7 +121,7 @@ impl WgpuContext {
                         layout: Some(&render_pipeline_layout),
                         vertex_stage,
                         fragment_stage: Some(fragment_stage),
-                        rasterization_state: Some(rasterization_state),
+                        rasterization_state: Some(rasterization_state.into()),
                         primitive_topology: PrimitiveTopology::TriangleStrip.into(),
                         color_states: &[color_state.into()],
                         depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),

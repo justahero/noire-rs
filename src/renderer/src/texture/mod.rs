@@ -1,6 +1,12 @@
+pub mod sampler_descriptor;
 pub mod swapchain_descriptor;
+pub mod texture;
+pub mod texture_descriptor;
 
+pub use sampler_descriptor::*;
 pub use swapchain_descriptor::*;
+pub use texture::{Texture, TextureUsage};
+pub use texture_descriptor::*;
 
 use uuid::Uuid;
 
