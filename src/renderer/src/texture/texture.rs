@@ -1,6 +1,6 @@
 
 bitflags::bitflags! {
-    #[derive(Debug)]
+    #[repr(transparent)]
     pub struct TextureUsage: u32 {
         /// Allows a texture to be the source
         const COPY_SRC = 1;
@@ -12,5 +12,7 @@ bitflags::bitflags! {
         const STORAGE = 8;
         /// Allows a texture to be an output attachment of a render pass
         const OUTPUT_ATTACHMENT = 16;
+        /// None of the bits set
+        const NONE = 0;
     }
 }

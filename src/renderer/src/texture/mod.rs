@@ -1,8 +1,12 @@
+pub mod sampler_descriptor;
 pub mod swapchain_descriptor;
+pub mod texture;
+pub mod texture_descriptor;
 
+pub use sampler_descriptor::*;
 pub use swapchain_descriptor::*;
-
-use uuid::Uuid;
+pub use texture::TextureUsage;
+pub use texture_descriptor::*;
 
 #[derive(Debug, Clone, Copy)]
 pub enum TextureFormat {
