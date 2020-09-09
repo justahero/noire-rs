@@ -1,16 +1,16 @@
 use crate::{
     BlendDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
-    Shader, ShaderStage, WgpuInto,
-Color, RenderPassDescriptor};
+    Shader, ShaderStage, WgpuInto, Color
+};
 use std::{borrow::Cow, sync::Arc};
-use wgpu::{ColorWrite, ShaderModuleSource, CommandEncoder};
+use wgpu::{ColorWrite, ShaderModuleSource};
 use window::Window;
 
 /// TODO remove from here
 const VERTEX_SHADER: &str = r#"
 #version 450
 
-in vec2 position;
+layout(location = 0) in vec2 position;
 
 void main() {
     gl_Position = vec4(position, 0.0, 1.0);
@@ -19,6 +19,8 @@ void main() {
 
 const FRAGMENT_SHADER: &str = r#"
 #version 450
+
+layout(location = 0) out vec4 out_color;
 
 void main() {
     out_color = vec4(1.0);
@@ -93,25 +95,13 @@ impl WgpuContext {
                         push_constant_ranges: &[],
                     });
 
-            let vertex_shader = Shader::compile(&VERTEX_SHADER, ShaderStage::Vertex).unwrap();
-            let vertex_shader_module =
-                self.device
-                    .create_shader_module(ShaderModuleSource::SpirV(Cow::from(
-                        vertex_shader.as_binary(),
-                    )));
-
+            let vertex_shader_module = self.create_shader_module(&VERTEX_SHADER, ShaderStage::Vertex);
             let vertex_stage = wgpu::ProgrammableStageDescriptor {
                 module: &vertex_shader_module,
                 entry_point: "main",
             };
 
-            let fragment_shader = Shader::compile(&FRAGMENT_SHADER, ShaderStage::Fragment).unwrap();
-            let fragment_shader_module =
-                self.device
-                    .create_shader_module(ShaderModuleSource::SpirV(Cow::from(
-                        fragment_shader.as_binary(),
-                    )));
-
+            let fragment_shader_module = self.create_shader_module(&FRAGMENT_SHADER, ShaderStage::Fragment);
             let fragment_stage = wgpu::ProgrammableStageDescriptor {
                 module: &fragment_shader_module,
                 entry_point: "main",
@@ -120,6 +110,7 @@ impl WgpuContext {
             let rasterization_state: wgpu::RasterizationStateDescriptor =
                 RasterizationStateDescriptor::default().into();
 
+            // TODO replace with custom struct "ColorStateDescriptor"
             let color_states = wgpu::ColorStateDescriptor {
                 format: swapchain_descriptor.format,
                 color_blend: BlendDescriptor::REPLACE.into(),
@@ -164,5 +155,14 @@ impl WgpuContext {
     fn create_encoder(&mut self) -> wgpu::CommandEncoder {
         let descriptor = wgpu::CommandEncoderDescriptor { label: None };
         self.device.create_command_encoder(&descriptor)
+    }
+
+    fn create_shader_module(
+        &mut self,
+        shader_source: &str,
+        shader_stage: ShaderStage
+    ) -> wgpu::ShaderModule {
+        let shader = Shader::compile(shader_source, shader_stage).unwrap();
+        self.device.create_shader_module(ShaderModuleSource::SpirV(Cow::from(shader.as_binary())))
     }
 }
