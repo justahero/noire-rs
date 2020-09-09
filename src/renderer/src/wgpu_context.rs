@@ -1,7 +1,7 @@
 use crate::{
     BlendDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
     Shader, ShaderStage, WgpuInto, Color
-};
+, SwapChainDescriptor, ColorStateDescriptor};
 use std::{borrow::Cow, sync::Arc};
 use wgpu::{ColorWrite, ShaderModuleSource};
 use window::Window;
@@ -58,8 +58,8 @@ impl WgpuContext {
         window: &window::Window,
         surface: &wgpu::Surface,
     ) -> wgpu::SwapChain {
-        let descriptor = window.wgpu_into();
-        self.device.create_swap_chain(surface, &descriptor)
+        let descriptor: SwapChainDescriptor = window.into();
+        self.device.create_swap_chain(surface, &descriptor.into())
     }
 
     /// Begins a new render pass,
@@ -70,7 +70,7 @@ impl WgpuContext {
     ) {
         let mut encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
 
-        let swapchain_descriptor: wgpu::SwapChainDescriptor = window.wgpu_into();
+        let swapchain_descriptor: SwapChainDescriptor = window.into();
 
         let color: wgpu::Color = Color::BLACK.into();
 
@@ -113,13 +113,7 @@ impl WgpuContext {
             let rasterization_state: wgpu::RasterizationStateDescriptor =
                 RasterizationStateDescriptor::default().into();
 
-            // TODO replace with custom struct "ColorStateDescriptor"
-            let color_state = wgpu::ColorStateDescriptor {
-                format: swapchain_descriptor.format,
-                color_blend: BlendDescriptor::REPLACE.into(),
-                alpha_blend: BlendDescriptor::REPLACE.into(),
-                write_mask: ColorWrite::ALL,
-            };
+            let color_state = ColorStateDescriptor::format(swapchain_descriptor.format);
 
             let render_pipeline =
                 self.device
@@ -130,7 +124,7 @@ impl WgpuContext {
                         fragment_stage: Some(fragment_stage),
                         rasterization_state: Some(rasterization_state),
                         primitive_topology: PrimitiveTopology::TriangleStrip.into(),
-                        color_states: &[color_state],
+                        color_states: &[color_state.into()],
                         depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
                         vertex_state: wgpu::VertexStateDescriptor {
                             index_format: wgpu::IndexFormat::Uint16,
