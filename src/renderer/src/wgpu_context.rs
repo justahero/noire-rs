@@ -26,7 +26,7 @@ const FRAGMENT_SHADER: &str = r#"
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    outColor = vec4(1.0);
+    outColor = vec4(1.0, 1.0, 1.0, 1.0);
 }
 "#;
 
@@ -89,54 +89,53 @@ impl WgpuContext {
         };
 
         // The render pass is part of the encoder, has to drop at the end
-        {
-            let render_pipeline_layout =
-                self.device
-                    .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                        label: None,
-                        bind_group_layouts: &[],
-                        push_constant_ranges: &[],
-                    });
+        let render_pipeline_layout =
+            self.device
+                .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                    label: None,
+                    bind_group_layouts: &[],
+                    push_constant_ranges: &[],
+                });
 
-            let vertex_shader_module = self.create_shader_module(&VERTEX_SHADER, ShaderStage::Vertex);
-            let vertex_stage = wgpu::ProgrammableStageDescriptor {
-                module: &vertex_shader_module,
-                entry_point: "main",
-            };
+        let vertex_shader_module = self.create_shader_module(&VERTEX_SHADER, ShaderStage::Vertex);
+        let vertex_stage = wgpu::ProgrammableStageDescriptor {
+            module: &vertex_shader_module,
+            entry_point: "main",
+        };
 
-            let fragment_shader_module = self.create_shader_module(&FRAGMENT_SHADER, ShaderStage::Fragment);
-            let fragment_stage = wgpu::ProgrammableStageDescriptor {
-                module: &fragment_shader_module,
-                entry_point: "main",
-            };
+        let fragment_shader_module = self.create_shader_module(&FRAGMENT_SHADER, ShaderStage::Fragment);
+        let fragment_stage = wgpu::ProgrammableStageDescriptor {
+            module: &fragment_shader_module,
+            entry_point: "main",
+        };
 
-            let rasterization_state = RasterizationStateDescriptor::default();
+        let rasterization_state = RasterizationStateDescriptor::default();
 
-            let color_state = ColorStateDescriptor::format(swapchain_descriptor.format);
+        let color_state = ColorStateDescriptor::format(swapchain_descriptor.format);
 
-            let render_pipeline =
-                self.device
-                    .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                        label: None,
-                        layout: Some(&render_pipeline_layout),
-                        vertex_stage,
-                        fragment_stage: Some(fragment_stage),
-                        rasterization_state: Some(rasterization_state.into()),
-                        primitive_topology: PrimitiveTopology::TriangleStrip.into(),
-                        color_states: &[color_state.into()],
-                        depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
-                        vertex_state: wgpu::VertexStateDescriptor {
-                            index_format: wgpu::IndexFormat::Uint16,
-                            vertex_buffers: &[],
-                        },
-                        sample_count: 1,
-                        sample_mask: !0,
-                        alpha_to_coverage_enabled: false,
-                    });
+        let render_pipeline =
+            self.device
+                .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+                    label: None,
+                    layout: Some(&render_pipeline_layout),
+                    vertex_stage,
+                    fragment_stage: Some(fragment_stage),
+                    rasterization_state: Some(rasterization_state.into()),
+                    primitive_topology: PrimitiveTopology::TriangleStrip.into(),
+                    color_states: &[color_state.into()],
+                    // depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
+                    depth_stencil_state: None,
+                    vertex_state: wgpu::VertexStateDescriptor {
+                        index_format: wgpu::IndexFormat::Uint16,
+                        vertex_buffers: &[],
+                    },
+                    sample_count: 1,
+                    sample_mask: !0,
+                    alpha_to_coverage_enabled: false,
+                });
 
-            let mut render_pass = encoder.begin_render_pass(&descriptor);
-            render_pass.set_pipeline(&render_pipeline);
-        }
+        let mut render_pass = encoder.begin_render_pass(&descriptor);
+        render_pass.set_pipeline(&render_pipeline);
     }
 
     pub fn finish(&mut self, queue: &mut wgpu::Queue) {

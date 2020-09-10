@@ -40,7 +40,7 @@ impl Default for TextureDescriptor {
             mip_level_count: 1,
             sample_count: 1,
             dimension: TextureDimension::D2,
-            texture_format: TextureFormat::Depth32Float,
+            texture_format: TextureFormat::Rgba8UnormSrgb,
             usage: TextureUsage::OUTPUT_ATTACHMENT
                 | TextureUsage::SAMPLED
                 | TextureUsage::COPY_SRC,
