@@ -1,3 +1,4 @@
+extern crate bitflags;
 extern crate shaderc;
 
 mod converter;

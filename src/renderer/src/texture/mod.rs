@@ -5,7 +5,7 @@ pub mod texture_descriptor;
 
 pub use sampler_descriptor::*;
 pub use swapchain_descriptor::*;
-pub use texture::TextureUsage;
+pub use texture::*;
 pub use texture_descriptor::*;
 
 #[derive(Debug, Clone, Copy)]
