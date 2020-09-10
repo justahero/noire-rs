@@ -1,3 +1,24 @@
+use std::num::NonZeroU32;
+
+use crate::{TextureFormat, TextureViewDimension};
+
+#[derive(Debug, Copy, Clone)]
+pub enum TextureAspect {
+    All,
+    StencilOnly,
+    DepthOnly,
+}
+
+impl From<TextureAspect> for wgpu::TextureAspect {
+    fn from(val: TextureAspect) -> Self {
+        match val {
+            TextureAspect::All => wgpu::TextureAspect::All,
+            TextureAspect::StencilOnly => wgpu::TextureAspect::StencilOnly,
+            TextureAspect::DepthOnly => wgpu::TextureAspect::DepthOnly,
+        }
+    }
+}
+
 pub struct Texture {
     pub width: u32,
     pub height: u32,
@@ -19,4 +40,30 @@ bitflags::bitflags! {
         /// None of the bits set
         const NONE = 0;
     }
+}
+
+impl From<TextureUsage> for wgpu::TextureUsage {
+    fn from(val: TextureUsage) -> Self {
+        wgpu::TextureUsage::from_bits(val.bits()).unwrap()
+    }
+}
+
+#[derive(Debug)]
+pub struct TextureViewDescriptor {
+    /// Debug label of the texture view
+    pub label: Option<String>,
+    /// Format of the texture view
+    pub format: Option<TextureFormat>,
+    /// Dimension of the texture view
+    pub dimension: Option<TextureViewDimension>,
+    /// Aspect ratio of the texture
+    pub aspect: TextureAspect,
+    /// Base mip level
+    pub base_mip_level: u32,
+    /// Mip level count
+    pub level_count: Option<NonZeroU32>,
+    /// Base Array Layer
+    pub base_array_layer: u32,
+    /// Layer count
+    pub array_layer_count: Option<NonZeroU32>,
 }

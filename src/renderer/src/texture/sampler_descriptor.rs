@@ -2,7 +2,7 @@ use std::num::NonZeroU8;
 
 use crate::CompareFunction;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum AddressMode {
     /// Clamp the value to the edge of the texture
     ClampToEdge,
@@ -22,12 +22,21 @@ impl From<AddressMode> for wgpu::AddressMode {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum FilterMode {
     /// Nearest neighbor sampling
     Nearest,
     /// Linear interpolation
     Linear,
+}
+
+impl From<FilterMode> for wgpu::FilterMode {
+    fn from(mode: FilterMode) -> Self {
+        match mode {
+            FilterMode::Nearest => wgpu::FilterMode::Nearest,
+            FilterMode::Linear => wgpu::FilterMode::Linear,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -70,6 +79,24 @@ impl Default for SamplerDescriptor {
             lod_max_clamp: 100.0,
             compare: Some(CompareFunction::LessEqual),
             anisotropy_clamp: std::num::NonZeroU8::new(1),
+        }
+    }
+}
+
+impl<'a> From<&SamplerDescriptor> for wgpu::SamplerDescriptor<'a> {
+    fn from(descriptor: &SamplerDescriptor) -> Self {
+        Self {
+            label: None,
+            address_mode_u: descriptor.address_mode_u.into(),
+            address_mode_v: descriptor.address_mode_v.into(),
+            address_mode_w: descriptor.address_mode_w.into(),
+            mag_filter: descriptor.mag_filter.into(),
+            min_filter: descriptor.min_filter.into(),
+            mipmap_filter: descriptor.mipmap_filter.into(),
+            lod_min_clamp: descriptor.lod_min_clamp,
+            lod_max_clamp: descriptor.lod_max_clamp,
+            compare: descriptor.compare.map(|c| c.into()),
+            anisotropy_clamp: descriptor.anisotropy_clamp,
         }
     }
 }

@@ -1,6 +1,6 @@
 use window::{Window, Windows, WindowMode};
 use winit::{event_loop::ControlFlow, event::{WindowEvent, Event, self}};
-use renderer::{WgpuContext, WgpuRenderer};
+use renderer::{WgpuContext, WgpuRenderer, TextureDescriptor, SamplerDescriptor};
 
 extern crate noire;
 extern crate futures;
@@ -35,6 +35,10 @@ fn main() {
     let mut context = WgpuContext::new(renderer.device.clone());
     let window = windows.get_window(&window_id).unwrap();
     let mut swap_chain = context.create_swapchain(window, &renderer.surface);
+    let mut depth_texture = context
+        .create_depth_texture(&TextureDescriptor::depth(window.width, window.height));
+//    let mut depth_texture_view = depth_texture
+//        .create_view(TextureViewDescriptor::default());
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Wait;

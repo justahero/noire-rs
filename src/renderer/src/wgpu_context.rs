@@ -1,7 +1,7 @@
 use crate::{
     DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
     Shader, ShaderStage, Color
-, SwapChainDescriptor, ColorStateDescriptor};
+, SwapChainDescriptor, ColorStateDescriptor, TextureDescriptor, SamplerDescriptor};
 use std::{borrow::Cow, sync::Arc};
 use wgpu::ShaderModuleSource;
 use window::Window;
@@ -62,11 +62,29 @@ impl WgpuContext {
         self.device.create_swap_chain(surface, &descriptor.into())
     }
 
+    /// Creates a new depth texture object
+    /// TODO refactor function, remove to better location?f
+    pub fn create_depth_texture(
+        &mut self,
+        texture_descriptor: &TextureDescriptor,
+    ) -> wgpu::Texture {
+        self.device.create_texture(&texture_descriptor.into())
+    }
+
+    /// Creates a sampler texture object
+    pub fn create_sampler(
+        &mut self,
+        sampler_descriptor: &SamplerDescriptor,
+    ) -> wgpu::Sampler {
+        self.device.create_sampler(&sampler_descriptor.into())
+    }
+
     /// Begins a new render pass,
     pub fn begin_pass(
         &mut self,
         window: &Window,
         frame: &wgpu::SwapChainTexture,
+        // depth_texture: &wgpu::TextureView,
     ) {
         let mut encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
 
@@ -82,6 +100,12 @@ impl WgpuContext {
                 store: true,
             },
         };
+
+        /*
+        let depth_stencil_descriptor = wgpu::RenderPassDepthStencilAttachmentDescriptor {
+            attachment: 
+        };
+        */
 
         let descriptor = wgpu::RenderPassDescriptor {
             color_attachments: &[color_descriptor],
