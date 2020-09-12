@@ -37,7 +37,7 @@ fn main() {
     let window = windows.get_window(&window_id).unwrap();
     let mut swap_chain = context.create_swapchain(window, &renderer.surface);
     let depth_descriptor = TextureDescriptor::depth(window.width, window.height);
-    let mut depth_texture = context
+    let depth_texture = context
         .create_depth_texture(&depth_descriptor);
     let mut depth_texture_view = depth_texture
         .create_view(&TextureViewDescriptor::create_from_texture(&depth_descriptor).into());

@@ -19,8 +19,11 @@ impl From<TextureAspect> for wgpu::TextureAspect {
     }
 }
 
+#[derive(Debug)]
 pub struct Texture {
+    /// Width of the texture
     pub width: u32,
+    /// Height of the texture
     pub height: u32,
 }
 

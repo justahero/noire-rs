@@ -2,6 +2,7 @@ use crate::{Color, Operations, LoadOp};
 
 #[derive(Debug)]
 pub enum TextureAttachment {
+    /// The Input string to look up the texture for.
     Input(String),
 }
 
@@ -14,21 +15,6 @@ pub struct RenderPassColorAttachmentDescriptor {
     /// Operations will be performed on this color attachment
     pub ops: Operations<Color>,
 }
-
-/*
-impl RenderPassColorAttachmentDescriptor {
-    pub fn new(attachment: TextureAttachment) -> Self {
-        Self {
-            attachment,
-            resolve_target: &attachment,
-            ops: Operations {
-                load: LoadOp::default(),
-                store: true
-            },
-        }
-    }
-}
-*/
 
 #[derive(Debug)]
 pub struct RenderPassDepthStencilAttachmentDescriptor {
