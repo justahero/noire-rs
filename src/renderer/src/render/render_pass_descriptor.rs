@@ -1,4 +1,4 @@
-use crate::{Color, Operations};
+use crate::{Color, Operations, LoadOp};
 
 #[derive(Debug)]
 pub enum TextureAttachment {
@@ -15,6 +15,21 @@ pub struct RenderPassColorAttachmentDescriptor {
     pub ops: Operations<Color>,
 }
 
+/*
+impl RenderPassColorAttachmentDescriptor {
+    pub fn new(attachment: TextureAttachment) -> Self {
+        Self {
+            attachment,
+            resolve_target: &attachment,
+            ops: Operations {
+                load: LoadOp::default(),
+                store: true
+            },
+        }
+    }
+}
+*/
+
 #[derive(Debug)]
 pub struct RenderPassDepthStencilAttachmentDescriptor {
     /// The view or texture attachment
@@ -23,6 +38,19 @@ pub struct RenderPassDepthStencilAttachmentDescriptor {
     pub depth_ops: Option<Operations<f32>>,
     /// Waht operation will be performed on the stencil part of the attachment
     pub stencil_ops: Option<Operations<f32>>,
+}
+
+impl RenderPassDepthStencilAttachmentDescriptor {
+    pub fn new(attachment: TextureAttachment) -> Self {
+        Self {
+            attachment,
+            depth_ops: Some(Operations {
+                load: LoadOp::default(),
+                store: true,
+            }),
+            stencil_ops: None,
+        }
+    }
 }
 
 #[derive(Debug)]

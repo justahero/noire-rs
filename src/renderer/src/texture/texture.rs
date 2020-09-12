@@ -1,6 +1,6 @@
 use std::num::NonZeroU32;
 
-use crate::{TextureFormat, TextureViewDimension};
+use crate::{TextureFormat, TextureViewDimension, TextureDescriptor};
 
 #[derive(Debug, Copy, Clone)]
 pub enum TextureAspect {
@@ -66,4 +66,34 @@ pub struct TextureViewDescriptor {
     pub base_array_layer: u32,
     /// Layer count
     pub array_layer_count: Option<NonZeroU32>,
+}
+
+impl TextureViewDescriptor {
+    pub fn create_from_texture(descriptor: &TextureDescriptor) -> Self {
+        Self {
+            label: None,
+            format: Some(descriptor.texture_format),
+            dimension: Some(TextureViewDimension::D2),
+            aspect: TextureAspect::All,
+            base_mip_level: 0,
+            level_count: NonZeroU32::new(1),
+            base_array_layer: 0,
+            array_layer_count: NonZeroU32::new(1),
+        }
+    }
+}
+
+impl<'a> From<TextureViewDescriptor> for wgpu::TextureViewDescriptor<'a> {
+    fn from(descriptor: TextureViewDescriptor) -> Self {
+        Self {
+            label: None,
+            format: descriptor.format.map(|f| f.into()),
+            dimension: descriptor.dimension.map(|d| d.into()),
+            aspect: descriptor.aspect.into(),
+            base_mip_level: descriptor.base_mip_level,
+            level_count: descriptor.level_count,
+            base_array_layer: descriptor.base_array_layer,
+            array_layer_count: descriptor.array_layer_count,
+        }
+    }
 }

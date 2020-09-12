@@ -84,7 +84,7 @@ impl WgpuContext {
         &mut self,
         window: &Window,
         frame: &wgpu::SwapChainTexture,
-        // depth_texture: &wgpu::TextureView,
+        depth_texture_view: &wgpu::TextureView,
     ) {
         let mut encoder = self.encoder.take().unwrap_or_else(|| self.create_encoder());
 
@@ -101,15 +101,18 @@ impl WgpuContext {
             },
         };
 
-        /*
         let depth_stencil_descriptor = wgpu::RenderPassDepthStencilAttachmentDescriptor {
-            attachment: 
+            attachment: &depth_texture_view,
+            depth_ops: Some(wgpu::Operations {
+                load: wgpu::LoadOp::Clear(0.0),
+                store: true,
+            }),
+            stencil_ops: None,
         };
-        */
 
         let descriptor = wgpu::RenderPassDescriptor {
             color_attachments: &[color_descriptor],
-            depth_stencil_attachment: None,
+            depth_stencil_attachment: Some(depth_stencil_descriptor),
         };
 
         // The render pass is part of the encoder, has to drop at the end
@@ -147,8 +150,8 @@ impl WgpuContext {
                     rasterization_state: Some(rasterization_state.into()),
                     primitive_topology: PrimitiveTopology::TriangleStrip.into(),
                     color_states: &[color_state.into()],
-                    // depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
-                    depth_stencil_state: None,
+                    depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
+                    // depth_stencil_state: None,
                     vertex_state: wgpu::VertexStateDescriptor {
                         index_format: wgpu::IndexFormat::Uint16,
                         vertex_buffers: &[],
