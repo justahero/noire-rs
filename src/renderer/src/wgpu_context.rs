@@ -1,7 +1,7 @@
 use crate::{
     DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
     Shader, ShaderStage, Color
-, SwapChainDescriptor, ColorStateDescriptor, TextureDescriptor, SamplerDescriptor};
+, SwapChainDescriptor, ColorStateDescriptor, TextureDescriptor, SamplerDescriptor, PipelineDescriptor, BindGroupDescriptor};
 use std::{borrow::Cow, sync::Arc};
 use wgpu::ShaderModuleSource;
 use window::Window;
@@ -79,6 +79,14 @@ impl WgpuContext {
         self.device.create_sampler(&sampler_descriptor.into())
     }
 
+    /// Creates a new bind group layout
+    pub fn create_bind_group_layout(&mut self, descriptor: &BindGroupDescriptor) {
+        let bind_group_entries = descriptor.bindings
+            .iter()
+            .map(|binding| binding.into())
+            .collect::<Vec<wgpu::BindGroupLayoutEntry>>();
+    }
+
     /// Begins a new render pass,
     pub fn begin_pass(
         &mut self,
@@ -151,7 +159,6 @@ impl WgpuContext {
                     primitive_topology: PrimitiveTopology::TriangleStrip.into(),
                     color_states: &[color_state.into()],
                     depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
-                    // depth_stencil_state: None,
                     vertex_state: wgpu::VertexStateDescriptor {
                         index_format: wgpu::IndexFormat::Uint16,
                         vertex_buffers: &[],

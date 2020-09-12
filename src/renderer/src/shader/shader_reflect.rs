@@ -1,6 +1,6 @@
-use spirv_reflect::{types::{ReflectDescriptorBinding, ReflectDescriptorSet, ReflectInterfaceVariable}, ShaderModule};
+use spirv_reflect::{types::{ReflectDescriptorBinding, ReflectDescriptorSet, ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags};
 
-use crate::{BindGroupDescriptor, BindingDescriptor, Shader, VertexAttributeDescriptor, WgpuInto};
+use crate::{BindGroupDescriptor, BindingDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage};
 
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///
@@ -38,25 +38,40 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
 pub(crate) fn reflect_bind_groups(shader_module: &ShaderModule, entry_point: Option<&str>) -> Vec<BindGroupDescriptor> {
     let descriptor_sets = shader_module.enumerate_descriptor_sets(entry_point).unwrap();
     println!("REFLECT BIND GROUPS: {:?}", descriptor_sets);
+    /*
     descriptor_sets.iter().map(|descriptor_set| {
-        reflect_bind_group(descriptor_set)
+        // reflect_bind_group(descriptor_set, &shader_module.get_shader_stage())
     })
     .collect()
+    */
+    Vec::new()
 }
 
-pub(crate) fn reflect_bind_group(descriptor_set: &ReflectDescriptorSet) -> BindGroupDescriptor {
+/*
+pub(crate) fn reflect_bind_group(
+    descriptor_set: &ReflectDescriptorSet,
+    shader_stage: &ReflectShaderStageFlags
+) -> BindGroupDescriptor {
     let bindings: Vec<BindingDescriptor> = descriptor_set.bindings.iter().map(|binding| {
-        reflect_binding(binding)
+        reflect_binding(binding, shader_stage)
     })
     .collect();
 
     BindGroupDescriptor::new(descriptor_set.set, bindings)
 }
 
-pub(crate) fn reflect_binding(binding: &ReflectDescriptorBinding) -> BindingDescriptor {
+pub(crate) fn reflect_binding(
+    binding: &ReflectDescriptorBinding,
+    shader_stage: &ReflectShaderStageFlags
+) -> BindGroupLayoutEntry {
     println!("BINDING: {:?}", binding);
-    BindingDescriptor {}
+    BindGroupLayoutEntry {
+        label: Some(binding.name),
+        binding: binding.binding,
+        visibility: ShaderStage::from_spirv_reflect(shader_stage),
+    }
 }
+*/
 
 pub(crate) fn reflect_input_variables(shader_module: &ShaderModule, entry_point: Option<&str>) -> Vec<VertexAttributeDescriptor> {
     let variables = shader_module.enumerate_input_variables(entry_point).unwrap();

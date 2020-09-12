@@ -1,5 +1,27 @@
 
-use crate::WgpuContext;
+use crate::{WgpuContext, BindGroupDescriptor};
+
+#[derive(Debug)]
+pub struct PipelineLayout {
+
+}
+
+#[derive(Debug)]
+pub struct PipelineLayoutDescriptor {
+    /// Debug label of the pipeline layout
+    pub label: Option<String>,
+    /// Bind groups that this pipeline uses
+    pub bind_group_layouts: Vec<BindGroupDescriptor>,
+}
+
+impl Default for PipelineLayoutDescriptor {
+    fn default() -> Self {
+        Self {
+            label: None,
+            bind_group_layouts: Vec::new(),
+        }
+    }
+}
 
 /// Describes a pipeline
 #[derive(Debug)]
@@ -17,7 +39,7 @@ impl Default for PipelineDescriptor {
 }
 
 impl PipelineDescriptor {
-    pub fn new(context: &mut WgpuContext) -> Self {
+    pub fn new(_context: &mut WgpuContext) -> Self {
         Self {
             .. Default::default()
         }
