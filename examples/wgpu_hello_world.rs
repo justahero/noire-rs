@@ -12,6 +12,7 @@ fn main() {
         .with_mode(WindowMode::Windowed);
 
     let window = settings.create_window(&event_loop);
+    let renderer = futures::executor::block_on(Renderer::new());
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Wait;
