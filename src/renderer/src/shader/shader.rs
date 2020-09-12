@@ -1,6 +1,7 @@
 use std::{borrow::Cow, fmt, fs::File, io::Read, path};
 use fmt::Display;
 use wgpu::ShaderModuleSource;
+use spirv_reflect::types::ReflectShaderStageFlags;
 
 type ShaderResult = Result<Shader, ShaderError>;
 
@@ -59,12 +60,33 @@ pub enum ShaderStage {
     Compute,
 }
 
+impl From<ReflectShaderStageFlags> for ShaderStage {
+    fn from(flags: ReflectShaderStageFlags) -> Self {
+        match flags {
+            ReflectShaderStageFlags::VERTEX => ShaderStage::Vertex,
+            ReflectShaderStageFlags::FRAGMENT => ShaderStage::Fragment,
+            ReflectShaderStageFlags::COMPUTE => ShaderStage::Compute,
+            _ => panic!("Shader stage {:?} not supported", flags),
+        }
+    }
+}
+
 impl From<ShaderStage> for shaderc::ShaderKind {
     fn from(stage: ShaderStage) -> Self {
         match stage {
             ShaderStage::Vertex => shaderc::ShaderKind::Vertex,
             ShaderStage::Fragment => shaderc::ShaderKind::Fragment,
             ShaderStage::Compute => shaderc::ShaderKind::Compute,
+        }
+    }
+}
+
+impl From<ShaderStage> for wgpu::ShaderStage {
+    fn from(stage: ShaderStage) -> Self {
+        match stage {
+            ShaderStage::Vertex => wgpu::ShaderStage::VERTEX,
+            ShaderStage::Fragment => wgpu::ShaderStage::FRAGMENT,
+            ShaderStage::Compute => wgpu::ShaderStage::COMPUTE,
         }
     }
 }
