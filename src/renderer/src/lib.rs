@@ -1,6 +1,7 @@
 extern crate bitflags;
 extern crate shaderc;
 
+mod buffer;
 mod converter;
 mod pipeline;
 mod render;
@@ -10,6 +11,7 @@ mod texture;
 mod vertex;
 mod window;
 
+pub use buffer::*;
 pub use converter::*;
 pub use pipeline::*;
 pub use render::*;

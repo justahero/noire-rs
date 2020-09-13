@@ -18,3 +18,20 @@ impl From<IndexFormat> for wgpu::IndexFormat {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+pub enum InputStepMode {
+    /// Input data is advanced by Vertex
+    Vertex,
+    /// Input data is advanced by instance
+    Instance,
+}
+
+impl From<InputStepMode> for wgpu::InputStepMode {
+    fn from(mode: InputStepMode) -> Self {
+        match mode {
+            InputStepMode::Vertex => wgpu::InputStepMode::Vertex,
+            InputStepMode::Instance => wgpu::InputStepMode::Instance,
+        }
+    }
+}
