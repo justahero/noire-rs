@@ -1,6 +1,6 @@
-use spirv_reflect::{types::{ ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags};
+use spirv_reflect::{types::{ ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags, types::ReflectDescriptorSet, types::ReflectDescriptorBinding};
 
-use crate::{BindGroupDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage};
+use crate::{BindGroupDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage, BindingType};
 
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///
@@ -21,9 +21,9 @@ impl ShaderLayout {
 pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     let shader_module = ShaderModule::load_u8_data(spv_data).unwrap();
     let entry_point_name = shader_module.get_entry_point_name();
-    let shader_stage = shader_module.get_shader_stage();
+    let shader_stage: ShaderStage = shader_module.get_shader_stage().into();
 
-    let bind_groups: Vec<BindGroupDescriptor> = reflect_bind_groups(&shader_module);
+    let bind_groups: Vec<BindGroupDescriptor> = reflect_bind_groups(&shader_module, shader_stage);
     let input_variables: Vec<VertexAttributeDescriptor> = reflect_input_variables(&shader_module);
 
     reflect_descriptor_bindings(&shader_module);
@@ -36,43 +36,39 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
 }
 
 /// Returns the list of bind groups in the shader
-pub(crate) fn reflect_bind_groups(shader_module: &ShaderModule) -> Vec<BindGroupDescriptor> {
+pub(crate) fn reflect_bind_groups(shader_module: &ShaderModule, shader_stage: ShaderStage) -> Vec<BindGroupDescriptor> {
     let descriptor_sets = shader_module.enumerate_descriptor_sets(None).unwrap();
     println!("REFLECT BIND GROUPS: {:?}", descriptor_sets);
-    /*
     descriptor_sets.iter().map(|descriptor_set| {
-        // reflect_bind_group(descriptor_set, &shader_module.get_shader_stage())
+        reflect_bind_group(descriptor_set, shader_stage)
     })
     .collect()
-    */
-    Vec::new()
 }
 
-/*
 pub(crate) fn reflect_bind_group(
     descriptor_set: &ReflectDescriptorSet,
-    shader_stage: &ReflectShaderStageFlags
+    shader_stage: ShaderStage,
 ) -> BindGroupDescriptor {
-    let bindings: Vec<BindingDescriptor> = descriptor_set.bindings.iter().map(|binding| {
+    let bindings: Vec<BindGroupLayoutEntry> = descriptor_set.bindings.iter().map(|binding| {
         reflect_binding(binding, shader_stage)
     })
     .collect();
-
     BindGroupDescriptor::new(descriptor_set.set, bindings)
 }
 
 pub(crate) fn reflect_binding(
     binding: &ReflectDescriptorBinding,
-    shader_stage: &ReflectShaderStageFlags
+    shader_stage: ShaderStage,
 ) -> BindGroupLayoutEntry {
     println!("BINDING: {:?}", binding);
     BindGroupLayoutEntry {
-        label: Some(binding.name),
+        label: Some(binding.name.clone()),
         binding: binding.binding,
-        visibility: ShaderStage::from_spirv_reflect(shader_stage),
+        visibility: shader_stage,
+        binding_type: BindingType::Unknown,
+        count: None,
     }
 }
-*/
 
 pub(crate) fn reflect_input_variables(shader_module: &ShaderModule) -> Vec<VertexAttributeDescriptor> {
     let variables = shader_module.enumerate_input_variables(None).unwrap();
