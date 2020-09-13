@@ -1,4 +1,4 @@
-use spirv_reflect::{types::{ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags};
+use spirv_reflect::{types::{ ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags};
 
 use crate::{BindGroupDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage};
 
@@ -27,6 +27,7 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     let input_variables: Vec<VertexAttributeDescriptor> = reflect_input_variables(&shader_module, None);
 
     reflect_descriptor_bindings(&shader_module, None);
+    reflect_descriptor_sets(&shader_module, None);
     reflect_push_constant_blocks(&shader_module, None);
 
     ShaderLayout {
@@ -81,6 +82,11 @@ pub(crate) fn reflect_input_variables(shader_module: &ShaderModule, entry_point:
 pub(crate) fn reflect_descriptor_bindings(shader_module: &ShaderModule, entry_point: Option<&str>) {
     let descriptors = shader_module.enumerate_descriptor_bindings(entry_point).unwrap();
     println!("DESCRIPTOR BINDINGS: {:?}", descriptors);
+}
+
+pub(crate) fn reflect_descriptor_sets(shader_module: &ShaderModule, entry_point: Option<&str>) {
+    let descriptor_sets = shader_module.enumerate_descriptor_sets(entry_point).unwrap();
+    println!("DESCRIPTOR SETS: {:?}", descriptor_sets);
 }
 
 pub(crate) fn reflect_push_constant_blocks(shader_module: &ShaderModule, entry_point: Option<&str>) {
