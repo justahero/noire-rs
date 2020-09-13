@@ -51,6 +51,13 @@ impl WgpuContext {
         }
     }
 
+    /// Creates a new vertex buffer with given data
+    pub fn create_vertex_buffer(
+        &mut self,
+    ) {
+
+    }
+
     /// Creates a new Swap chain object
     /// TODO refactor function, parameter dependencies are a bit weird
     pub fn create_swapchain(

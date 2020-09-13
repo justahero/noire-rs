@@ -1,7 +1,9 @@
 extern crate bitflags;
 extern crate shaderc;
 
+mod buffer;
 mod converter;
+mod mesh;
 mod pipeline;
 mod render;
 mod shader;
@@ -10,7 +12,9 @@ mod vertex;
 mod wgpu_context;
 mod wgpu_renderer;
 
+pub use buffer::*;
 pub use converter::*;
+pub use mesh::*;
 pub use pipeline::*;
 pub use render::*;
 pub use shader::*;

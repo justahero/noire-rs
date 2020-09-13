@@ -1,20 +1,3 @@
-#[derive(Debug)]
-pub struct VertexAttributeDescriptor {
-    pub offset: u64,
-    pub location: u32,
-    pub format: VertexFormat,
-}
-
-impl From<VertexAttributeDescriptor> for wgpu::VertexAttributeDescriptor {
-    fn from(val: VertexAttributeDescriptor) -> Self {
-        wgpu::VertexAttributeDescriptor {
-            offset: val.offset,
-            format: val.format.into(),
-            shader_location: val.location,
-        }
-    }
-}
-
 #[derive(Debug, Clone, Copy)]
 pub enum VertexFormat {
     Uchar2,

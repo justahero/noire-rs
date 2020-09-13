@@ -1,8 +1,8 @@
-pub mod state;
 pub mod vertex;
+pub mod vertex_buffer;
 
-pub use state::*;
 pub use vertex::*;
+pub use vertex_buffer::*;
 
 #[derive(Debug, Copy, Clone)]
 pub enum IndexFormat {
@@ -15,6 +15,23 @@ impl From<IndexFormat> for wgpu::IndexFormat {
         match format {
             IndexFormat::Uint16 => wgpu::IndexFormat::Uint16,
             IndexFormat::Uint32 => wgpu::IndexFormat::Uint32,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum InputStepMode {
+    /// Input data is advanced by Vertex
+    Vertex,
+    /// Input data is advanced by instance
+    Instance,
+}
+
+impl From<InputStepMode> for wgpu::InputStepMode {
+    fn from(mode: InputStepMode) -> Self {
+        match mode {
+            InputStepMode::Vertex => wgpu::InputStepMode::Vertex,
+            InputStepMode::Instance => wgpu::InputStepMode::Instance,
         }
     }
 }
