@@ -4,7 +4,10 @@ use crate::ShaderStage;
 
 #[derive(Debug)]
 pub enum BindingType {
-
+    /// Binding type is a uniform buffer
+    UniformBuffer,
+    /// TODO fill in
+    Unknown,
 }
 
 #[derive(Debug)]

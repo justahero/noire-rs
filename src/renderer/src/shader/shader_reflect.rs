@@ -23,12 +23,12 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     let _entry_point_name = shader_module.get_entry_point_name();
     let _shader_stage = shader_module.get_shader_stage();
 
-    let bind_groups: Vec<BindGroupDescriptor> = reflect_bind_groups(&shader_module, None);
-    let input_variables: Vec<VertexAttributeDescriptor> = reflect_input_variables(&shader_module, None);
+    let bind_groups: Vec<BindGroupDescriptor> = reflect_bind_groups(&shader_module);
+    let input_variables: Vec<VertexAttributeDescriptor> = reflect_input_variables(&shader_module);
 
-    reflect_descriptor_bindings(&shader_module, None);
-    reflect_descriptor_sets(&shader_module, None);
-    reflect_push_constant_blocks(&shader_module, None);
+    reflect_descriptor_bindings(&shader_module);
+    reflect_descriptor_sets(&shader_module);
+    reflect_push_constant_blocks(&shader_module);
 
     ShaderLayout {
         bind_groups,
@@ -36,8 +36,8 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
 }
 
 /// Returns the list of bind groups in the shader
-pub(crate) fn reflect_bind_groups(shader_module: &ShaderModule, entry_point: Option<&str>) -> Vec<BindGroupDescriptor> {
-    let descriptor_sets = shader_module.enumerate_descriptor_sets(entry_point).unwrap();
+pub(crate) fn reflect_bind_groups(shader_module: &ShaderModule) -> Vec<BindGroupDescriptor> {
+    let descriptor_sets = shader_module.enumerate_descriptor_sets(None).unwrap();
     println!("REFLECT BIND GROUPS: {:?}", descriptor_sets);
     /*
     descriptor_sets.iter().map(|descriptor_set| {
@@ -74,23 +74,23 @@ pub(crate) fn reflect_binding(
 }
 */
 
-pub(crate) fn reflect_input_variables(shader_module: &ShaderModule, entry_point: Option<&str>) -> Vec<VertexAttributeDescriptor> {
-    let variables = shader_module.enumerate_input_variables(entry_point).unwrap();
+pub(crate) fn reflect_input_variables(shader_module: &ShaderModule) -> Vec<VertexAttributeDescriptor> {
+    let variables = shader_module.enumerate_input_variables(None).unwrap();
     variables.iter().map(|variable| reflect_vertex_attribute(&variable)).collect()
 }
 
-pub(crate) fn reflect_descriptor_bindings(shader_module: &ShaderModule, entry_point: Option<&str>) {
-    let descriptors = shader_module.enumerate_descriptor_bindings(entry_point).unwrap();
+pub(crate) fn reflect_descriptor_bindings(shader_module: &ShaderModule) {
+    let descriptors = shader_module.enumerate_descriptor_bindings(None).unwrap();
     println!("DESCRIPTOR BINDINGS: {:?}", descriptors);
 }
 
-pub(crate) fn reflect_descriptor_sets(shader_module: &ShaderModule, entry_point: Option<&str>) {
-    let descriptor_sets = shader_module.enumerate_descriptor_sets(entry_point).unwrap();
+pub(crate) fn reflect_descriptor_sets(shader_module: &ShaderModule) {
+    let descriptor_sets = shader_module.enumerate_descriptor_sets(None).unwrap();
     println!("DESCRIPTOR SETS: {:?}", descriptor_sets);
 }
 
-pub(crate) fn reflect_push_constant_blocks(shader_module: &ShaderModule, entry_point: Option<&str>) {
-    let block_variables = shader_module.enumerate_push_constant_blocks(entry_point).unwrap();
+pub(crate) fn reflect_push_constant_blocks(shader_module: &ShaderModule) {
+    let block_variables = shader_module.enumerate_push_constant_blocks(None).unwrap();
     println!("PUSH CONSTANT BLOCKS: {:?}", block_variables);
 }
 
