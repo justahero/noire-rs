@@ -1,6 +1,6 @@
-use spirv_reflect::{types::{ReflectDescriptorBinding, ReflectDescriptorSet, ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags};
+use spirv_reflect::{types::{ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags};
 
-use crate::{BindGroupDescriptor, BindingDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage};
+use crate::{BindGroupDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage};
 
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///

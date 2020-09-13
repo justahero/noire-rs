@@ -1,12 +1,10 @@
 use crate::TextureFormat;
 
 pub mod bind_group;
-pub mod binding;
 pub mod pipeline;
 pub mod state;
 
-pub use bind_group::{BindGroupDescriptor};
-pub use binding::*;
+pub use bind_group::*;
 pub use pipeline::*;
 pub use state::*;
 

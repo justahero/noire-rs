@@ -1,6 +1,6 @@
 use std::num::NonZeroU32;
 
-use crate::{BindingDescriptor, ShaderStage};
+use crate::ShaderStage;
 
 #[derive(Debug)]
 pub enum BindingType {

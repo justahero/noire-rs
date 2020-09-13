@@ -1,7 +1,7 @@
 use crate::{
     DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
     Shader, ShaderStage, Color
-, SwapChainDescriptor, ColorStateDescriptor, TextureDescriptor, SamplerDescriptor, PipelineDescriptor, BindGroupDescriptor};
+, SwapChainDescriptor, ColorStateDescriptor, TextureDescriptor, SamplerDescriptor, PipelineDescriptor, BindGroupDescriptor, bind_group::BindGroupLayoutDescriptor};
 use std::{borrow::Cow, sync::Arc};
 use wgpu::ShaderModuleSource;
 use window::Window;
@@ -80,11 +80,30 @@ impl WgpuContext {
     }
 
     /// Creates a new bind group layout
-    pub fn create_bind_group_layout(&mut self, descriptor: &BindGroupDescriptor) {
-        let bind_group_entries = descriptor.bindings
+    pub fn create_bind_group_layout(
+        &mut self,
+        descriptor: &BindGroupLayoutDescriptor,
+    ) -> wgpu::BindGroupLayout {
+        let bind_group_entries = descriptor.entries
             .iter()
             .map(|binding| binding.into())
             .collect::<Vec<wgpu::BindGroupLayoutEntry>>();
+
+        let wgpu_descriptor = wgpu::BindGroupLayoutDescriptor {
+            label: None,
+            entries: bind_group_entries.as_slice(),
+        };
+
+        self.device.create_bind_group_layout(&wgpu_descriptor)
+    }
+
+    fn create_shader_module(
+        &mut self,
+        shader_source: &str,
+        shader_stage: ShaderStage
+    ) -> wgpu::ShaderModule {
+        let shader = Shader::compile(shader_source, shader_stage).unwrap();
+        self.device.create_shader_module(ShaderModuleSource::SpirV(Cow::from(shader.as_binary())))
     }
 
     /// Begins a new render pass,
@@ -184,14 +203,5 @@ impl WgpuContext {
     fn create_encoder(&mut self) -> wgpu::CommandEncoder {
         let descriptor = wgpu::CommandEncoderDescriptor { label: None };
         self.device.create_command_encoder(&descriptor)
-    }
-
-    fn create_shader_module(
-        &mut self,
-        shader_source: &str,
-        shader_stage: ShaderStage
-    ) -> wgpu::ShaderModule {
-        let shader = Shader::compile(shader_source, shader_stage).unwrap();
-        self.device.create_shader_module(ShaderModuleSource::SpirV(Cow::from(shader.as_binary())))
     }
 }
