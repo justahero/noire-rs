@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{fmt, fs::File, io::Read, path};
 use fmt::Display;
 use spirv_reflect::types::ReflectShaderStageFlags;
 
@@ -31,6 +31,10 @@ pub enum ShaderError {
     UnsupportedShaderKind(shaderc::ShaderKind),
     /// Wraps any CompilerError values
     CompileError(String),
+    /// Failed to open file
+    OpenFileFailed(String),
+    /// Failed to read from source file
+    ReadFromFileFailed(String),
 }
 
 impl Display for ShaderError {
@@ -38,6 +42,8 @@ impl Display for ShaderError {
         let s = match self {
             ShaderError::UnsupportedShaderKind(kind) => format!("Unsupported shader kind '{:?}' found", kind),
             ShaderError::CompileError(error) => format!("Failed to compile shader: {}", error),
+            ShaderError::OpenFileFailed(error) => format!("Failed to open file: {}", error),
+            ShaderError::ReadFromFileFailed(error) => format!("Failed to read from file: {}", error),
         };
         write!(f, "{}", s)
     }
@@ -135,6 +141,18 @@ impl Shader {
             stage,
             source,
         })
+    }
+
+    /// Loads and compiles the shader from file
+    pub fn from_file(file_path: &path::PathBuf, stage: ShaderStage) -> ShaderResult {
+        let path = std::path::Path::new(file_path);
+        let display = path.display();
+
+        let mut source = String::new();
+        let mut file = File::open(&path).map_err(|_| ShaderError::OpenFileFailed(format!("{}", display)))?;
+        file.read_to_string(&mut source).map_err(|_| ShaderError::ReadFromFileFailed(format!("{}", display)))?;
+
+        Shader::compile(&source, stage)
     }
 
     /// Returns the shader as vec of u8.
