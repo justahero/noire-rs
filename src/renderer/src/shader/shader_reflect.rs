@@ -1,4 +1,4 @@
-use spirv_reflect::{types::{ ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags, types::ReflectDescriptorSet, types::ReflectDescriptorBinding};
+use spirv_reflect::{types::ReflectInterfaceVariable, ShaderModule, types::ReflectDescriptorSet, types::ReflectDescriptorBinding};
 
 use crate::{BindGroupDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage, BindingType};
 
