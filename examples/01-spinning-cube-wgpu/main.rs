@@ -1,4 +1,4 @@
-use renderer::{Shader, ShaderStage};
+use renderer::{Shader, ShaderStage, ShaderLayout};
 use utils::app_dir;
 
 fn main() {
@@ -6,6 +6,9 @@ fn main() {
     let vertex_file = app_dir.join("examples/01-spinning-cube-wgpu/shaders/vertex.glsl");
     let fragment_file = app_dir.join("examples/01-spinning-cube-wgpu/shaders/fragment.glsl");
 
-    let vertex_shader = Shader::from_file(&vertex_file, ShaderStage::Vertex).unwrap();
+    let _vertex_shader = Shader::from_file(&vertex_file, ShaderStage::Vertex).unwrap();
     let fragment_shader = Shader::from_file(&fragment_file, ShaderStage::Fragment).unwrap();
+
+    let shader_layout = ShaderLayout::from_shader(&fragment_shader);
+    dbg!(shader_layout);
 }

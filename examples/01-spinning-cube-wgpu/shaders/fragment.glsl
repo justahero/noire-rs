@@ -1,20 +1,21 @@
 #version 450
 
-uniform vec3 u_cameraPos;
-uniform vec3 u_lightPos     = vec3(0.0, 6.0, -4.0);
-uniform vec4 u_lightColor   = vec4(1.0, 1.0, 1.0, 1.0);
-uniform vec4 u_ambientColor = vec4(0.1, 0.1, 0.1, 1.0);
-uniform vec4 u_diffuseColor = vec4(0.3, 0.5, 0.4, 1.0);
-uniform vec4 u_objectColor  = vec4(1.0, 1.0, 1.0, 1.0);
-uniform float u_shininess = 10.0;
+layout(set = 0, binding = 0) uniform Locals {
+    vec3 u_cameraPos;
+    vec2 u_resolution;
+    float u_time;
+};
 
-uniform vec2 u_resolution;
-uniform float u_time;
+const vec3 u_lightPos = vec3(0.0, 6.0, -4.0);
+const vec4 u_lightColor = vec4(1.0, 1.0, 1.0, 1.0);
+const vec4 u_ambientColor = vec4(0.1, 0.1, 0.1, 1.0);
+const vec4 u_diffuseColor = vec4(0.3, 0.5, 0.4, 1.0);
+const vec4 u_objectColor = vec4(1.0, 1.0, 1.0, 1.0);
+const float u_shininess = 10.0;
 
-layout (location = 0) in vec3 vertex;
-layout (location = 1) in vec3 normal;
-
-out vec4 out_color;
+layout(location = 0) in vec3 vertex;
+layout(location = 1) in vec3 normal;
+layout(location = 0) out vec4 out_color;
 
 void main() {
     vec3 lightDir = normalize(u_lightPos - vertex);
