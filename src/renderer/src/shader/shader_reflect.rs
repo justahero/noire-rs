@@ -1,4 +1,4 @@
-use spirv_reflect::{types::{ ReflectInterfaceVariable}, ShaderModule, types::ReflectShaderStageFlags, types::ReflectDescriptorSet, types::ReflectDescriptorBinding};
+use spirv_reflect::{types::ReflectInterfaceVariable, ShaderModule, types::ReflectDescriptorSet, types::ReflectDescriptorBinding};
 
 use crate::{BindGroupDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage, BindingType};
 
@@ -20,11 +20,11 @@ impl ShaderLayout {
 ///
 pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     let shader_module = ShaderModule::load_u8_data(spv_data).unwrap();
-    let entry_point_name = shader_module.get_entry_point_name();
+    let _entry_point_name = shader_module.get_entry_point_name();
     let shader_stage: ShaderStage = shader_module.get_shader_stage().into();
 
     let bind_groups: Vec<BindGroupDescriptor> = reflect_bind_groups(&shader_module, shader_stage);
-    let input_variables: Vec<VertexAttributeDescriptor> = reflect_input_variables(&shader_module);
+    let _input_variables: Vec<VertexAttributeDescriptor> = reflect_input_variables(&shader_module);
 
     reflect_descriptor_bindings(&shader_module);
     reflect_descriptor_sets(&shader_module);

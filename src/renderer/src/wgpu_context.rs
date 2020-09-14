@@ -1,7 +1,7 @@
 use crate::{
     DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
     Shader, ShaderStage, Color
-, SwapChainDescriptor, ColorStateDescriptor, TextureDescriptor, SamplerDescriptor, PipelineDescriptor, BindGroupDescriptor, bind_group::BindGroupLayoutDescriptor};
+, SwapChainDescriptor, ColorStateDescriptor, TextureDescriptor, SamplerDescriptor, bind_group::BindGroupLayoutDescriptor};
 use std::{borrow::Cow, sync::Arc};
 use wgpu::ShaderModuleSource;
 use window::Window;

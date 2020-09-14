@@ -1,5 +1,4 @@
 use renderer::{self, Shader, ShaderLayout};
-use shaderc;
 
 const VERTEX_SHADER: &str = r#"
 #version 450
