@@ -1,4 +1,4 @@
-use renderer::{Renderer, ShaderLayout, ShaderStage};
+use renderer::{Renderer, ShaderLayout, ShaderStage, VertexStateDescriptor};
 
 fn main() {
     let vertex_source = include_str!("shaders/vertex.glsl");
@@ -10,4 +10,8 @@ fn main() {
 
     let shader_layout = ShaderLayout::from_shader(&fragment_shader);
     dbg!(shader_layout);
+
+    let mut vertex_stage = VertexStateDescriptor::new();
+    // vertex_stage.add(VertexBufferDescriptor::new());
+    // vertex_stage.add(VertexBufferDescriptor::new());
 }

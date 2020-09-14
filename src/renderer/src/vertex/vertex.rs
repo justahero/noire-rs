@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum VertexFormat {
     Uchar2,
     Uchar4,
@@ -30,6 +30,44 @@ pub enum VertexFormat {
     Int2,
     Int3,
     Int4,
+}
+
+impl VertexFormat {
+    /// Returns the size in bytes of the vertex format
+    pub fn size(&self) -> u64 {
+        match self {
+            VertexFormat::Uchar2 => 2,
+            VertexFormat::Uchar4 => 4,
+            VertexFormat::Char2 => 2,
+            VertexFormat::Char4 => 4,
+            VertexFormat::Uchar2Norm => 2,
+            VertexFormat::Uchar4Norm => 4,
+            VertexFormat::Char2Norm => 2,
+            VertexFormat::Char4Norm => 4,
+            VertexFormat::Ushort2 => 2 * 2,
+            VertexFormat::Ushort4 => 2 * 4,
+            VertexFormat::Short2 => 2 * 2,
+            VertexFormat::Short4 => 2 * 4,
+            VertexFormat::Ushort2Norm => 2 * 2,
+            VertexFormat::Ushort4Norm => 2 * 4,
+            VertexFormat::Short2Norm => 2 * 2,
+            VertexFormat::Short4Norm => 2 * 4,
+            VertexFormat::Half2 => 2 * 2,
+            VertexFormat::Half4 => 2 * 4,
+            VertexFormat::Float => 4,
+            VertexFormat::Float2 => 2 * 4,
+            VertexFormat::Float3 => 3 * 4,
+            VertexFormat::Float4 => 4 * 4,
+            VertexFormat::Uint => 4,
+            VertexFormat::Uint2 => 2 * 4,
+            VertexFormat::Uint3 => 3 * 4,
+            VertexFormat::Uint4 => 4 * 4,
+            VertexFormat::Int => 4,
+            VertexFormat::Int2 => 2 * 4,
+            VertexFormat::Int3 => 3 * 4,
+            VertexFormat::Int4 => 4 * 4,
+        }
+    }
 }
 
 impl From<VertexFormat> for wgpu::VertexFormat {
