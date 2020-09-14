@@ -18,15 +18,6 @@ impl Default for ColorStateDescriptor {
     }
 }
 
-impl ColorStateDescriptor {
-    pub fn format(format: TextureFormat) -> Self {
-        Self {
-            format,
-            .. Default::default()
-        }
-    }
-}
-
 impl From<ColorStateDescriptor> for wgpu::ColorStateDescriptor {
     fn from(val: ColorStateDescriptor) -> Self {
         wgpu::ColorStateDescriptor {

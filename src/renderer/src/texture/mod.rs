@@ -110,6 +110,17 @@ impl From<TextureFormat> for wgpu::TextureFormat {
     }
 }
 
+impl From<TextureFormat> for wgpu::ColorStateDescriptor {
+    fn from(format: TextureFormat) -> Self {
+        Self {
+            format: format.into(),
+            color_blend: wgpu::BlendDescriptor::REPLACE,
+            alpha_blend: wgpu::BlendDescriptor::REPLACE,
+            write_mask: wgpu::ColorWrite::ALL,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy)]
 pub struct TextureId(Uuid);
 

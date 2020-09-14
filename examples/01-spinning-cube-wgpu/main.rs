@@ -1,4 +1,4 @@
-use renderer::{Shader, ShaderStage, ShaderLayout};
+use renderer::{Shader, ShaderStage, ShaderLayout, VertexStateDescriptor, VertexBufferDescriptor};
 use utils::app_dir;
 
 fn main() {
@@ -11,4 +11,9 @@ fn main() {
 
     let shader_layout = ShaderLayout::from_shader(&fragment_shader);
     dbg!(shader_layout);
+
+    let mut vertex_stage = VertexStateDescriptor::new();
+    vertex_stage.add(VertexBufferDescriptor::new());
+    vertex_stage.add(VertexBufferDescriptor::new());
+
 }
