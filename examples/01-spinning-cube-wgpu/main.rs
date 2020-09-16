@@ -1,4 +1,4 @@
-use renderer::{Shader, ShaderStage, ShaderLayout, VertexStateDescriptor, VertexBufferDescriptor};
+use renderer::{Shader, ShaderStage, ShaderLayout, VertexStateDescriptor, VertexBufferDescriptor, VertexFormat};
 use utils::app_dir;
 
 fn main() {
@@ -9,11 +9,10 @@ fn main() {
     let _vertex_shader = Shader::from_file(&vertex_file, ShaderStage::Vertex).unwrap();
     let fragment_shader = Shader::from_file(&fragment_file, ShaderStage::Fragment).unwrap();
 
+    // check what is parsed
     let shader_layout = ShaderLayout::from_shader(&fragment_shader);
     dbg!(shader_layout);
 
     let mut vertex_stage = VertexStateDescriptor::new();
-    vertex_stage.add(VertexBufferDescriptor::new());
-    vertex_stage.add(VertexBufferDescriptor::new());
-
+    vertex_stage.add(VertexBufferDescriptor::new(vec![VertexFormat::Float3]));
 }

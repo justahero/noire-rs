@@ -1,9 +1,9 @@
 use crate::{
     DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
     Shader, ShaderStage, Color
-, SwapChainDescriptor, TextureDescriptor, SamplerDescriptor, bind_group::BindGroupLayoutDescriptor};
+, SwapChainDescriptor, TextureDescriptor, SamplerDescriptor, bind_group::BindGroupLayoutDescriptor, BufferId, Resources, BufferDescriptor};
 use std::{borrow::Cow, sync::Arc};
-use wgpu::ShaderModuleSource;
+use wgpu::{ShaderModuleSource, util::DeviceExt};
 use window::Window;
 
 /// TODO remove from here
@@ -40,6 +40,8 @@ pub struct WgpuContext {
     pub device: Arc<wgpu::Device>,
     /// The command encoder to use for render passes
     encoder: Option<wgpu::CommandEncoder>,
+    /// The list of all managed resources
+    resources: Resources,
 }
 
 impl WgpuContext {
@@ -48,14 +50,26 @@ impl WgpuContext {
         Self {
             device,
             encoder: None,
+            resources: Resources::new(),
         }
     }
 
-    /// Creates a new vertex buffer with given data
-    pub fn create_vertex_buffer(
+    /// Creates a new buffer
+    pub fn create_buffer(
         &mut self,
-    ) {
+        descriptor: BufferDescriptor,
+    ) -> BufferId {
+        let id = BufferId::new();
+        let contents = [];
 
+        let buffer_id = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: None,
+            contents: &contents,
+            usage: descriptor.usage.into(),
+        });
+        self.resources.buffers.insert(id, buffer_id);
+
+        id
     }
 
     /// Creates a new Swap chain object
