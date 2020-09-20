@@ -1,6 +1,6 @@
 use crate::WindowId;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct EventType<T> {
     pub event: T,
 }
@@ -25,12 +25,21 @@ impl<T> Default for Events<T> {
 
 impl<T> Events<T> {
     pub fn add(&mut self, event: T) -> &mut Self {
-        let event_type = EventType {
-            event,
-        };
-
-        self.events.push(event_type);
+        self.events.push(EventType { event });
         self
+    }
+
+    /// Returns the number of events
+    pub fn len(&self) -> usize {
+        self.events.len()
+    }
+
+    /// Creates a new iterator, drains all events
+    pub fn drain<'a>(&mut self) -> Vec<T> {
+        self.events
+            .drain(..)
+            .map(|event_type| event_type.event)
+            .collect()
     }
 }
 
@@ -38,7 +47,7 @@ impl<T: Copy> Iterator for Events<T> {
     type Item = EventType<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.events.len() < self.count {
+        if self.events.len() > self.count {
             self.count += 1;
             Some(self.events[self.count - 1])
         } else {
@@ -54,9 +63,9 @@ pub struct CloseWindow {
 
 #[cfg(test)]
 mod tests {
-    use crate::Events;
+    use crate::{Events, EventType};
 
-    #[derive(Debug, PartialEq)]
+    #[derive(Copy, Clone, Debug, PartialEq, Eq)]
     struct TestEvent {}
 
     #[test]
@@ -64,7 +73,19 @@ mod tests {
         let mut events = Events::<TestEvent>::default();
         events.add(TestEvent{});
 
-        assert_eq!(Some(TestEvent{}), events.next());
+        assert_eq!(1, events.len());
+        assert_eq!(Some(EventType::<TestEvent>{ event: TestEvent{}}), events.next());
         assert_eq!(None, events.next());
+    }
+
+    #[test]
+    fn test_drain_events() {
+        let mut events = Events::<TestEvent>::default();
+        events.add(TestEvent{});
+        events.add(TestEvent{});
+
+        assert_eq!(2, events.len());
+        assert_eq!(vec![TestEvent{}, TestEvent{}], events.drain());
+        assert_eq!(0, events.len());
     }
 }
