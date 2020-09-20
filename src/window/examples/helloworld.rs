@@ -10,7 +10,6 @@ fn main() {
     let event_loop = winit::event_loop::EventLoop::new();
     let mut windows = Windows::default();
     let id = windows.create(Window::default(), &event_loop);
-    let winit_window = windows.get_mut_window(&id).unwrap();
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Wait;

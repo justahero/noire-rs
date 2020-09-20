@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc, sync::Mutex};
+use std::{collections::HashMap};
 use winit::monitor::{MonitorHandle, VideoMode};
 
 use once_cell::sync::OnceCell;
@@ -8,9 +8,9 @@ use winit::window::WindowId as WinitWindowId;
 use crate::{Window, WindowId, WindowMode};
 
 /// This function creates the single instance of Windows
-pub(crate) fn windows() -> &'static Arc<Mutex<Windows>> {
-    static WINDOWS: OnceCell<Arc<Mutex<Windows>>> = OnceCell::new();
-    WINDOWS.get_or_init(|| Arc::new(Mutex::new(Windows::default())))
+pub(crate) fn windows() -> &'static Windows {
+    static WINDOWS: OnceCell<Windows> = OnceCell::new();
+    WINDOWS.get_or_init(|| Windows::default())
 }
 
 pub struct Windows {
