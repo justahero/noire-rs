@@ -1,7 +1,7 @@
 use crate::WindowId;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct EventType<T> {
+pub struct Event<T> {
     pub event: T,
 }
 
@@ -9,7 +9,7 @@ pub struct EventType<T> {
 #[derive(Debug)]
 pub struct Events<T> {
     /// The list of all events
-    events: Vec<EventType<T>>,
+    events: Vec<Event<T>>,
     /// The current counf to iterate over
     count: usize,
 }
@@ -25,7 +25,7 @@ impl<T> Default for Events<T> {
 
 impl<T> Events<T> {
     pub fn add(&mut self, event: T) -> &mut Self {
-        self.events.push(EventType { event });
+        self.events.push(Event { event });
         self
     }
 
@@ -44,7 +44,7 @@ impl<T> Events<T> {
 }
 
 impl<T: Copy> Iterator for Events<T> {
-    type Item = EventType<T>;
+    type Item = Event<T>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.events.len() > self.count {
@@ -63,7 +63,7 @@ pub struct CloseWindow {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Events, EventType};
+    use crate::{Events, Event};
 
     #[derive(Copy, Clone, Debug, PartialEq, Eq)]
     struct TestEvent {}
@@ -74,7 +74,7 @@ mod tests {
         events.add(TestEvent{});
 
         assert_eq!(1, events.len());
-        assert_eq!(Some(EventType::<TestEvent>{ event: TestEvent{}}), events.next());
+        assert_eq!(Some(Event::<TestEvent>{ event: TestEvent{}}), events.next());
         assert_eq!(None, events.next());
     }
 

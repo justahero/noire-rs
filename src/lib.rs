@@ -4,6 +4,7 @@
 extern crate app;
 extern crate backtrace;
 extern crate cgmath;
+// extern crate env_logger;
 extern crate gl;
 // TODO remove here
 extern crate glfw;

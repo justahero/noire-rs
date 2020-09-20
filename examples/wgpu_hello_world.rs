@@ -1,5 +1,4 @@
-use window::{Window, Windows, WindowMode};
-use winit::{event_loop::ControlFlow, event::{WindowEvent, Event, self}};
+use window::{Window, Windows, WindowMode, Runner};
 use renderer::{WgpuContext, WgpuRenderer, TextureDescriptor, TextureViewDescriptor};
 
 extern crate noire;
@@ -42,6 +41,10 @@ fn main() {
     let mut depth_texture_view = depth_texture
         .create_view(&TextureViewDescriptor::create_from_texture(&depth_descriptor).into());
 
+    let runner = Runner::new();
+    runner.run(event_loop);
+
+    /*
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Wait;
 
@@ -70,4 +73,5 @@ fn main() {
             _ => ()
         }
     });
+    */
 }

@@ -1,5 +1,5 @@
 pub struct App {
-    /// The runner 
+    /// The runner
     runner: Box<dyn Fn(App)>,
 }
 
