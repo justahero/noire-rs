@@ -18,6 +18,7 @@ pub use converter::*;
 pub use mesh::*;
 pub use pipeline::*;
 pub use render::*;
+pub use render::*;
 pub use resources::*;
 pub use shader::*;
 pub use texture::*;

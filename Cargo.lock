@@ -1880,6 +1880,7 @@ name = "window"
 version = "0.1.0"
 dependencies = [
  "cart-tmp-winit 0.22.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "once_cell 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "uuid 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
