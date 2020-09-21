@@ -23,8 +23,6 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "log 0.4.11 (registry+https://github.com/rust-lang/crates.io-index)",
- "renderer 0.1.0",
- "window 0.1.0",
 ]
 
 [[package]]
@@ -1932,6 +1930,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "window"
 version = "0.1.0"
 dependencies = [
+ "app 0.1.0",
  "cart-tmp-winit 0.22.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.11 (registry+https://github.com/rust-lang/crates.io-index)",

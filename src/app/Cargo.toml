@@ -7,6 +7,4 @@ edition = "2018"
 license = "MIT"
 
 [dependencies]
-renderer = { path = "../renderer", version = "0.1" }
-window = { path = "../window", version = "0.1"}
 log = "0.4.11"

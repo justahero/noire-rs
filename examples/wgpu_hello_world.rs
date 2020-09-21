@@ -1,4 +1,5 @@
-use window::{Window, Windows, WindowMode, Runner};
+use app::prelude::App;
+use window::{Window, WindowMode, Windows, winit_run};
 use renderer::{WgpuContext, WgpuRenderer, TextureDescriptor, TextureViewDescriptor};
 
 extern crate noire;
@@ -27,22 +28,22 @@ fn main() {
 
     let winit_id: winit::window::WindowId = windows.create(window, &event_loop);
 
-    let mut renderer = {
+    let renderer = {
         let winit_window = windows.get_winit_window(&winit_id).unwrap();
         futures::executor::block_on(WgpuRenderer::new(&winit_window))
     };
 
     let mut context = WgpuContext::new(renderer.device.clone());
     let window = windows.get_window(&window_id).unwrap();
-    let mut swap_chain = context.create_swapchain(window, &renderer.surface);
+    let _swap_chain = context.create_swapchain(window, &renderer.surface);
     let depth_descriptor = TextureDescriptor::depth(window.width, window.height);
     let depth_texture = context
         .create_depth_texture(&depth_descriptor);
-    let mut depth_texture_view = depth_texture
+    let mut _depth_texture_view = depth_texture
         .create_view(&TextureViewDescriptor::create_from_texture(&depth_descriptor).into());
 
-    let runner = Runner::new();
-    runner.run(event_loop);
+    let app = App::build();
+    winit_run(app, event_loop);
 
     /*
     event_loop.run(move |event, _, control_flow| {
