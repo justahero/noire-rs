@@ -1,4 +1,4 @@
-use winit::window::Window as WinitWindow;
+use window::{Window, windows};
 use std::sync::Arc;
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
@@ -18,15 +18,17 @@ pub struct WgpuRenderer {
 }
 
 impl WgpuRenderer {
-    pub async fn new(window: &WinitWindow) -> Self {
+    pub async fn new(window: &Window) -> Self {
         let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
+        let windows = windows().lock().unwrap();
+        let winit_window = windows.get_winit_window(&window.id).unwrap();
 
         // setup basic swap chain here for now
         // TODO move to a more appropriate place, especially when resize events occur
-        let surface = unsafe { instance.create_surface(window) };
+        let surface = unsafe { instance.create_surface(winit_window) };
 
-        let width = window.inner_size().width;
-        let height = window.inner_size().height;
+        let width = winit_window.inner_size().width;
+        let height = winit_window.inner_size().height;
 
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {

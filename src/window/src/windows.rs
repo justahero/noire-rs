@@ -1,4 +1,4 @@
-use std::{collections::HashMap};
+use std::{collections::HashMap, sync::Mutex};
 use winit::monitor::{MonitorHandle, VideoMode};
 
 use once_cell::sync::OnceCell;
@@ -8,9 +8,9 @@ use winit::window::WindowId as WinitWindowId;
 use crate::{Window, WindowId, WindowMode};
 
 /// This function creates the single instance of Windows
-pub(crate) fn windows() -> &'static Windows {
-    static WINDOWS: OnceCell<Windows> = OnceCell::new();
-    WINDOWS.get_or_init(|| Windows::default())
+pub fn windows() -> &'static Mutex<Windows> {
+    static WINDOWS: OnceCell<Mutex<Windows>> = OnceCell::new();
+    WINDOWS.get_or_init(|| Mutex::new(Windows::default()))
 }
 
 pub struct Windows {
@@ -18,6 +18,8 @@ pub struct Windows {
     pub winit_windows: HashMap<WinitWindowId, WinitWindow>,
     /// Lookup table to find find Window by WindowId
     pub windows: HashMap<WindowId, Window>,
+    /// Lookup table to map window id to winit window id
+    pub window_ids: HashMap<WindowId, WinitWindowId>,
 }
 
 impl Default for Windows {
@@ -25,6 +27,7 @@ impl Default for Windows {
         Self {
             winit_windows: HashMap::new(),
             windows: HashMap::new(),
+            window_ids: HashMap::new(),
         }
     }
 }
@@ -59,18 +62,29 @@ impl Windows {
         winit_window.set_title(&window.title);
         winit_window.set_resizable(window.resizable);
 
-        let window_id = winit_window.id().clone();
+        let window_id = window.id.clone();
+        let winit_window_id = winit_window.id().clone();
 
         // store instance of the Window
-        self.winit_windows.insert(winit_window.id(), winit_window);
-        self.windows.insert(window.id, window);
+        self.winit_windows.insert(winit_window_id, winit_window);
+        self.windows.insert(window_id, window);
+        self.window_ids.insert(window_id, winit_window_id);
 
-        window_id
+        winit_window_id
     }
 
-    /// Returns a reference to the winit Window by internal id
-    pub fn get_winit_window(&self, window_id: &WinitWindowId) -> Option<&WinitWindow> {
-        self.winit_windows.get(window_id)
+    /// Returns a reference to the winit Window by WindowID
+    pub fn get_winit_window(&self, window_id: &WindowId) -> Option<&WinitWindow> {
+        if let Some(id) = self.window_ids.get(window_id) {
+            self.winit_windows.get(id)
+        } else {
+            None
+        }
+    }
+
+    /// Returns a reference to the winit window by its internal id
+    pub fn get_winit_window_by_id(&self, winit_id: &WinitWindowId) -> Option<&WinitWindow> {
+        self.winit_windows.get(winit_id)
     }
 
     /// Returns a reference to the Window description

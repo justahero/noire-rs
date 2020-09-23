@@ -32,7 +32,7 @@ where
     }
 
     /// Adds a new event to the app
-    pub fn add_event<T>(&mut self, event: T) -> &mut Self {
+    pub fn add_event<T>(&mut self, _event: T) -> &mut Self {
         self
     }
 

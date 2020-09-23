@@ -1,5 +1,5 @@
 use app::prelude::{App, EventHandler};
-use window::{Window, WindowMode, Windows, winit_run};
+use window::{Window, WindowMode, windows, winit_run};
 use renderer::{WgpuContext, WgpuRenderer, TextureDescriptor, TextureViewDescriptor};
 
 extern crate noire;
@@ -46,24 +46,16 @@ fn render(
 
 fn main() {
     let event_loop = winit::event_loop::EventLoop::new();
-    let mut windows = Windows::default();
     let window = Window::default()
         .with_title("Test")
         .with_mode(WindowMode::Windowed);
+    let _ = windows().lock().unwrap().create(window.clone(), &event_loop);
+
     let app = App::build(Example::new(window.clone()));
-
-    let window_id = window.id.clone();
-
-    let winit_id: winit::window::WindowId = windows.create(window, &event_loop);
-
-    let renderer = {
-        let winit_window = windows.get_winit_window(&winit_id).unwrap();
-        futures::executor::block_on(WgpuRenderer::new(&winit_window))
-    };
+    let renderer = futures::executor::block_on(WgpuRenderer::new(&window));
 
     let mut context = WgpuContext::new(renderer.device.clone());
-    let window = windows.get_window(&window_id).unwrap();
-    let _swap_chain = context.create_swapchain(window, &renderer.surface);
+    let _swap_chain = context.create_swapchain(&window, &renderer.surface);
     let depth_descriptor = TextureDescriptor::depth(window.width, window.height);
     let depth_texture = context
         .create_depth_texture(&depth_descriptor);

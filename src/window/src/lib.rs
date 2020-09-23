@@ -56,8 +56,8 @@ where
                 winit::event::WindowEvent::CloseRequested => {
                     *control_flow = ControlFlow::Exit
                 }
-                winit::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => {
-                    if let Some(window) = windows().get_winit_window(&window_id) {
+                winit::event::WindowEvent::KeyboardInput { device_id: _, input: _, is_synthetic: _ } => {
+                    if let Some(_window) = windows().lock().unwrap().get_winit_window_by_id(&window_id) {
                         // TODO
                     }
                 }
