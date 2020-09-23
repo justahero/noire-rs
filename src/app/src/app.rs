@@ -1,21 +1,23 @@
+use crate::prelude::EventHandler;
+
 /// App struct
-pub struct App {
+pub struct App<E: EventHandler + 'static> {
     /// The runner
-    runner: Box<dyn Fn(App)>,
+    runner: Box<dyn Fn(App<E>)>,
+    /// Keep the example
+    pub event_handler: E,
 }
 
-impl Default for App {
-    fn default() -> Self {
+impl<E> App<E>
+where
+    E: EventHandler + 'static
+{
+    /// Builds a new App
+    pub fn build(instance: E) -> Self {
         Self {
             runner: Box::new(run_once),
+            event_handler: instance,
         }
-    }
-}
-
-impl App {
-    /// Builds a new App
-    pub fn build() -> Self {
-        Default::default()
     }
 
     /// Executes the runner
@@ -26,24 +28,23 @@ impl App {
 
     /// Update the app
     pub fn update(&mut self) {
-        println!("App::update");
+        self.event_handler.update();
     }
 
     /// Adds a new event to the app
-    pub fn send_event<T>(&mut self) -> &mut Self
-    where
-        T: Send + Sync + 'static
-    {
-        // TODO
+    pub fn add_event<T>(&mut self, event: T) -> &mut Self {
         self
     }
 
-    pub fn set_runner(&mut self, runner: impl Fn(App) + 'static) -> &mut Self {
+    pub fn set_runner(&mut self, runner: impl Fn(App<E>) + 'static) -> &mut Self {
         self.runner = Box::new(runner);
         self
     }
 }
 
-fn run_once(mut app: App) {
+fn run_once<E>(mut app: App<E>)
+where
+    E: EventHandler
+{
     app.update();
 }

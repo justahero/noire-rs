@@ -16,14 +16,14 @@ impl Default for WindowId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum WindowMode {
     Windowed,
     BorderlessFullscreen,
     Fullscreen,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Description of how a Window instance should be created
 /// The Window implements the Builder pattern, specific attributes can be
 /// set independently

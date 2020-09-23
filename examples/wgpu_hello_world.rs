@@ -1,10 +1,36 @@
-use app::prelude::App;
+use app::prelude::{App, EventHandler};
 use window::{Window, WindowMode, Windows, winit_run};
 use renderer::{WgpuContext, WgpuRenderer, TextureDescriptor, TextureViewDescriptor};
 
 extern crate noire;
 extern crate futures;
 extern crate wgpu;
+
+pub struct Example {
+    pub window: Window,
+}
+
+impl Example {
+    pub fn new(window: Window) -> Self {
+        Self {
+            window,
+        }
+    }
+}
+
+impl EventHandler for Example {
+    /// Initializes the Example
+    fn init(&mut self) {
+    }
+
+    /// Update the example
+    fn update(&mut self) {
+    }
+
+    /// Renders everything
+    fn render(&mut self) {
+    }
+}
 
 fn render(
     window: &Window,
@@ -24,6 +50,8 @@ fn main() {
     let window = Window::default()
         .with_title("Test")
         .with_mode(WindowMode::Windowed);
+    let app = App::build(Example::new(window.clone()));
+
     let window_id = window.id.clone();
 
     let winit_id: winit::window::WindowId = windows.create(window, &event_loop);
@@ -42,37 +70,5 @@ fn main() {
     let mut _depth_texture_view = depth_texture
         .create_view(&TextureViewDescriptor::create_from_texture(&depth_descriptor).into());
 
-    let app = App::build();
     winit_run(app, event_loop);
-
-    /*
-    event_loop.run(move |event, _, control_flow| {
-        *control_flow = winit::event_loop::ControlFlow::Wait;
-
-        // TODO handle Window resize event
-        match event {
-            Event::MainEventsCleared => {
-                let winit_window = windows.get_winit_window(&winit_id).unwrap();
-                winit_window.request_redraw();
-            }
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => *control_flow = ControlFlow::Exit,
-            Event::RedrawRequested(_window_id) => {
-                let window = windows.get_window(&window_id).unwrap();
-                render(&window, &mut renderer.queue, &mut context, &mut swap_chain, &mut depth_texture_view);
-            }
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::KeyboardInput{ ref input, .. } => {
-                    if input.virtual_keycode == Some(event::VirtualKeyCode::Escape) && input.state == event::ElementState::Pressed {
-                        *control_flow = ControlFlow::Exit
-                    }
-                }
-                _ => ()
-            }
-            _ => ()
-        }
-    });
-    */
 }

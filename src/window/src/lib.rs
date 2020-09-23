@@ -1,9 +1,7 @@
-pub mod event;
 pub mod window;
 pub mod windows;
 
-use app::prelude::App;
-pub use event::*;
+use app::prelude::{App, EventHandler};
 pub use window::*;
 pub use windows::*;
 
@@ -19,24 +17,41 @@ pub use winit::{
 pub enum WindowEvent {
     /// Window Resize event with
     Resized { width: u32, height: u32 },
+    /// Update
+    Update,
+    /// Window is closed
+    CloseWindow { window_id: WindowId },
 }
 
-pub fn winit_run(mut app: App, event_loop: EventLoop<()>) {
+pub fn winit_run<E>(mut app: App<E>, event_loop: EventLoop<()>)
+where
+    E: EventHandler
+{
     println!("Starting Event Loop");
+    app.event_handler.init();
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Poll;
 
         match event {
             winit::event::Event::MainEventsCleared => {
-                // TODO do something here?
+                app.update();
+            }
+            winit::event::Event::Suspended => {
+
+            }
+            winit::event::Event::Resumed => {
+
             }
             winit::event::Event::WindowEvent {
                 event,
                 window_id,
             } => match event {
                 winit::event::WindowEvent::Resized(size) => {
-                    // TODO send event to app
+                    // let (width, height) = size;
+                    let width = size.width;
+                    let height = size.height;
+                    app.add_event(WindowEvent::Resized{ width, height });
                 }
                 winit::event::WindowEvent::CloseRequested => {
                     *control_flow = ControlFlow::Exit
