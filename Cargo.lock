@@ -1180,6 +1180,7 @@ dependencies = [
  "rand_chacha 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 1.3.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "renderer 0.1.0",
+ "resources 0.1.0",
  "utils 0.1.0",
  "wgpu 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "winit 0.23.0 (registry+https://github.com/rust-lang/crates.io-index)",

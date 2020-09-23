@@ -7,8 +7,6 @@ use winit::window::WindowId as WinitWindowId;
 use crate::Window;
 
 pub struct App {
-    /// The runner
-    runner: Box<dyn Fn(App)>,
     /// Lookup table to find find Window by WindowId
     pub windows: HashMap<WinitWindowId, Window>,
     /// The list of resources
@@ -18,7 +16,6 @@ pub struct App {
 impl Default for App {
     fn default() -> Self {
         Self {
-            runner: Box::new(run_once),
             windows: HashMap::new(),
             resources: Resources::new(),
         }
@@ -38,7 +35,7 @@ impl App {
 
     /// Builds a new App
     pub fn build() -> Self {
-        Default::default()
+        App::default()
     }
 
     /// Adds a new resource
@@ -49,14 +46,4 @@ impl App {
         self.resources.insert::<T>(value);
         self
     }
-
-    /// Executes the runner
-    pub fn run(mut self) {
-        let runner = std::mem::replace(&mut self.runner, Box::new(run_once));
-        (runner)(self);
-    }
-}
-
-fn run_once(mut app: App) {
-    app.update();
 }

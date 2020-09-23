@@ -1,6 +1,8 @@
 use resources::Resources;
 
-use crate::{App, Renderer, Window, WindowSettings, EventLoop};
+use crate::{App, Renderer, Window, WindowSettings};
+
+use super::EventLoop;
 
 /// Represents a window to render into, that also updates data and renders
 ///

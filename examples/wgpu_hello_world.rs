@@ -1,43 +1,30 @@
-use renderer::{Renderer, WindowMode, WindowSettings};
-use winit::{event_loop::ControlFlow, event::{WindowEvent, Event}};
+use renderer::{App, Window, WindowHandler, WindowMode, WindowSettings};
+use resources::Resources;
 
 extern crate noire;
 extern crate futures;
 extern crate wgpu;
 
+pub struct Example {
+}
+
+impl WindowHandler for Example {
+    fn load(window: &Window, _resources: &Resources, _renderer: &mut renderer::Renderer) -> Self where Self: Sized {
+        todo!()
+    }
+
+    fn update(&mut self, _resources: &Resources) {
+    }
+
+    fn render(&mut self, _window: &mut Window, app: &mut renderer::Renderer) {
+        todo!()
+    }
+}
+
 fn main() {
-    let event_loop = winit::event_loop::EventLoop::new();
     let settings = WindowSettings::default()
         .with_title("Test")
         .with_mode(WindowMode::Windowed);
 
-    let window = settings.create_window(&event_loop);
-    let renderer = futures::executor::block_on(Renderer::new());
-
-    event_loop.run(move |event, _, control_flow| {
-        *control_flow = winit::event_loop::ControlFlow::Wait;
-
-        // TODO handle Window resize event
-        match event {
-            Event::MainEventsCleared => {
-                window.request_redraw();
-            }
-            Event::WindowEvent {
-                event: WindowEvent::CloseRequested,
-                ..
-            } => *control_flow = ControlFlow::Exit,
-            Event::RedrawRequested(_window_id) => {
-                window.request_redraw();
-            }
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::KeyboardInput{ ref input, .. } => {
-                    if input.virtual_keycode == Some(winit::event::VirtualKeyCode::Escape) && input.state == winit::event::ElementState::Pressed {
-                        *control_flow = ControlFlow::Exit
-                    }
-                }
-                _ => ()
-            }
-            _ => ()
-        }
-    });
+    Example::run(settings);
 }

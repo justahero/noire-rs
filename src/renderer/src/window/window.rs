@@ -70,7 +70,7 @@ impl Default for Window {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Description of how a Window instance should be created
 pub struct WindowSettings {
     /// The title of the Window
