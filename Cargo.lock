@@ -19,13 +19,6 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
-name = "app"
-version = "0.1.0"
-dependencies = [
- "log 0.4.11 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "approx"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1045,7 +1038,6 @@ dependencies = [
 name = "noire"
 version = "0.1.0"
 dependencies = [
- "app 0.1.0",
  "backtrace 0.3.46 (registry+https://github.com/rust-lang/crates.io-index)",
  "cart-tmp-winit 0.22.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "cgmath 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1930,7 +1922,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "window"
 version = "0.1.0"
 dependencies = [
- "app 0.1.0",
  "cart-tmp-winit 0.22.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.11 (registry+https://github.com/rust-lang/crates.io-index)",

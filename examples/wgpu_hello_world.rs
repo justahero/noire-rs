@@ -1,35 +1,11 @@
-use app::prelude::{App, EventHandler};
-use window::{Window, WindowMode, windows, winit_run};
-use renderer::{WgpuContext, WgpuRenderer, TextureDescriptor, TextureViewDescriptor};
+use window::{App, Window};
+use renderer::{WgpuContext};
 
 extern crate noire;
 extern crate futures;
 extern crate wgpu;
 
 pub struct Example {
-    pub window: Window,
-}
-
-impl Example {
-    pub fn new(window: Window) -> Self {
-        Self {
-            window,
-        }
-    }
-}
-
-impl EventHandler for Example {
-    /// Initializes the Example
-    fn init(&mut self) {
-    }
-
-    /// Update the example
-    fn update(&mut self) {
-    }
-
-    /// Renders everything
-    fn render(&mut self) {
-    }
 }
 
 fn render(
@@ -45,6 +21,7 @@ fn render(
 }
 
 fn main() {
+    /*
     let event_loop = winit::event_loop::EventLoop::new();
     let window = Window::default()
         .with_title("Test")
@@ -63,4 +40,9 @@ fn main() {
         .create_view(&TextureViewDescriptor::create_from_texture(&depth_descriptor).into());
 
     winit_run(app, event_loop);
+    */
+
+    App::build()
+        .create_window(Window::default())
+        .run();
 }

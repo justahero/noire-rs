@@ -1,7 +1,10 @@
+pub mod app;
+pub mod app_builder;
 pub mod window;
 pub mod windows;
 
-use app::prelude::{App, EventHandler};
+pub use app::App;
+pub use app_builder::AppBuilder;
 pub use window::*;
 pub use windows::*;
 
@@ -23,19 +26,24 @@ pub enum WindowEvent {
     CloseWindow { window_id: WindowId },
 }
 
-pub fn winit_run<E>(mut app: App<E>, event_loop: EventLoop<()>)
-where
-    E: EventHandler
-{
-    println!("Starting Event Loop");
-    app.event_handler.init();
+/// TODO maybe create a struct / trait combination out of it, to provide better object handling, for example windows?
 
+pub fn winit_run(mut app: App) {
+    println!("Creating window(s)");
+    let mut windows = Windows::default();
+
+    let mut event_loop = EventLoop::new();
+    for window in app.windows {
+        windows.create(window, &event_loop);
+    }
+
+    println!("Starting Event Loop");
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Poll;
 
         match event {
             winit::event::Event::MainEventsCleared => {
-                app.update();
+                // app.update();
             }
             winit::event::Event::Suspended => {
 
@@ -51,13 +59,13 @@ where
                     // let (width, height) = size;
                     let width = size.width;
                     let height = size.height;
-                    app.add_event(WindowEvent::Resized{ width, height });
+                    // app.add_event(WindowEvent::Resized{ width, height });
                 }
                 winit::event::WindowEvent::CloseRequested => {
                     *control_flow = ControlFlow::Exit
                 }
                 winit::event::WindowEvent::KeyboardInput { device_id: _, input: _, is_synthetic: _ } => {
-                    if let Some(_window) = windows().lock().unwrap().get_winit_window_by_id(&window_id) {
+                    if let Some(_window) = windows.get_winit_window_by_id(&window_id) {
                         // TODO
                     }
                 }
