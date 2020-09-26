@@ -22,6 +22,8 @@ impl AppBuilder {
 
     /// Puts the underlying App into run event loop
     pub fn run(&mut self) {
+        // TODO maybe create event loop here, create windows here, setup resources and assign to app?
+
         let app = std::mem::take(&mut self.app);
         app.run();
     }

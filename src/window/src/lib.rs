@@ -33,10 +33,9 @@ pub fn winit_run(mut app: App) {
     
     let event_loop = EventLoop::new();
 
-    // TODO maybe drain all Window instances here or pass it in differently
     let mut windows = Windows::default();
-    for window in &app.windows {
-        windows.create(window.clone(), &event_loop);
+    for window in app.windows.drain(..) {
+        windows.create(window, &event_loop);
     }
 
     println!("Starting Event Loop");

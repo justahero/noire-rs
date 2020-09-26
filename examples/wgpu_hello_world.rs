@@ -1,4 +1,4 @@
-use window::{App, Window};
+use window::{App, Window, WindowMode};
 use renderer::{WgpuContext};
 
 extern crate noire;
@@ -22,12 +22,6 @@ fn render(
 
 fn main() {
     /*
-    let event_loop = winit::event_loop::EventLoop::new();
-    let window = Window::default()
-        .with_title("Test")
-        .with_mode(WindowMode::Windowed);
-    let _ = windows().lock().unwrap().create(window.clone(), &event_loop);
-
     let app = App::build(Example::new(window.clone()));
     let renderer = futures::executor::block_on(WgpuRenderer::new(&window));
 
@@ -42,7 +36,11 @@ fn main() {
     winit_run(app, event_loop);
     */
 
+    let window = Window::default()
+        .with_title("Test")
+        .with_mode(WindowMode::Windowed);
+
     App::build()
-        .create_window(Window::default())
+        .create_window(window)
         .run();
 }
