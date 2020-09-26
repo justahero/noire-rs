@@ -33,4 +33,9 @@ impl App {
         let runner = std::mem::replace(&mut self.runner, Box::new(winit_run));
         (runner)(self);
     }
+
+    /// Update the App
+    pub fn update(&mut self) {
+        // TODO
+    }
 }

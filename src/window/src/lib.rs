@@ -30,11 +30,13 @@ pub enum WindowEvent {
 
 pub fn winit_run(mut app: App) {
     println!("Creating window(s)");
-    let mut windows = Windows::default();
+    
+    let event_loop = EventLoop::new();
 
-    let mut event_loop = EventLoop::new();
-    for window in app.windows {
-        windows.create(window, &event_loop);
+    // TODO maybe drain all Window instances here or pass it in differently
+    let mut windows = Windows::default();
+    for window in &app.windows {
+        windows.create(window.clone(), &event_loop);
     }
 
     println!("Starting Event Loop");
@@ -43,7 +45,7 @@ pub fn winit_run(mut app: App) {
 
         match event {
             winit::event::Event::MainEventsCleared => {
-                // app.update();
+                app.update();
             }
             winit::event::Event::Suspended => {
 
