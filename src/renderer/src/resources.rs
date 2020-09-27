@@ -9,10 +9,18 @@ pub struct Resources {
     pub buffers: HashMap<BufferId, wgpu::Buffer>,
 }
 
+impl Default for Resources {
+    fn default() -> Self {
+        Self {
+            buffers: HashMap::new(),
+        }
+    }
+}
+
 impl Resources {
     pub fn new() -> Self {
         Self {
-            buffers: HashMap::new(),
+            .. Default::default()
         }
     }
 }

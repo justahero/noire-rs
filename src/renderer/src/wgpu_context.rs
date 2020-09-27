@@ -1,7 +1,4 @@
-use crate::{
-    DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor,
-    Shader, ShaderStage, Color
-, SwapChainDescriptor, TextureDescriptor, SamplerDescriptor, bind_group::BindGroupLayoutDescriptor, BufferId, Resources, BufferDescriptor};
+use crate::{BufferDescriptor, BufferId, Color, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor, RenderContext, Resources, SamplerDescriptor, Shader, ShaderStage, SwapChainDescriptor, TextureDescriptor, bind_group::BindGroupLayoutDescriptor};
 use std::{borrow::Cow, sync::Arc};
 use wgpu::{ShaderModuleSource, util::DeviceExt};
 use window::Window;
@@ -52,24 +49,6 @@ impl WgpuContext {
             encoder: None,
             resources: Resources::new(),
         }
-    }
-
-    /// Creates a new buffer
-    pub fn create_buffer(
-        &mut self,
-        descriptor: BufferDescriptor,
-    ) -> BufferId {
-        let id = BufferId::new();
-        let contents = [];
-
-        let buffer_id = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: None,
-            contents: &contents,
-            usage: descriptor.usage.into(),
-        });
-        self.resources.buffers.insert(id, buffer_id);
-
-        id
     }
 
     /// Creates a new Swap chain object
@@ -222,5 +201,25 @@ impl WgpuContext {
     fn create_encoder(&mut self) -> wgpu::CommandEncoder {
         let descriptor = wgpu::CommandEncoderDescriptor { label: None };
         self.device.create_command_encoder(&descriptor)
+    }
+}
+
+impl RenderContext for WgpuContext {
+    /// Creates a new buffer
+    fn create_buffer(
+        &mut self,
+        descriptor: BufferDescriptor,
+    ) -> BufferId {
+        let id = BufferId::new();
+        let contents = [];
+
+        let buffer_id = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: None,
+            contents: &contents,
+            usage: descriptor.usage.into(),
+        });
+        self.resources.buffers.insert(id, buffer_id);
+
+        id
     }
 }

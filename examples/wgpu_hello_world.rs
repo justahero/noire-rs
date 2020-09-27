@@ -1,11 +1,12 @@
 use window::{App, Window, WindowMode};
-use renderer::{WgpuContext};
+use renderer::{WgpuContext, WgpuRenderer};
 
 extern crate noire;
 extern crate futures;
 extern crate wgpu;
 
 pub struct Example {
+    // TODO
 }
 
 fn render(
@@ -22,7 +23,6 @@ fn render(
 
 fn main() {
     /*
-    let app = App::build(Example::new(window.clone()));
     let renderer = futures::executor::block_on(WgpuRenderer::new(&window));
 
     let mut context = WgpuContext::new(renderer.device.clone());

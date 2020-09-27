@@ -1,5 +1,5 @@
-use window::{Window, windows};
 use std::sync::Arc;
+use window::{Window, WindowId, windows};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct WgpuRenderer {
@@ -27,8 +27,8 @@ impl WgpuRenderer {
         // TODO move to a more appropriate place, especially when resize events occur
         let surface = unsafe { instance.create_surface(winit_window) };
 
-        let width = winit_window.inner_size().width;
-        let height = winit_window.inner_size().height;
+        let width = window.width;
+        let height = window.height;
 
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -62,4 +62,6 @@ impl WgpuRenderer {
             height,
         }
     }
+
+    // TODO handle creation of surfaces here?
 }

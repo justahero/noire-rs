@@ -14,5 +14,6 @@ path = "examples/helloworld.rs"
 env_logger = "0.7.1"
 log = "0.4.11"
 once_cell = "1.4.1"
+resources = { path = "../resources", version = "0.1.0" }
 winit = { version = "0.22.2", package = "cart-tmp-winit", default-features = false }
 uuid = { version = "0.8.1", features = ["v4", "serde"] }

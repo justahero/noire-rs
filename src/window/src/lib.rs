@@ -33,7 +33,7 @@ pub fn winit_run(mut app: App) {
     
     let event_loop = EventLoop::new();
 
-    let mut windows = Windows::default();
+    let mut windows = windows().lock().unwrap();
     for window in app.windows.drain(..) {
         windows.create(window, &event_loop);
     }
