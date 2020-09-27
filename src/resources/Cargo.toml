@@ -6,3 +6,4 @@ authors = ["Sebastian Ziebell"]
 license = "MIT"
 
 [dependencies]
+bevy_hecs = "0.2.1"
