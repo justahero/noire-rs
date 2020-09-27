@@ -58,8 +58,8 @@ pub fn winit_run(mut app: App) {
             } => match event {
                 winit::event::WindowEvent::Resized(size) => {
                     // let (width, height) = size;
-                    let width = size.width;
-                    let height = size.height;
+                    let _width = size.width;
+                    let _height = size.height;
                     // app.add_event(WindowEvent::Resized{ width, height });
                 }
                 winit::event::WindowEvent::CloseRequested => {

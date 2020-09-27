@@ -1,5 +1,5 @@
 use window::{App, Window, WindowMode};
-use renderer::{WgpuContext, WgpuRenderer};
+use renderer::{WgpuContext};
 
 extern crate noire;
 extern crate futures;

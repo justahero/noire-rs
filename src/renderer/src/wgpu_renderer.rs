@@ -1,5 +1,5 @@
 use std::sync::Arc;
-use window::{Window, WindowId, windows};
+use window::{Window, windows};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct WgpuRenderer {

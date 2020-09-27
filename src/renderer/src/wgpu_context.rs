@@ -1,7 +1,8 @@
-use crate::{BufferDescriptor, BufferId, Color, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor, RenderContext, Resources, SamplerDescriptor, Shader, ShaderStage, SwapChainDescriptor, TextureDescriptor, bind_group::BindGroupLayoutDescriptor};
 use std::{borrow::Cow, sync::Arc};
 use wgpu::{ShaderModuleSource, util::DeviceExt};
 use window::Window;
+
+use crate::{BufferDescriptor, BufferId, Color, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor, RenderContext, SamplerDescriptor, Shader, ShaderStage, SwapChainDescriptor, TextureDescriptor, WgpuResources, bind_group::BindGroupLayoutDescriptor};
 
 /// TODO remove from here
 const VERTEX_SHADER: &str = r#"
@@ -38,7 +39,7 @@ pub struct WgpuContext {
     /// The command encoder to use for render passes
     encoder: Option<wgpu::CommandEncoder>,
     /// The list of all managed resources
-    resources: Resources,
+    resources: WgpuResources,
 }
 
 impl WgpuContext {
@@ -47,7 +48,7 @@ impl WgpuContext {
         Self {
             device,
             encoder: None,
-            resources: Resources::new(),
+            resources: WgpuResources::default(),
         }
     }
 
@@ -213,12 +214,14 @@ impl RenderContext for WgpuContext {
         let id = BufferId::new();
         let contents = [];
 
-        let buffer_id = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        let buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: None,
             contents: &contents,
             usage: descriptor.usage.into(),
         });
-        self.resources.buffers.insert(id, buffer_id);
+
+        self.resources.buffer_descriptors.insert(id, descriptor);
+        self.resources.buffers.insert(id, buffer);
 
         id
     }
