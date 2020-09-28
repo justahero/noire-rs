@@ -80,11 +80,23 @@ impl Resources {
         }
     }
 
+    /// Returns the resource type as reference
+    ///
     pub fn get<T: Resource>(&self) -> Option<bevy_hecs::Ref<'_, T>> {
         self.data
             .get(&TypeId::of::<T>())
             .and_then(|data| unsafe {
                 bevy_hecs::Ref::new(&data.archetype, 0).ok()
+            })
+    }
+
+    /// Returns the resource type as mutable reference
+    ///
+    pub fn get_mut<T: Resource>(&mut self) -> Option<bevy_hecs::RefMut<'_, T>> {
+        self.data
+            .get_mut(&TypeId::of::<T>())
+            .and_then(|data| unsafe {
+                bevy_hecs::RefMut::new(&data.archetype, 0).ok()
             })
     }
 }
@@ -93,15 +105,16 @@ impl Resources {
 mod tests {
     use crate::Resources;
 
+    #[derive(Debug, PartialEq, Eq)]
     pub struct Point2 {
-        pub x: f32,
-        pub y: f32,
+        pub x: i32,
+        pub y: i32,
     }
 
     #[test]
     fn it_inserts_resources() {
         let mut resources = Resources::new();
-        resources.insert::<Point2>(Point2 { x: 0.0, y: 0.0 });
+        resources.insert::<Point2>(Point2 { x: 0, y: 0 });
         resources.insert::<String>("hello_world".to_string());
 
         assert_eq!(2, resources.data.len());
@@ -110,9 +123,24 @@ mod tests {
     #[test]
     fn it_gets_resource() {
         let mut resources = Resources::new();
-        resources.insert::<Point2>(Point2 { x: 0.0, y: 2.0 });
+        resources.insert::<Point2>(Point2 { x: 0, y: 2 });
         resources.insert::<String>("world".to_string());
 
+        assert_eq!(Point2{ x: 0, y: 2 }, *resources.get::<Point2>().unwrap());
         assert_eq!(String::from("world"), *resources.get::<String>().unwrap());
+    }
+
+    #[test]
+    fn it_modifies_resource() {
+        let mut resources = Resources::new();
+        resources.insert::<Point2>(Point2 { x: 1, y: 1 });
+
+        assert_eq!(Point2{ x: 1, y: 1 }, *resources.get::<Point2>().unwrap());
+        {
+            let mut p = resources.get_mut::<Point2>().unwrap();
+            p.x = 0;
+            p.y = 0;
+        }
+        assert_eq!(Point2{ x: 0, y: 0 }, *resources.get::<Point2>().unwrap());
     }
 }
