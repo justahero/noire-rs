@@ -1,5 +1,8 @@
-use std::sync::Arc;
+use std::{sync::Arc};
+use resources::Resources;
 use window::{Window, windows};
+
+use crate::{RenderResourceContext, WgpuRenderResourceContext};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct WgpuRenderer {
@@ -9,12 +12,14 @@ pub struct WgpuRenderer {
     pub device: Arc<wgpu::Device>,
     /// Handle to a command queue on the (graphics) device
     pub queue: wgpu::Queue,
+    /*
     /// Default surface
     pub surface: wgpu::Surface,
     /// The width of the surface
     pub width: u32,
     /// The height of the surface
     pub height: u32,
+    */
 }
 
 impl WgpuRenderer {
@@ -57,11 +62,18 @@ impl WgpuRenderer {
             instance,
             device: Arc::new(device),
             queue,
-            surface,
-            width,
-            height,
         }
     }
 
-    // TODO handle creation of surfaces here?
+    /// Creates a new window surface
+    pub fn create_surface(&mut self, resources: &mut Resources) {
+        let mut render_resource_context = resources
+            .get_mut::<Box<dyn RenderResourceContext>>()
+            .unwrap();
+        let render_resource_context = render_resource_context
+            .downcast_mut::<WgpuRenderResourceContext>()
+            .unwrap();
+
+        // TODO
+    }
 }

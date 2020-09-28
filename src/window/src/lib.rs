@@ -38,6 +38,9 @@ pub fn winit_run(mut app: App) {
         windows.create(window, &event_loop);
     }
 
+    // TODO send init event here?
+
+
     println!("Starting Event Loop");
     event_loop.run(move |event, _, control_flow| {
         *control_flow = winit::event_loop::ControlFlow::Poll;

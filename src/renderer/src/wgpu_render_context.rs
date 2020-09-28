@@ -1,8 +1,8 @@
 use std::{borrow::Cow, sync::Arc};
-use wgpu::{ShaderModuleSource, util::DeviceExt};
+use wgpu::ShaderModuleSource;
 use window::Window;
 
-use crate::{BufferDescriptor, BufferId, Color, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor, RenderContext, SamplerDescriptor, Shader, ShaderStage, SwapChainDescriptor, TextureDescriptor, WgpuResources, bind_group::BindGroupLayoutDescriptor};
+use crate::{Color, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor, RenderContext, SamplerDescriptor, Shader, ShaderStage, SwapChainDescriptor, TextureDescriptor, WgpuResources, bind_group::BindGroupLayoutDescriptor};
 
 /// TODO remove from here
 const VERTEX_SHADER: &str = r#"
@@ -33,7 +33,7 @@ void main() {
 /// This implementation is meant as a low level layer between WGPU and the renderer crate
 /// to provide a slightly easier to use interface.
 ///
-pub struct WgpuContext {
+pub struct WgpuRenderContext {
     /// The WGPU device to create objects
     pub device: Arc<wgpu::Device>,
     /// The command encoder to use for render passes
@@ -42,7 +42,7 @@ pub struct WgpuContext {
     resources: WgpuResources,
 }
 
-impl WgpuContext {
+impl WgpuRenderContext {
     /// Constructs a new WGPUContext instance
     pub fn new(device: Arc<wgpu::Device>) -> Self {
         Self {
@@ -205,24 +205,12 @@ impl WgpuContext {
     }
 }
 
-impl RenderContext for WgpuContext {
-    /// Creates a new buffer
-    fn create_buffer(
-        &mut self,
-        descriptor: BufferDescriptor,
-    ) -> BufferId {
-        let id = BufferId::new();
-        let contents = [];
+impl RenderContext for WgpuRenderContext {
+    fn context(&self) -> &dyn crate::RenderResourceContext {
+        todo!()
+    }
 
-        let buffer = self.device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: None,
-            contents: &contents,
-            usage: descriptor.usage.into(),
-        });
-
-        self.resources.buffer_descriptors.insert(id, descriptor);
-        self.resources.buffers.insert(id, buffer);
-
-        id
+    fn context_mut(&mut self) -> &mut dyn crate::RenderResourceContext {
+        todo!()
     }
 }

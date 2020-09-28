@@ -6,8 +6,9 @@ authors = ["Sebastian Ziebell"]
 license = "MIT"
 
 [dependencies]
+bevy_ecs = "0.2.1"
 bitflags = "1.2.1"
-bytemuck = "1.4.1"
+downcast-rs = "1.2.0"
 resources = { path = "../resources", version = "0.1.0" }
 shaderc = { version = "0.6.2" }
 spirv-reflect = "0.2.3"

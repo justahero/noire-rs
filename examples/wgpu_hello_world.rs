@@ -1,18 +1,17 @@
 use window::{App, Window, WindowMode};
-use renderer::{WgpuContext};
+use renderer::WgpuRenderContext;
 
 extern crate noire;
 extern crate futures;
 extern crate wgpu;
 
 pub struct Example {
-    // TODO
 }
 
 fn render(
     window: &Window,
     queue: &mut wgpu::Queue,
-    context: &mut WgpuContext,
+    context: &mut WgpuRenderContext,
     swap_chain: &mut wgpu::SwapChain,
     depth_texture_view: &mut wgpu::TextureView,
 ) {
@@ -25,7 +24,7 @@ fn main() {
     /*
     let renderer = futures::executor::block_on(WgpuRenderer::new(&window));
 
-    let mut context = WgpuContext::new(renderer.device.clone());
+    let mut context = WgpuRenderContext::new(renderer.device.clone());
     let _swap_chain = context.create_swapchain(&window, &renderer.surface);
     let depth_descriptor = TextureDescriptor::depth(window.width, window.height);
     let depth_texture = context

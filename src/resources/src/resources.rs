@@ -134,7 +134,7 @@ mod tests {
     fn it_modifies_resource() {
         let mut resources = Resources::new();
         resources.insert::<Point2>(Point2 { x: 1, y: 1 });
-
+ 
         assert_eq!(Point2{ x: 1, y: 1 }, *resources.get::<Point2>().unwrap());
         {
             let mut p = resources.get_mut::<Point2>().unwrap();

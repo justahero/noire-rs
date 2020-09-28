@@ -1,6 +1,6 @@
-use crate::{BufferDescriptor, BufferId};
+use crate::RenderResourceContext;
 
 pub trait RenderContext {
-    /// Creates a new buffer
-    fn create_buffer(&mut self, descriptor: BufferDescriptor, ) -> BufferId;
+    fn context(&self) -> &dyn RenderResourceContext;
+    fn context_mut(&mut self) -> &mut dyn RenderResourceContext;
 }

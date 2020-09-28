@@ -31,7 +31,7 @@ impl From<BufferUsage> for wgpu::BufferUsage {
 }
 
 /// Describes a buffer
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BufferDescriptor {
     /// Debug label of a buffer
     pub label: Option<String>,
@@ -40,3 +40,4 @@ pub struct BufferDescriptor {
     /// Usage of the Buffer
     pub usage: BufferUsage,
 }
+

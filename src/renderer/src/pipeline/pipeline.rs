@@ -1,5 +1,5 @@
 
-use crate::{WgpuContext, BindGroupDescriptor};
+use crate::{WgpuRenderContext, BindGroupDescriptor};
 
 #[derive(Debug)]
 pub struct PipelineLayout {
@@ -39,7 +39,7 @@ impl Default for PipelineDescriptor {
 }
 
 impl PipelineDescriptor {
-    pub fn new(_context: &mut WgpuContext) -> Self {
+    pub fn new(_context: &mut WgpuRenderContext) -> Self {
         Self {
             .. Default::default()
         }
