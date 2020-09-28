@@ -5,6 +5,7 @@ edition = "2018"
 authors = ["Sebastian Ziebell"]
 
 [dependencies]
+bevy_ecs = "0.2.1"
 bitflags = "1.2.1"
 bytemuck = "1.4.1"
 resources = { path = "../resources", version = "0.1.0" }
