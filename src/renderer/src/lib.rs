@@ -17,6 +17,7 @@ pub use converter::*;
 pub use pipeline::*;
 pub use render::*;
 pub use renderer::*;
+use resources::Resources;
 pub use shader::*;
 pub use surface::*;
 pub use texture::*;
