@@ -24,3 +24,4 @@ The following paths need to be set up:
 
 * Learn WGPU: https://sotrh.github.io/learn-wgpu/#what-is-wgpu
   * Setup swap chain: https://sotrh.github.io/learn-wgpu/beginner/tutorial2-swapchain/#state-new
+* https://docs.rs/winit/0.22.2/winit/
