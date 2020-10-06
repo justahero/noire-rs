@@ -1,6 +1,8 @@
 use winit::event_loop::ControlFlow;
 
-use crate::{App, Renderer, Window, WindowHandler, WindowSettings};
+use crate::{App, Renderer, Window, WindowSettings};
+
+use super::WindowHandler;
 
 #[derive(Debug)]
 pub struct EventLoop {
