@@ -4,7 +4,7 @@ pub struct Surface {
     /// Reference to the associated window
     window: winit::window::Window,
     /// The Wgpu Surface
-    surface: wgpu::Surface,
+    pub surface: wgpu::Surface,
     /// The swap chain
     swap_chain: wgpu::SwapChain,
     /// The output target texture

@@ -57,7 +57,7 @@ impl From<TextureViewDimension> for wgpu::TextureViewDimension {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextureDescriptor {
     /// Debug label of the texture
     pub label: Option<String>,
@@ -120,8 +120,8 @@ impl TextureDescriptor {
     }
 }
 
-impl<'a> From<&TextureDescriptor> for wgpu::TextureDescriptor<'a> {
-    fn from(descriptor: &TextureDescriptor) -> Self {
+impl<'a> From<TextureDescriptor> for wgpu::TextureDescriptor<'a> {
+    fn from(descriptor: TextureDescriptor) -> Self {
         Self {
             label: None,
             size: descriptor.size.into(),

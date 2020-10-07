@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{Shader, ShaderStage, Surface};
+use crate::{Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct Renderer {
@@ -60,5 +60,26 @@ impl Renderer {
         winit_window: winit::window::Window,
     ) -> Surface {
         Surface::new(winit_window, self)
+    }
+
+    /// Creates a 2d texture instance
+    pub fn create_texture_2d(
+        &self,
+        width: u32,
+        height: u32,
+        format: TextureFormat,
+    ) -> Texture {
+        let descriptor = TextureDescriptor::texture_2d(width, height, format);
+        Texture::new(descriptor, &self.device)
+    }
+
+    /// Creates a new depth texture
+    pub fn create_depth_texture(
+        &self,
+        width: u32,
+        height: u32,
+    ) -> Texture {
+        let descriptor = TextureDescriptor::depth(width, height);
+        Texture::new(descriptor, &self.device)
     }
 }

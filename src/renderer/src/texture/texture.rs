@@ -1,6 +1,53 @@
 use std::num::NonZeroU32;
 
-use crate::{TextureFormat, TextureViewDimension, TextureDescriptor};
+use crate::{TextureDescriptor, TextureFormat, TextureViewDimension};
+
+/// Specifies a texture
+#[derive(Debug)]
+pub struct Texture {
+    /// Descriptor to the Texture
+    pub descriptor: TextureDescriptor,
+    /// The wgpu texture
+    pub texture: wgpu::Texture,
+}
+
+impl Texture {
+    pub const DEPTH_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
+
+    /// Creates a new texture with the given descriptor
+    pub fn new(
+        descriptor: TextureDescriptor,
+        device: &wgpu::Device,
+    ) -> Self {
+        let wgpu_descriptor: wgpu::TextureDescriptor = descriptor.clone().into();
+        let texture = device.create_texture(&wgpu_descriptor);
+
+        Self {
+            descriptor,
+            texture,
+        }
+    }
+
+    /// Returns the width of the texutre
+    pub fn width(&self) -> u32 {
+        self.descriptor.size.width
+    }
+
+    /// Returns the height of the texture
+    pub fn height(&self) -> u32 {
+        self.descriptor.size.height
+    }
+
+    /// Format of the texture
+    pub fn texture_format(&self) -> TextureFormat {
+        self.descriptor.texture_format
+    }
+
+    /// Allowed usage of the texture
+    pub fn usage(&self) -> TextureUsage {
+        self.descriptor.usage
+    }
+}
 
 #[derive(Debug, Copy, Clone)]
 pub enum TextureAspect {
