@@ -9,7 +9,7 @@ pub struct Renderer {
     /// The link / connection to the graphics device, useful to create objects
     pub device: Arc<wgpu::Device>,
     /// Handle to a command queue on the (graphics) device
-    pub queue: wgpu::Queue,
+    pub queue: Arc<wgpu::Queue>,
 }
 
 impl Renderer {
@@ -41,7 +41,7 @@ impl Renderer {
         Self {
             instance,
             device: Arc::new(device),
-            queue,
+            queue: Arc::new(queue),
         }
     }
 
