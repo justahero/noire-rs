@@ -55,6 +55,24 @@ impl<T> From<Operations<T>> for wgpu::Operations<T> {
     }
 }
 
+impl Operations<wgpu::Color> {
+    pub fn new(color: wgpu::Color) -> Self {
+        Self {
+            load: LoadOp::Clear(color),
+            store: true,
+        }
+    }
+}
+
+impl Operations<f32> {
+    pub fn clear(value: f32) -> Self {
+        Self {
+            load: LoadOp::Clear(value),
+            store: true,
+        }
+    }
+}
+
 impl From<Color> for wgpu::Color {
     fn from(c: Color) -> Self {
         wgpu::Color { r: c.r as f64, g: c.g as f64, b: c.b as f64, a: c.a as f64 }

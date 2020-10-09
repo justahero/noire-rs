@@ -5,8 +5,7 @@ extern crate noire;
 extern crate futures;
 extern crate wgpu;
 
-pub struct Example {
-}
+pub struct Example {}
 
 impl WindowHandler for Example {
     fn load(window: &Window, _resources: &Resources, _renderer: &mut renderer::Renderer) -> Self where Self: Sized {

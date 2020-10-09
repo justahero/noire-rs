@@ -1,7 +1,8 @@
 use wgpu::TextureUsage;
 
-use crate::{TextureFormat, PresentMode};
+use crate::{PresentMode, TextureFormat, Window};
 
+#[derive(Debug, Clone)]
 pub struct SwapChainDescriptor {
     /// The usage of the swap chain
     pub usage: TextureUsage,
@@ -23,6 +24,42 @@ impl From<SwapChainDescriptor> for wgpu::SwapChainDescriptor {
             width: desc.width,
             height: desc.height,
             present_mode: desc.present_mode.into(),
+        }
+    }
+}
+
+impl From<&Window> for SwapChainDescriptor {
+    fn from(window: &Window) -> Self {
+        let present_mode = match window.vsync {
+            true => PresentMode::Fifo,
+            false => PresentMode::Immediate,
+        };
+
+        SwapChainDescriptor {
+            usage: TextureUsage::OUTPUT_ATTACHMENT,
+            format: TextureFormat::Bgra8UnormSrgb,
+            width: window.width,
+            height: window.height,
+            present_mode,
+        }
+    }
+}
+
+impl From<&winit::window::Window> for SwapChainDescriptor {
+    fn from(window: &winit::window::Window) -> Self {
+        let size = window.inner_size();
+        let present_mode = if window.fullscreen().is_some() {
+            PresentMode::Immediate
+        } else {
+            PresentMode::Fifo
+        };
+
+        SwapChainDescriptor {
+            usage: TextureUsage::OUTPUT_ATTACHMENT,
+            format: TextureFormat::Bgra8UnormSrgb,
+            width: size.width,
+            height: size.height,
+            present_mode,
         }
     }
 }

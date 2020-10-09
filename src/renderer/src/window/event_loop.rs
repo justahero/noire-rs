@@ -1,8 +1,6 @@
 use winit::event_loop::ControlFlow;
 
-use crate::{App, Renderer, Window, WindowSettings};
-
-use super::WindowHandler;
+use crate::{App, Renderer, Window, WindowHandler, WindowSettings};
 
 #[derive(Debug)]
 pub struct EventLoop {
@@ -18,7 +16,7 @@ impl EventLoop {
     }
 
     /// Runs the window event loop
-    pub fn run<T>(self, settings: &WindowSettings, app: App)
+    pub fn run<T>(self, settings: &WindowSettings, mut app: App)
     where
         T: WindowHandler + Sized + 'static
     {
@@ -27,9 +25,16 @@ impl EventLoop {
             *control_flow = winit::event_loop::ControlFlow::Poll;
 
             match event {
+                winit::event::Event::NewEvents(cause) => match cause {
+                    winit::event::StartCause::Init => {
+                        // event_handler.init(&mut app.resources)
+                    }
+                    _ => {},
+                }
                 winit::event::Event::MainEventsCleared => {
-                    // TODO do something here?
-                    // app.update();
+                    app.update();
+                }
+                winit::event::Event::RedrawRequested(_window_id) => {
                 }
                 winit::event::Event::WindowEvent {
                     event,
@@ -45,7 +50,10 @@ impl EventLoop {
                     winit::event::WindowEvent::CloseRequested => {
                         *control_flow = ControlFlow::Exit
                     }
-                    winit::event::WindowEvent::KeyboardInput { device_id, input, is_synthetic } => {
+                    winit::event::WindowEvent::KeyboardInput { device_id: _, input: _, is_synthetic: _ } => {
+                        if let Some(_window) = app.get_window_by_id(&window_id) {
+                            // TODO
+                        }
                     }
                     _ => {},
                 }

@@ -1,4 +1,4 @@
-use crate::{Renderer, WgpuInto};
+use crate::{Renderer, SwapChainDescriptor, WgpuInto};
 
 pub struct Surface {
     /// Reference to the associated window
@@ -53,6 +53,11 @@ impl Surface {
     /// Returns height of the surface
     pub fn height(&self) -> u32 {
         self.window.inner_size().height
+    }
+
+    /// Returns the Swap Chain descriptor
+    pub fn swap_chain_descriptor(&self) -> SwapChainDescriptor {
+        (&self.window).into()
     }
 }
 
