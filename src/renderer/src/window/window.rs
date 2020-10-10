@@ -1,5 +1,7 @@
 use winit::monitor::{MonitorHandle, VideoMode};
 
+use crate::{Renderer, Surface, Texture};
+
 #[derive(Debug, Clone)]
 pub enum WindowMode {
     Windowed,
@@ -7,66 +9,46 @@ pub enum WindowMode {
     Fullscreen,
 }
 
-#[derive(Debug, Clone)]
-/// Description of how a Window instance should be created
-/// The Window implements the Builder pattern, specific attributes can be
-/// set independently
+/// Specifies a renderable Window
+#[derive(Debug)]
 pub struct Window {
-    /// The title of the Window
-    pub title: String,
-    /// Width of the Window
-    pub width: u32,
-    /// Height of the Window
-    pub height: u32,
-    /// Marks the Window as resizable when true
-    pub resizable: bool,
-    /// True when vertical sync is set, limit frame refresh to display to avoid tearing
-    pub vsync: bool,
-    /// The window mode, fullscreen / windowed
-    pub window_mode: WindowMode,
+    /// The render surface to render into
+    pub surface: Surface,
+    /// The depth buffer texture
+    pub depth_buffer: Texture,
 }
 
 impl Window {
-    /// Creates a new Window description
-    pub fn new(title: &str, width: u32, height: u32) -> Self {
+    /// Creates a new renderable window
+    pub fn new(
+        settings: &WindowSettings,
+        event_loop: &winit::event_loop::EventLoopWindowTarget<()>,
+        renderer: &Renderer,
+    ) -> Self {
+        let window_builder = settings.create_builder(&event_loop);
+        let window = window_builder.build(&event_loop).unwrap();
+        let surface = renderer.create_surface(window);
+        let depth_buffer = renderer.create_depth_texture(surface.width(), surface.height());
+
         Self {
-            title: title.to_string(),
-            width,
-            height,
-            .. Default::default()
+            surface,
+            depth_buffer,
         }
     }
 
-    /// Sets the title of the Window
-    pub fn with_title(mut self, title: &str) -> Self {
-        self.title = title.to_string();
-        self
+    /// Returns width of the window
+    pub fn width(&self) -> u32 {
+        self.surface.width()
     }
 
-    /// Sets the dimensions of the Window
-    pub fn with_size(mut self, width: u32, height: u32) -> Self {
-        self.width = width;
-        self.height = height;
-        self
+    /// Returns height of the window
+    pub fn height(&self) -> u32 {
+        self.surface.height()
     }
 
-    /// Sets the Window mode
-    pub fn with_mode(mut self, mode: WindowMode) -> Self {
-        self.window_mode = mode;
-        self
-    }
-}
-
-impl Default for Window {
-    fn default() -> Self {
-        Self {
-            title: String::from("Hello World"),
-            width: 1280,
-            height: 720,
-            resizable: false,
-            vsync: true,
-            window_mode: WindowMode::Windowed,
-        }
+    /// Returns the winit window instance
+    pub fn winit_window(&self) -> &winit::window::Window {
+        &self.surface.window()
     }
 }
 

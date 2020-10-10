@@ -20,21 +20,29 @@ impl EventLoop {
     where
         T: WindowHandler + Sized + 'static
     {
-        println!("Starting Event Loop");
-        self.event_loop.run(move |event, _, control_flow| {
+        let mut renderer = futures::executor::block_on(Renderer::new());
+        let mut window = Window::new(settings, &self.event_loop, &renderer);
+        let mut window_handler = T::load(&window, &app.resources, &mut renderer);
+
+        // Start main event loop
+        self.event_loop.run(move |event, _event_loop, control_flow| {
             *control_flow = winit::event_loop::ControlFlow::Poll;
 
             match event {
                 winit::event::Event::NewEvents(cause) => match cause {
                     winit::event::StartCause::Init => {
-                        // event_handler.init(&mut app.resources)
                     }
                     _ => {},
                 }
                 winit::event::Event::MainEventsCleared => {
-                    app.update();
+                    window_handler.update(&app.resources);
+                    window_handler.render(&mut window, &mut renderer);
                 }
-                winit::event::Event::RedrawRequested(_window_id) => {
+                winit::event::Event::RedrawRequested(window_id) => {
+                    if let Some(_window) = app.get_window_by_id(&window_id) {
+                        let mut renderer = app.resources.get_mut::<Renderer>().unwrap();
+                        window_handler.render(&mut window, &mut renderer);
+                    }
                 }
                 winit::event::Event::WindowEvent {
                     event,

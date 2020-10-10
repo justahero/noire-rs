@@ -28,23 +28,6 @@ impl From<SwapChainDescriptor> for wgpu::SwapChainDescriptor {
     }
 }
 
-impl From<&Window> for SwapChainDescriptor {
-    fn from(window: &Window) -> Self {
-        let present_mode = match window.vsync {
-            true => PresentMode::Fifo,
-            false => PresentMode::Immediate,
-        };
-
-        SwapChainDescriptor {
-            usage: TextureUsage::OUTPUT_ATTACHMENT,
-            format: TextureFormat::Bgra8UnormSrgb,
-            width: window.width,
-            height: window.height,
-            present_mode,
-        }
-    }
-}
-
 impl From<&winit::window::Window> for SwapChainDescriptor {
     fn from(window: &winit::window::Window) -> Self {
         let size = window.inner_size();

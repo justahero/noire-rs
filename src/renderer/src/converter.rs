@@ -1,6 +1,6 @@
-use wgpu::{PresentMode, TextureFormat, TextureUsage};
+use wgpu::TextureUsage;
 
-use crate::{LoadOp, Window};
+use crate::{LoadOp, PresentMode, SwapChainDescriptor, TextureFormat};
 
 pub trait WgpuFrom<T> {
     fn from(val: T) -> Self;
@@ -19,23 +19,6 @@ where
     }
 }
 
-impl WgpuFrom<&Window> for wgpu::SwapChainDescriptor {
-    fn from(window: &Window) -> Self {
-        let present_mode = match window.vsync {
-            true => wgpu::PresentMode::Fifo,
-            false => wgpu::PresentMode::Immediate,
-        };
-
-        wgpu::SwapChainDescriptor {
-            usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
-            format: wgpu::TextureFormat::Bgra8UnormSrgb,
-            width: window.width,
-            height: window.height,
-            present_mode,
-        }
-    }
-}
-
 impl WgpuFrom<&LoadOp<f32>> for wgpu::LoadOp<f32> {
     fn from(op: &LoadOp<f32>) -> Self {
         match op {
@@ -45,10 +28,9 @@ impl WgpuFrom<&LoadOp<f32>> for wgpu::LoadOp<f32> {
     }
 }
 
-impl WgpuFrom<&winit::window::Window> for wgpu::SwapChainDescriptor {
+impl WgpuFrom<&winit::window::Window> for SwapChainDescriptor {
     fn from(window: &winit::window::Window) -> Self {
         let size = window.inner_size();
-
         let present_mode = if window.fullscreen().is_some() {
             PresentMode::Immediate
         } else {

@@ -1,5 +1,6 @@
 use crate::{Renderer, SwapChainDescriptor, WgpuInto};
 
+#[derive(Debug)]
 pub struct Surface {
     /// Reference to the associated window
     window: winit::window::Window,
@@ -67,6 +68,6 @@ fn new_swap_chain(
     surface: &wgpu::Surface,
     window: &winit::window::Window,
 ) -> wgpu::SwapChain {
-    let descriptor = window.wgpu_into();
-    device.create_swap_chain(surface, &descriptor)
+    let descriptor: SwapChainDescriptor = window.wgpu_into();
+    device.create_swap_chain(surface, &descriptor.into())
 }
