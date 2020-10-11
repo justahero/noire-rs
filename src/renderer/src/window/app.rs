@@ -2,9 +2,7 @@ use std::collections::HashMap;
 
 use resources::Resources;
 
-use winit::window::WindowId as WinitWindowId;
-
-use crate::Window;
+use winit::window::{Window, WindowId as WinitWindowId};
 
 pub struct App {
     /// Lookup table to find find Window by WindowId

@@ -1,6 +1,6 @@
 use wgpu::TextureUsage;
 
-use crate::{LoadOp, PresentMode, SwapChainDescriptor, TextureFormat};
+use crate::{LoadOp, PresentMode, SwapChainDescriptor, TextureFormat, WindowSettings};
 
 pub trait WgpuFrom<T> {
     fn from(val: T) -> Self;
@@ -16,6 +16,23 @@ where
 {
     fn wgpu_into(self) -> U {
         U::from(self)
+    }
+}
+
+impl WgpuFrom<&WindowSettings> for wgpu::SwapChainDescriptor {
+    fn from(window: &WindowSettings) -> Self {
+        let present_mode = match window.vsync {
+            true => wgpu::PresentMode::Fifo,
+            false => wgpu::PresentMode::Immediate,
+        };
+
+        wgpu::SwapChainDescriptor {
+            usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+            format: wgpu::TextureFormat::Bgra8UnormSrgb,
+            width: window.width,
+            height: window.height,
+            present_mode,
+        }
     }
 }
 

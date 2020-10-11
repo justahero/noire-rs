@@ -1,6 +1,6 @@
 use wgpu::TextureUsage;
 
-use crate::{PresentMode, TextureFormat, Window};
+use crate::{PresentMode, TextureFormat, WindowSettings};
 
 #[derive(Debug, Clone)]
 pub struct SwapChainDescriptor {
@@ -24,6 +24,23 @@ impl From<SwapChainDescriptor> for wgpu::SwapChainDescriptor {
             width: desc.width,
             height: desc.height,
             present_mode: desc.present_mode.into(),
+        }
+    }
+}
+
+impl From<&WindowSettings> for SwapChainDescriptor {
+    fn from(window: &WindowSettings) -> Self {
+        let present_mode = match window.vsync {
+            true => PresentMode::Fifo,
+            false => PresentMode::Immediate,
+        };
+
+        SwapChainDescriptor {
+            usage: TextureUsage::OUTPUT_ATTACHMENT,
+            format: TextureFormat::Bgra8UnormSrgb,
+            width: window.width,
+            height: window.height,
+            present_mode,
         }
     }
 }
