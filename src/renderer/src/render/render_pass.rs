@@ -2,7 +2,7 @@ use std::{borrow::Cow, sync::Arc};
 
 use wgpu::{Color, ShaderModuleSource};
 
-use crate::{DepthStencilStateDescriptor, Operations, PrimitiveTopology, RasterizationStateDescriptor, Shader, ShaderStage, Surface};
+use crate::{DepthStencilStateDescriptor, Operations, PrimitiveTopology, RasterizationStateDescriptor, Shader, ShaderStage, Surface, Texture};
 
 /// TODO remove from here
 const VERTEX_SHADER: &str = r#"
@@ -70,12 +70,8 @@ impl<'a> RenderPass {
     pub fn begin(
         &mut self,
         surface: &mut Surface,
-        depth_texture: &wgpu::TextureView,
+        depth_texture: &Texture,
     ) {
-        assert!(self.encoder.is_some());
-
-        // set up render pass descriptor
-        let mut encoder = self.encoder.take().unwrap();
         let swapchain_descriptor = surface.swap_chain_descriptor();
 
         let color: wgpu::Color = Color::BLACK.into();
@@ -86,7 +82,7 @@ impl<'a> RenderPass {
         };
 
         let depth_stencil_descriptor = wgpu::RenderPassDepthStencilAttachmentDescriptor {
-            attachment: &depth_texture,
+            attachment: &depth_texture.view,
             depth_ops: Some(Operations::clear(0.0).into()),
             stencil_ops: None,
         };
@@ -138,7 +134,11 @@ impl<'a> RenderPass {
                 alpha_to_coverage_enabled: false,
             });
 
-        let mut render_pass = encoder.begin_render_pass(&render_pass_descriptor);
+        let mut render_pass = self.encoder
+            .as_mut()
+            .unwrap()
+            .begin_render_pass(&render_pass_descriptor);
+
         render_pass.set_pipeline(&render_pipeline);
     }
 

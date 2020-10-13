@@ -39,9 +39,9 @@ impl EventLoop {
                     window_handler.render(&mut window, &mut renderer);
                 }
                 winit::event::Event::RedrawRequested(window_id) => {
-                    if let Some(_window) = app.get_window_by_id(&window_id) {
-                        let mut renderer = app.resources.get_mut::<Renderer>().unwrap();
+                    if window.winit_window().id() == window_id {
                         window_handler.render(&mut window, &mut renderer);
+                        window.winit_window().request_redraw();
                     }
                 }
                 winit::event::Event::WindowEvent {

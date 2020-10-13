@@ -9,6 +9,8 @@ pub struct Texture {
     pub descriptor: TextureDescriptor,
     /// The wgpu texture
     pub texture: wgpu::Texture,
+    /// The wgpu texture view
+    pub view: wgpu::TextureView,
 }
 
 impl Texture {
@@ -19,12 +21,14 @@ impl Texture {
         descriptor: TextureDescriptor,
         device: &wgpu::Device,
     ) -> Self {
-        let wgpu_descriptor: wgpu::TextureDescriptor = descriptor.clone().into();
-        let texture = device.create_texture(&wgpu_descriptor);
+        let texture: wgpu::Texture = device.create_texture(&descriptor.clone().into());
+        let view_descriptor = TextureViewDescriptor::create_from_texture(&descriptor);
+        let view = texture.create_view(&view_descriptor.into());
 
         Self {
-            descriptor,
+            descriptor: descriptor.clone(),
             texture,
+            view,
         }
     }
 
