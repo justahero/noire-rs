@@ -1,22 +1,61 @@
-use renderer::{App, Window, WindowHandler, WindowMode, WindowSettings};
+use std::collections::HashMap;
+
+use renderer::{RenderPass, Renderer, Shader, ShaderStage, Window, WindowHandler, WindowMode, WindowSettings};
 use resources::Resources;
 
 extern crate noire;
 extern crate futures;
 extern crate wgpu;
 
-pub struct Example {}
+// NOTE for now shaders are hard coded here
+const VERTEX_SHADER: &str = r#"
+#version 450
+
+out gl_PerVertex {
+    vec4 gl_Position;
+};
+
+void main() {
+    vec2 position = vec2(gl_VertexIndex, (gl_VertexIndex & 1) * 2) - 1;
+    gl_Position = vec4(position, 0.0, 1.0);
+}
+"#;
+
+const FRAGMENT_SHADER: &str = r#"
+#version 450
+
+layout(location = 0) out vec4 outColor;
+
+void main() {
+    outColor = vec4(1.0, 1.0, 1.0, 1.0);
+}
+"#;
+
+pub struct Example {
+    shaders: HashMap<ShaderStage, Shader>,
+}
 
 impl WindowHandler for Example {
-    fn load(window: &Window, _resources: &Resources, _renderer: &mut renderer::Renderer) -> Self where Self: Sized {
-        todo!()
+    fn load(_window: &Window, _resources: &Resources, renderer: &mut Renderer) -> Self where Self: Sized {
+        let vertex_shader = renderer.create_shader(&VERTEX_SHADER, ShaderStage::Vertex);
+        let fragment_shader = renderer.create_shader(&FRAGMENT_SHADER, ShaderStage::Fragment);
+
+        let mut shaders = HashMap::new();
+        shaders.insert(ShaderStage::Vertex, vertex_shader);
+        shaders.insert(ShaderStage::Fragment, fragment_shader);
+
+        Example {
+            shaders,
+        }
     }
 
     fn update(&mut self, _resources: &Resources) {
     }
 
-    fn render(&mut self, _window: &mut Window, app: &mut renderer::Renderer) {
-        todo!()
+    fn render(&mut self, window: &mut Window, renderer: &mut Renderer) {
+        let mut render_pass = RenderPass::new(renderer.device.clone(), renderer.queue.clone());
+        render_pass.begin(&mut window.surface, &window.depth_buffer, &self.shaders);
+        render_pass.finish();
     }
 }
 

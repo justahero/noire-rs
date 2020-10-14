@@ -50,7 +50,7 @@ impl Display for ShaderError {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ShaderStage {
     /// Type for vertex shader stage
     Vertex,

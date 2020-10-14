@@ -1,34 +1,9 @@
-use std::{borrow::Cow, sync::Arc};
+use std::{collections::HashMap, sync::Arc};
 
-use wgpu::{Color, ShaderModuleSource};
+use wgpu::Color;
 
 use crate::{DepthStencilStateDescriptor, Operations, PrimitiveTopology, RasterizationStateDescriptor, Shader, ShaderStage, Surface, Texture};
 
-/// TODO remove from here
-const VERTEX_SHADER: &str = r#"
-#version 450
-
-out gl_PerVertex {
-    vec4 gl_Position;
-};
-
-void main() {
-    vec2 position = vec2(gl_VertexIndex, (gl_VertexIndex & 1) * 2) - 1;
-    gl_Position = vec4(position, 0.0, 1.0);
-}
-"#;
-
-const FRAGMENT_SHADER: &str = r#"
-#version 450
-
-layout(location = 0) out vec4 outColor;
-
-void main() {
-    outColor = vec4(1.0, 1.0, 1.0, 1.0);
-}
-"#;
-
-#[derive(Debug)]
 pub struct RenderPass {
     /// The device to create instances with
     device: Arc<wgpu::Device>,
@@ -56,21 +31,12 @@ impl<'a> RenderPass {
         }
     }
 
-    /// Internal function to compile a shader from String
-    fn create_shader_module(
-        &mut self,
-        shader_source: &str,
-        shader_stage: ShaderStage
-    ) -> wgpu::ShaderModule {
-        let shader = Shader::compile(shader_source, shader_stage, &self.device).unwrap();
-        self.device.create_shader_module(ShaderModuleSource::SpirV(Cow::from(shader.as_binary())))
-    }
-
     /// Starts a new Render Pass
     pub fn begin(
         &mut self,
         surface: &mut Surface,
         depth_texture: &Texture,
+        shaders: &HashMap<ShaderStage, Shader>,
     ) {
         let swapchain_descriptor = surface.swap_chain_descriptor();
 
@@ -101,15 +67,15 @@ impl<'a> RenderPass {
                     push_constant_ranges: &[],
                 });
 
-        let vertex_shader_module = self.create_shader_module(&VERTEX_SHADER, ShaderStage::Vertex);
+        let vertex_shader = shaders.get(&ShaderStage::Vertex).unwrap();
         let vertex_stage = wgpu::ProgrammableStageDescriptor {
-            module: &vertex_shader_module,
+            module: &vertex_shader.module,
             entry_point: "main",
         };
 
-        let fragment_shader_module = self.create_shader_module(&FRAGMENT_SHADER, ShaderStage::Fragment);
+        let fragment_shader = shaders.get(&ShaderStage::Fragment).unwrap();
         let fragment_stage = wgpu::ProgrammableStageDescriptor {
-            module: &fragment_shader_module,
+            module: &fragment_shader.module,
             entry_point: "main",
         };
 

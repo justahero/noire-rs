@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat};
+use crate::{RenderPass, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct Renderer {
@@ -43,6 +43,13 @@ impl Renderer {
             device: Arc::new(device),
             queue: Arc::new(queue),
         }
+    }
+
+    /// Creates a new render pass
+    pub fn begin_render_pass(
+        &self,
+    ) -> RenderPass {
+        RenderPass::new(self.device.clone(), self.queue.clone())
     }
 
     /// Creates a new shader
