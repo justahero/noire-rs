@@ -36,10 +36,11 @@ impl EventLoop {
                 }
                 winit::event::Event::MainEventsCleared => {
                     window_handler.update(&app.resources);
-                    window_handler.render(&mut window, &mut renderer);
+                    window.winit_window().request_redraw();
                 }
                 winit::event::Event::RedrawRequested(window_id) => {
                     if window.winit_window().id() == window_id {
+                        window_handler.update(&app.resources);
                         window_handler.render(&mut window, &mut renderer);
                         window.winit_window().request_redraw();
                     }
