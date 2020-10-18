@@ -101,7 +101,7 @@ pub(crate) fn reflect_vertex_attribute(variable: &ReflectInterfaceVariable) -> V
 
 #[cfg(test)]
 mod tests {
-    use crate::{ShaderStage, Shader, ShaderLayout};
+    use crate::{Renderer, Shader, ShaderLayout, ShaderStage};
 
     const VERTEX_SHADER: &str = r#"
     #version 450
@@ -129,7 +129,8 @@ mod tests {
 
     #[test]
     fn it_enumerates_variable_in_layout() {
-        let shader = Shader::compile(&VERTEX_SHADER, ShaderStage::Vertex).unwrap();
+        let renderer = futures::executor::block_on(Renderer::new());
+        let shader = Shader::compile(&VERTEX_SHADER, ShaderStage::Vertex, &renderer.device).unwrap();
         let layout = ShaderLayout::from_shader(&shader);
         dbg!(layout);
     }

@@ -1,4 +1,4 @@
-use renderer::{self, Shader, ShaderLayout};
+use renderer::{self, Renderer, Shader, ShaderLayout};
 
 const VERTEX_SHADER: &str = r#"
 #version 450
@@ -15,7 +15,8 @@ void main() {
 "#;
 
 fn main() {
-    let shader = Shader::compile(VERTEX_SHADER, renderer::ShaderStage::Vertex)
+    let renderer = futures::executor::block_on(Renderer::new());
+    let shader = Shader::compile(VERTEX_SHADER, renderer::ShaderStage::Vertex, &renderer.device)
         .expect("Failed to compile shader");
     println!("Shader {}", shader.stage);
 
