@@ -40,8 +40,8 @@ impl EventLoop {
                 }
                 winit::event::Event::RedrawRequested(window_id) => {
                     if window.winit_window().id() == window_id {
-                        window_handler.update(&app.resources);
                         window_handler.render(&mut window, &mut renderer);
+                        window.swap_buffers();
                         window.winit_window().request_redraw();
                     }
                 }

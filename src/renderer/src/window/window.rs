@@ -50,6 +50,11 @@ impl Window {
     pub fn winit_window(&self) -> &winit::window::Window {
         &self.surface.window()
     }
+
+    /// "Swaps" the buffer, by removing the surface output its content is rendered
+    pub fn swap_buffers(&mut self) {
+        &self.surface.drop_swap_chain();
+    }
 }
 
 #[derive(Debug, Clone)]
