@@ -60,6 +60,11 @@ impl Surface {
     pub fn swap_chain_descriptor(&self) -> SwapChainDescriptor {
         (&self.window).into()
     }
+
+    /// Remove swap chain
+    pub fn drop_swap_chain(&mut self) {
+        self.output.take();
+    }
 }
 
 /// Helper function to create a new swap chain
