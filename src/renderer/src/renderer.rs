@@ -58,6 +58,7 @@ impl Renderer {
         source: &str,
         stage: ShaderStage,
     ) -> Shader {
+        // TODO use better error handling, return useful Result
         Shader::compile(source, stage, &self.device).expect("Failed to compile shader")
     }
 

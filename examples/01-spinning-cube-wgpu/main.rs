@@ -1,4 +1,4 @@
-use renderer::{Renderer, Shader, ShaderStage, ShaderLayout, VertexStateDescriptor, VertexBufferDescriptor, VertexFormat};
+use renderer::{Renderer, ShaderLayout, ShaderStage, VertexBufferDescriptor, VertexFormat, VertexStateDescriptor};
 
 fn main() {
     let vertex_source = include_str!("shaders/vertex.glsl");
