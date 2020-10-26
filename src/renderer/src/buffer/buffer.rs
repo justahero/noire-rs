@@ -13,6 +13,12 @@ bitflags::bitflags! {
     }
 }
 
+impl From<BufferUsage> for wgpu::BufferUsage {
+    fn from(usage: BufferUsage) -> Self {
+        Self::from_bits(usage.bits()).unwrap()
+    }
+}
+
 /// Describes a buffer
 #[derive(Debug)]
 pub struct BufferDescriptor {
