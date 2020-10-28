@@ -6,6 +6,7 @@ authors = ["Sebastian Ziebell"]
 
 [dependencies]
 bitflags = "1.2.1"
+resources = { path = "../resources", version = "0.1.0" }
 shaderc = { version = "0.6.2" }
 spirv-reflect = "0.2.3"
 uuid = { version = "0.8.1", features = ["v4", "serde"] }
