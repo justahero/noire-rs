@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{Shader, ShaderStage};
+use crate::{Shader, ShaderStage, Surface};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct Renderer {
@@ -52,5 +52,13 @@ impl Renderer {
         stage: ShaderStage,
     ) -> Shader {
         Shader::compile(source, stage, &self.device).expect("Failed to compile shader")
+    }
+
+    /// Creates surface in context of renderer
+    pub fn create_surface(
+        &self,
+        winit_window: winit::window::Window,
+    ) -> Surface {
+        Surface::new(winit_window, self)
     }
 }
