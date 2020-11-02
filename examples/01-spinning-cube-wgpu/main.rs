@@ -1,17 +1,32 @@
-use renderer::{Renderer, ShaderLayout, ShaderStage, VertexBufferDescriptor, VertexFormat, VertexStateDescriptor};
+use std::collections::HashMap;
+
+use renderer::{Renderer, Shader, ShaderStage, WindowHandler, WindowSettings};
+
+pub struct Example {
+    shaders: HashMap<ShaderStage, Shader>,
+}
+
+impl WindowHandler for Example {
+    fn load(_window: &renderer::Window, _resources: &resources::Resources, renderer: &mut Renderer) -> Self where Self: Sized {
+        let vertex_shader = renderer.create_shader(include_str!("shaders/vertex.glsl"), ShaderStage::Vertex);
+        let fragment_shader = renderer.create_shader(include_str!("shaders/fragment.glsl"), ShaderStage::Fragment);
+
+        let mut shaders = HashMap::new();
+        shaders.insert(ShaderStage::Vertex, vertex_shader);
+        shaders.insert(ShaderStage::Fragment, fragment_shader);
+
+        Example {
+            shaders,
+        }
+    }
+
+    fn render(&mut self, window: &mut renderer::Window, renderer: &mut Renderer) {
+        let mut render_pass = renderer.begin_render_pass();
+        render_pass.begin(&mut window.surface, &window.depth_buffer, &self.shaders);
+        render_pass.finish();
+    }
+}
 
 fn main() {
-    let vertex_source = include_str!("shaders/vertex.glsl");
-    let fragment_source = include_str!("shaders/fragment.glsl");
-
-    let renderer = futures::executor::block_on(Renderer::new());
-    let _vertex_shader = renderer.create_shader(vertex_source, ShaderStage::Vertex);
-    let fragment_shader = renderer.create_shader(fragment_source,  ShaderStage::Fragment);
-
-    // check what is parsed
-    let shader_layout = ShaderLayout::from_shader(&fragment_shader);
-    dbg!(shader_layout);
-
-    let mut vertex_stage = VertexStateDescriptor::new();
-    vertex_stage.add(VertexBufferDescriptor::new(vec![VertexFormat::Float3]));
+    Example::run(WindowSettings::default());
 }

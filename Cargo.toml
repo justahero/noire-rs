@@ -14,7 +14,7 @@ debug-assertions = true
 
 [[example]]
 name = "spinningcube"
-path = "examples/01-spinning-cube/main.rs"
+path = "examples/01-spinning-cube-wgpu/main.rs"
 
 [[example]]
 name = "triangles"
