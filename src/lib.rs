@@ -4,6 +4,7 @@
 extern crate backtrace;
 extern crate cgmath;
 extern crate gl;
+// TODO remove here
 extern crate glfw;
 extern crate image;
 extern crate notify;
@@ -11,6 +12,7 @@ extern crate opensimplex;
 extern crate rand;
 extern crate rand_chacha;
 extern crate regex;
+extern crate renderer;
 extern crate utils;
 
 pub mod canvas;
