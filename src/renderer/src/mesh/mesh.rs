@@ -97,6 +97,12 @@ pub mod shape {
         pub size: f32,
     }
 
+    impl Cube {
+        pub fn new(size: f32) -> Self {
+            Cube { size }
+        }
+    }
+
     impl Default for Cube {
         fn default() -> Self {
             Cube { size: 1.0, }

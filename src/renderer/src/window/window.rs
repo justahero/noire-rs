@@ -36,6 +36,11 @@ impl Window {
         }
     }
 
+    /// Returns the aspect ratio
+    pub fn aspect(&self) -> f32 {
+        self.surface.aspect()
+    }
+
     /// Returns width of the window
     pub fn width(&self) -> u32 {
         self.surface.width()
