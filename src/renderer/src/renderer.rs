@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
-use crate::{RenderPass, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat};
+use wgpu::{BufferUsage, util::DeviceExt};
+
+use crate::{RenderPass, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct Renderer {
@@ -43,6 +45,18 @@ impl Renderer {
             device: Arc::new(device),
             queue: Arc::new(queue),
         }
+    }
+
+    /// Creates a new vertex buffer
+    pub fn create_buffer(&mut self, data: &[u8]) -> VertexBuffer {
+        let vertex_buffer = self.device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Vertex Buffer"),
+                contents: data,
+                usage: BufferUsage::VERTEX,
+            }
+        );
+        VertexBuffer::new(vertex_buffer)
     }
 
     /// Creates a new render pass

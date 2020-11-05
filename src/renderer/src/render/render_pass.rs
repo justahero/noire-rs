@@ -108,7 +108,7 @@ impl<'a> RenderPass {
         render_pass.set_pipeline(&render_pipeline);
     }
 
-    /// TODO Sets a vertex buffer
+    /// Sets a vertex buffer
     pub fn set_vertex_buffer(&mut self) -> &mut Self {
         self
     }

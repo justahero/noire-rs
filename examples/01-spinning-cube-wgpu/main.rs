@@ -31,7 +31,7 @@ impl WindowHandler for Example {
                 vec3(0.0, 1.0, 0.0),
             );
 
-        let buffer = renderer.create_buffer(data);
+        // let buffer = renderer.create_buffer(data);
 
         Example {
             shaders,

@@ -46,7 +46,7 @@ impl VertexBufferDescriptor {
 
             offset += format.size();
             stride += format.size();
-            attributes.push(descriptor);
+            attributes.push(descriptor.into());
         }
 
         Self {
@@ -63,26 +63,49 @@ impl VertexBufferDescriptor {
     }
 }
 
-/// Describes vertex input state for a render pipeline
 #[derive(Debug)]
-pub struct VertexStateDescriptor {
-    /// The format of any index buffer used with the pipeline
-    pub index_format: IndexFormat,
-    /// The format of any vertex buffers used with this pipeline
-    pub vertex_buffers: Vec<VertexBufferDescriptor>,
+pub struct WgpuVertexBufferDescriptor {
+    pub stride: wgpu::BufferAddress,
+    pub step_mode: wgpu::InputStepMode,
+    pub attributes: Vec<wgpu::VertexAttributeDescriptor>,
 }
 
-impl VertexStateDescriptor {
-    pub fn new() -> Self {
-        Self {
-            index_format: IndexFormat::Uint16,
-            vertex_buffers: Vec::new(),
+impl From<&VertexBufferDescriptor> for WgpuVertexBufferDescriptor {
+    fn from(descriptor: &VertexBufferDescriptor) -> Self {
+        let attributes = descriptor
+            .attributes
+            .iter()
+            .map(|item| item.into())
+            .collect::<Vec<wgpu::VertexAttributeDescriptor>>();
+
+        WgpuVertexBufferDescriptor {
+            stride: descriptor.stride.into(),
+            step_mode: descriptor.step_mode.into(),
+            attributes,
         }
     }
+}
 
-    /// Add a vertex buffer descriptor
-    pub fn add(&mut self, descriptor: VertexBufferDescriptor) {
-        self.vertex_buffers.push(descriptor);
+impl<'a> From<&'a WgpuVertexBufferDescriptor> for wgpu::VertexBufferDescriptor<'a> {
+    fn from(descriptor: &'a WgpuVertexBufferDescriptor) -> Self {
+        wgpu::VertexBufferDescriptor {
+            stride: descriptor.stride,
+            step_mode: descriptor.step_mode,
+            attributes: &descriptor.attributes,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct VertexBuffer {
+    pub vertex_buffer: wgpu::Buffer,
+}
+
+impl VertexBuffer {
+    pub fn new(vertex_buffer: wgpu::Buffer) -> Self {
+        VertexBuffer {
+            vertex_buffer,
+        }
     }
 }
 
