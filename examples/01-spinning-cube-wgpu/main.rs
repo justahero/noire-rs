@@ -7,7 +7,7 @@ pub struct Example {
     /// The shaders to render
     shaders: HashMap<ShaderStage, Shader>,
     /// The cube mesh to render
-    mesh: Mesh,
+    buffer: VertexBuffer,
     /// The camera to view the scene from
     camera: Camera,
 }
@@ -31,18 +31,18 @@ impl WindowHandler for Example {
                 vec3(0.0, 1.0, 0.0),
             );
 
-        // let buffer = renderer.create_buffer(data);
+        let buffer = renderer.create_vertex_buffer(&Vec::new());
 
         Example {
             shaders,
-            mesh,
+            buffer,
             camera,
         }
     }
 
     fn render(&mut self, window: &mut renderer::Window, renderer: &mut Renderer) {
-        let mut render_pass = renderer.begin_render_pass();
-        render_pass.begin(&mut window.surface, &window.depth_buffer, &self.shaders);
+        let mut render_pass = renderer.begin_render_pass(&window);
+        // render_pass.set_vertex_buffer(vertex_buffer)
         render_pass.finish();
     }
 }

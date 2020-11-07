@@ -53,8 +53,7 @@ impl WindowHandler for Example {
     }
 
     fn render(&mut self, window: &mut Window, renderer: &mut Renderer) {
-        let mut render_pass = RenderPass::new(renderer.device.clone(), renderer.queue.clone());
-        render_pass.begin(&mut window.surface, &window.depth_buffer, &self.shaders);
+        let mut render_pass = renderer.begin_render_pass(&window);
         render_pass.finish();
     }
 }

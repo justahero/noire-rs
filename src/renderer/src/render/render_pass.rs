@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use wgpu::Color;
 
-use crate::{DepthStencilStateDescriptor, Operations, PrimitiveTopology, RasterizationStateDescriptor, Shader, ShaderStage, Surface, Texture};
+use crate::{DepthStencilStateDescriptor, Operations, PipelineDescriptor, PrimitiveTopology, RasterizationStateDescriptor, Renderer, Shader, ShaderStage, Surface, Texture, VertexBuffer};
 
 pub struct RenderPass {
     /// The device to create instances with
@@ -14,19 +14,20 @@ pub struct RenderPass {
 }
 
 impl<'a> RenderPass {
-    pub fn new(
-        device: Arc<wgpu::Device>,
-        queue: Arc<wgpu::Queue>,
-    ) -> Self {
+    /// TODO merge functions 'new' and 'begin to keep reference
+    /// to internal wgpu::RenderPass reference.
+    ///
+    /// Initializes a new Renderer
+    pub fn new(renderer: &Renderer) -> Self {
         let descriptor = wgpu::CommandEncoderDescriptor {
             label: Some("Render Pass"),
         };
 
-        let encoder = device.create_command_encoder(&descriptor);
+        let encoder = renderer.device.create_command_encoder(&descriptor);
 
         Self {
-            device,
-            queue,
+            device: renderer.device.clone(),
+            queue: renderer.queue.clone(),
             encoder: Some(encoder),
         }
     }
@@ -108,8 +109,13 @@ impl<'a> RenderPass {
         render_pass.set_pipeline(&render_pipeline);
     }
 
+    /// TODO set pipeline code here
+    pub fn set_pipeline(&mut self, pipeline: &PipelineDescriptor) -> &mut Self {
+        self
+    }
+
     /// Sets a vertex buffer
-    pub fn set_vertex_buffer(&mut self) -> &mut Self {
+    pub fn set_vertex_buffer(&mut self, vertex_buffer: &VertexBuffer) -> &mut Self {
         self
     }
 

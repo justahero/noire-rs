@@ -87,6 +87,11 @@ impl Mesh {
             indices: None,
         }
     }
+
+    /// Returns all bytes as u8 vector
+    pub fn slice(&self) -> Vec<u8> {
+        Vec::new()
+    }
 }
 
 pub mod shape {
@@ -229,12 +234,3 @@ pub mod shape {
         }
     }
 }
-
-/*
-    /// Type of primitive topology
-    pub topology: PrimitiveTopology,
-    /// The list of vertex attributes
-    pub attributes: Vec<VertexAttribute>,
-    /// The list of optional indices referencing vertex data
-    pub indices: Option<Indices>,
-*/

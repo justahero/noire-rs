@@ -1,4 +1,4 @@
-use crate::{IndexFormat, VertexFormat, InputStepMode};
+use crate::{VertexFormat, InputStepMode};
 
 #[derive(Debug, PartialEq)]
 pub struct VertexAttributeDescriptor {
