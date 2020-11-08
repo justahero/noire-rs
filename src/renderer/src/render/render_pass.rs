@@ -37,11 +37,9 @@ impl<'a> RenderPass {
         &mut self,
         surface: &mut Surface,
         depth_texture: &Texture,
-        pass_descriptor: &mut PassDescriptor,
+        _pass_descriptor: &mut PassDescriptor,
         render_pass_fn: &mut dyn Fn(&mut RenderPass),
     ) {
-        let swapchain_descriptor = surface.swap_chain_descriptor();
-
         let color: wgpu::Color = Color::BLACK.into();
         let color_descriptor = wgpu::RenderPassColorAttachmentDescriptor {
             attachment: surface.texture(),
@@ -65,7 +63,7 @@ impl<'a> RenderPass {
 
         let mut encoder = self.encoder.take().unwrap();
         {
-            let render_pass = encoder.begin_render_pass(&render_pass_descriptor);
+            let _render_pass = encoder.begin_render_pass(&render_pass_descriptor);
             render_pass_fn(self);
         }
 
@@ -76,7 +74,7 @@ impl<'a> RenderPass {
     pub fn set_pipeline(
         &mut self,
         surface: &mut Surface,
-        pipeline: &PipelineDescriptor,
+        _pipeline: &PipelineDescriptor,
         shaders: &HashMap<ShaderStage, Shader>,
     ) -> &mut Self {
         let swapchain_descriptor = surface.swap_chain_descriptor();
@@ -104,7 +102,7 @@ impl<'a> RenderPass {
 
         let rasterization_state = RasterizationStateDescriptor::default();
 
-        let render_pipeline = self.device
+        let _render_pipeline = self.device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: None,
                 layout: Some(&render_pipeline_layout),
@@ -129,7 +127,7 @@ impl<'a> RenderPass {
     }
 
     /// Sets a vertex buffer
-    pub fn set_vertex_buffer(&mut self, vertex_buffer: &VertexBuffer) -> &mut Self {
+    pub fn set_vertex_buffer(&mut self, _vertex_buffer: &VertexBuffer) -> &mut Self {
         self
     }
 
