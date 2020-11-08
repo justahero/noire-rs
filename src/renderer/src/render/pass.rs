@@ -39,7 +39,7 @@ impl<'a> Default for PassDescriptor<'a> {
 
 impl<'a> From<&'a Window> for PassDescriptor<'a> {
     fn from(window: &'a Window) -> Self {
-        let color: Color = Color::BLACK;
+        let color = Color::BLACK;
         let color_attachment = RenderPassColorAttachmentDescriptor {
             attachment: &window.surface,
             resolve_target: None,

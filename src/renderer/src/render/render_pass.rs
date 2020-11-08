@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use wgpu::Color;
 
-use crate::{DepthStencilStateDescriptor, Operations, PipelineDescriptor, PrimitiveTopology, RasterizationStateDescriptor, Renderer, Shader, ShaderStage, Surface, Texture, VertexBuffer};
+use crate::{DepthStencilStateDescriptor, Operations, PassDescriptor, PipelineDescriptor, PrimitiveTopology, RasterizationStateDescriptor, Renderer, Shader, ShaderStage, Surface, Texture, VertexBuffer};
 
 pub struct RenderPass {
     /// The device to create instances with
@@ -37,7 +37,8 @@ impl<'a> RenderPass {
         &mut self,
         surface: &mut Surface,
         depth_texture: &Texture,
-        shaders: &HashMap<ShaderStage, Shader>,
+        pass_descriptor: &mut PassDescriptor,
+        render_pass_fn: &mut dyn Fn(&mut RenderPass),
     ) {
         let swapchain_descriptor = surface.swap_chain_descriptor();
 
@@ -45,7 +46,10 @@ impl<'a> RenderPass {
         let color_descriptor = wgpu::RenderPassColorAttachmentDescriptor {
             attachment: surface.texture(),
             resolve_target: None,
-            ops: Operations::new(color).into(),
+            ops: wgpu::Operations {
+                load: wgpu::LoadOp::Clear(color),
+                store: true,
+            },
         };
 
         let depth_stencil_descriptor = wgpu::RenderPassDepthStencilAttachmentDescriptor {
@@ -58,6 +62,24 @@ impl<'a> RenderPass {
             color_attachments: &[color_descriptor],
             depth_stencil_attachment: Some(depth_stencil_descriptor),
         };
+
+        let mut encoder = self.encoder.take().unwrap();
+        {
+            let render_pass = encoder.begin_render_pass(&render_pass_descriptor);
+            render_pass_fn(self);
+        }
+
+        self.encoder = Some(encoder);
+    }
+
+    /// TODO set pipeline code here
+    pub fn set_pipeline(
+        &mut self,
+        surface: &mut Surface,
+        pipeline: &PipelineDescriptor,
+        shaders: &HashMap<ShaderStage, Shader>,
+    ) -> &mut Self {
+        let swapchain_descriptor = surface.swap_chain_descriptor();
 
         // create a new pipeline
         let render_pipeline_layout =
@@ -101,16 +123,8 @@ impl<'a> RenderPass {
                 alpha_to_coverage_enabled: false,
             });
 
-        let mut render_pass = self.encoder
-            .as_mut()
-            .unwrap()
-            .begin_render_pass(&render_pass_descriptor);
+        // render_pass.set_pipeline(&render_pipeline);
 
-        render_pass.set_pipeline(&render_pipeline);
-    }
-
-    /// TODO set pipeline code here
-    pub fn set_pipeline(&mut self, pipeline: &PipelineDescriptor) -> &mut Self {
         self
     }
 

@@ -61,7 +61,7 @@ impl Renderer {
 
     /// Creates a new render pass
     /// NOTE takes window to reference its surface and optional depth buffer texture
-    pub fn begin_render_pass(
+    pub fn create_render_pass(
         &self,
     ) -> RenderPass {
         RenderPass::new(&self)

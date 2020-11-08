@@ -1,7 +1,9 @@
 pub mod color;
+pub mod pass;
 pub mod render_pass;
 
 pub use color::Color;
+pub use pass::*;
 pub use render_pass::RenderPass;
 
 /// Operation to perform to the output attachment, at start of render pass
@@ -55,8 +57,8 @@ impl<T> From<Operations<T>> for wgpu::Operations<T> {
     }
 }
 
-impl Operations<wgpu::Color> {
-    pub fn new(color: wgpu::Color) -> Self {
+impl Operations<Color> {
+    pub fn new(color: Color) -> Self {
         Self {
             load: LoadOp::Clear(color),
             store: true,

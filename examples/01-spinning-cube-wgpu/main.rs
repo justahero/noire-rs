@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use cgmath::vec3;
-use renderer::{Camera, Mesh, Renderer, Shader, ShaderStage, WindowHandler, WindowSettings, point3, shape};
+use renderer::{Camera, Mesh, Renderer, Shader, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
 
 pub struct Example {
     /// The shaders to render
@@ -21,7 +21,7 @@ impl WindowHandler for Example {
         shaders.insert(ShaderStage::Vertex, vertex_shader);
         shaders.insert(ShaderStage::Fragment, fragment_shader);
 
-        let mesh = shape::Cube::new(1.0).into();
+        let mesh = shape::Cube::new(1.0);
         let mut camera = Camera::default();
         camera
             .perspective(window.aspect())
@@ -41,7 +41,7 @@ impl WindowHandler for Example {
     }
 
     fn render(&mut self, window: &mut renderer::Window, renderer: &mut Renderer) {
-        let mut render_pass = renderer.begin_render_pass(&window);
+        let mut render_pass = renderer.create_render_pass(&window);
         // render_pass.set_vertex_buffer(vertex_buffer)
         render_pass.finish();
     }
