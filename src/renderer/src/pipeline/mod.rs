@@ -2,10 +2,12 @@ use crate::TextureFormat;
 
 pub mod bind_group;
 pub mod pipeline;
+pub mod pipeline_layout;
 pub mod state;
 
 pub use bind_group::*;
 pub use pipeline::*;
+pub use pipeline_layout::*;
 pub use state::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -42,6 +44,7 @@ impl From<CullMode> for wgpu::CullMode {
     }
 }
 
+#[derive(Debug)]
 pub struct RasterizationStateDescriptor {
     pub front_face: FrontFace,
     pub cull_mode: CullMode,

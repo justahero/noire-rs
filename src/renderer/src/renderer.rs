@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{RenderPass, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, Window};
+use crate::{PipelineDescriptor, RenderPass, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, Window};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct Renderer {
@@ -47,6 +47,10 @@ impl Renderer {
         }
     }
 
+    pub fn create_render_pipeline(&mut self) {
+
+    }
+
     /// Creates a new vertex buffer
     pub fn create_vertex_buffer(&mut self, data: &Vec<u8>) -> VertexBuffer {
         let buffer = self.device.create_buffer_init(
@@ -60,7 +64,6 @@ impl Renderer {
     }
 
     /// Creates a new render pass
-    /// NOTE takes window to reference its surface and optional depth buffer texture
     pub fn create_render_pass(
         &self,
     ) -> RenderPass {

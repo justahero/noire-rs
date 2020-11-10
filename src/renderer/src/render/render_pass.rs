@@ -70,17 +70,14 @@ impl<'a> RenderPass {
         self.encoder = Some(encoder);
     }
 
-    /// TODO set pipeline code here
-    pub fn set_pipeline(
+    /// TODO create pipeline code here
+    pub fn create_pipeline(
         &mut self,
-        surface: &mut Surface,
-        _pipeline: &PipelineDescriptor,
+        pipeline_descriptor: &PipelineDescriptor,
         shaders: &HashMap<ShaderStage, Shader>,
     ) -> &mut Self {
-        let swapchain_descriptor = surface.swap_chain_descriptor();
-
         // create a new pipeline
-        let render_pipeline_layout =
+        let pipeline_layout =
             self.device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: None,
@@ -88,6 +85,7 @@ impl<'a> RenderPass {
                     push_constant_ranges: &[],
                 });
 
+        // set up shaders
         let vertex_shader = shaders.get(&ShaderStage::Vertex).unwrap();
         let vertex_stage = wgpu::ProgrammableStageDescriptor {
             module: &vertex_shader.module,
@@ -102,15 +100,20 @@ impl<'a> RenderPass {
 
         let rasterization_state = RasterizationStateDescriptor::default();
 
+        let color_states = pipeline_descriptor.color_states
+            .iter()
+            .map(|c| c.into())
+            .collect::<Vec<wgpu::ColorStateDescriptor>>();
+
         let _render_pipeline = self.device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                label: None,
-                layout: Some(&render_pipeline_layout),
+                label: pipeline_descriptor.label.as_ref().map(|label| label.as_str()),
+                layout: Some(&pipeline_layout),
                 vertex_stage,
                 fragment_stage: Some(fragment_stage),
                 rasterization_state: Some(rasterization_state.into()),
-                primitive_topology: PrimitiveTopology::TriangleStrip.into(),
-                color_states: &[swapchain_descriptor.format.into()],
+                primitive_topology: pipeline_descriptor.primitive_topology.into(),
+                color_states: &color_states,
                 depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
                 vertex_state: wgpu::VertexStateDescriptor {
                     index_format: wgpu::IndexFormat::Uint16,
@@ -121,7 +124,7 @@ impl<'a> RenderPass {
                 alpha_to_coverage_enabled: false,
             });
 
-        // render_pass.set_pipeline(&render_pipeline);
+        // self.render_pass.set_pipeline(&render_pipeline);
 
         self
     }

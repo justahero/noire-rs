@@ -18,12 +18,12 @@ impl Default for ColorStateDescriptor {
     }
 }
 
-impl From<ColorStateDescriptor> for wgpu::ColorStateDescriptor {
-    fn from(val: ColorStateDescriptor) -> Self {
+impl From<&ColorStateDescriptor> for wgpu::ColorStateDescriptor {
+    fn from(val: &ColorStateDescriptor) -> Self {
         wgpu::ColorStateDescriptor {
             format: val.format.into(),
-            alpha_blend: val.alpha_blend.into(),
-            color_blend: val.color_blend.into(),
+            alpha_blend: (&val.alpha_blend).into(),
+            color_blend: (&val.color_blend).into(),
             write_mask: val.write_mask.into(),
         }
     }
@@ -36,8 +36,8 @@ pub struct BlendDescriptor {
     pub operation: BlendOperation,
 }
 
-impl From<BlendDescriptor> for wgpu::BlendDescriptor {
-    fn from(val: BlendDescriptor) -> Self {
+impl From<&BlendDescriptor> for wgpu::BlendDescriptor {
+    fn from(val: &BlendDescriptor) -> Self {
         wgpu::BlendDescriptor {
             src_factor: val.src_factor.into(),
             dst_factor: val.dst_factor.into(),

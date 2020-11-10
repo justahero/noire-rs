@@ -1,11 +1,11 @@
-use crate::BindGroupDescriptor;
+use crate::{ColorStateDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor, Shader};
 
 #[derive(Debug)]
 pub struct PipelineLayoutDescriptor {
     /// Debug label of the pipeline layout
     pub label: Option<String>,
     /// Bind groups that this pipeline uses
-    pub bind_group_layouts: Vec<BindGroupDescriptor>,
+    pub bind_group_layouts: Vec<wgpu::BindGroupLayout>,
 }
 
 impl Default for PipelineLayoutDescriptor {
@@ -17,25 +17,37 @@ impl Default for PipelineLayoutDescriptor {
     }
 }
 
-/// Describes a pipeline
-#[derive(Debug)]
+/// Describes a Render Pipeline
 pub struct PipelineDescriptor {
     /// The name of the pipeline (optional), used for debugging
-    pub name: Option<String>,
-}
-
-impl Default for PipelineDescriptor {
-    fn default() -> Self {
-        Self {
-            name: None,
-        }
-    }
+    pub label: Option<String>,
+    /// Vertex Shader
+    pub vertex_shader: Shader,
+    /// Fragment Shader
+    pub fragment_shader: Option<Shader>,
+    /// List of color state descriptors
+    pub color_states: Vec<ColorStateDescriptor>,
+    /// Rasterization state
+    pub rasterization_state: Option<RasterizationStateDescriptor>,
+    /// Defines the way draw calls are rendered
+    pub primitive_topology: PrimitiveTopology,
+    /// Depth Stencil state
+    pub depth_stencil_state: Option<DepthStencilStateDescriptor>,
 }
 
 impl PipelineDescriptor {
-    pub fn new() -> Self {
+    pub fn new(
+        vertex_shader: Shader,
+        fragment_shader: Option<Shader>,
+    ) -> Self {
         Self {
-            .. Default::default()
+            label: Some(String::from("Test")),
+            vertex_shader,
+            fragment_shader,
+            color_states: Vec::new(),
+            rasterization_state: Some(RasterizationStateDescriptor::default()),
+            primitive_topology: PrimitiveTopology::TriangleList,
+            depth_stencil_state: Some(DepthStencilStateDescriptor::default()),
         }
     }
 }
