@@ -1,21 +1,4 @@
-use crate::{ColorStateDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor, Shader};
-
-#[derive(Debug)]
-pub struct PipelineLayout {
-    /// Debug label of the pipeline layout
-    pub label: Option<String>,
-    /// Bind groups that this pipeline uses
-    pub bind_group_layouts: Vec<wgpu::BindGroupLayout>,
-}
-
-impl Default for PipelineLayout {
-    fn default() -> Self {
-        Self {
-            label: None,
-            bind_group_layouts: Vec::new(),
-        }
-    }
-}
+use crate::{ColorStateDescriptor, DepthStencilStateDescriptor, PipelineLayout, PrimitiveTopology, RasterizationStateDescriptor, Shader};
 
 /// Describes a Render Pipeline
 pub struct PipelineDescriptor {
