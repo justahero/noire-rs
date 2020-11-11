@@ -77,11 +77,13 @@ impl<'a> RenderPass {
         shaders: &HashMap<ShaderStage, Shader>,
     ) -> &mut Self {
         // create a new pipeline
+        let bind_group_layouts = Vec::new();
+
         let pipeline_layout =
             self.device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: None,
-                    bind_group_layouts: &[],
+                    bind_group_layouts: &bind_group_layouts,
                     push_constant_ranges: &[],
                 });
 
@@ -124,7 +126,7 @@ impl<'a> RenderPass {
                     index_format: wgpu::IndexFormat::Uint16,
                     vertex_buffers: &[],
                 },
-                sample_count: 1,
+                sample_count: pipeline_descriptor.sample_count,
                 sample_mask: !0,
                 alpha_to_coverage_enabled: false,
             });

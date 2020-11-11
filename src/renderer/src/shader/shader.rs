@@ -3,6 +3,8 @@ use fmt::Display;
 use wgpu::ShaderModuleSource;
 use spirv_reflect::types::ReflectShaderStageFlags;
 
+use crate::ShaderLayout;
+
 type ShaderResult = Result<Shader, ShaderError>;
 
 #[derive(Debug)]
@@ -170,5 +172,10 @@ impl Shader {
     /// Returns the shader as vec of u32.
     pub fn as_binary(&self) -> &[u32] {
         self.source.as_binary()
+    }
+
+    /// Returns the Shader Layout
+    pub fn layout(&self) -> ShaderLayout {
+        ShaderLayout::from_shader(self)
     }
 }

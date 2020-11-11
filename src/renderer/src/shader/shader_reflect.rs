@@ -1,6 +1,6 @@
-use spirv_reflect::{types::ReflectInterfaceVariable, ShaderModule, types::ReflectDescriptorSet, types::ReflectDescriptorBinding};
+use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectInterfaceVariable, ReflectShaderStageFlags}};
 
-use crate::{BindGroupDescriptor, Shader, VertexAttributeDescriptor, WgpuInto, bind_group::BindGroupLayoutEntry, ShaderStage, BindingType};
+use crate::{BindGroupDescriptor, BindingDescriptor, BindingType, Shader, ShaderStage, VertexAttributeDescriptor, WgpuInto};
 
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///
@@ -17,7 +17,7 @@ impl ShaderLayout {
     }
 }
 
-///
+/// Reflect the given shader
 pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     let shader_module = ShaderModule::load_u8_data(spv_data).unwrap();
     let _entry_point_name = shader_module.get_entry_point_name();
@@ -47,7 +47,7 @@ pub(crate) fn reflect_bind_group(
     descriptor_set: &ReflectDescriptorSet,
     shader_stage: ShaderStage,
 ) -> BindGroupDescriptor {
-    let bindings: Vec<BindGroupLayoutEntry> = descriptor_set.bindings.iter().map(|binding| {
+    let bindings: Vec<BindingDescriptor> = descriptor_set.bindings.iter().map(|binding| {
         reflect_binding(binding, shader_stage)
     })
     .collect();
@@ -57,14 +57,16 @@ pub(crate) fn reflect_bind_group(
 pub(crate) fn reflect_binding(
     binding: &ReflectDescriptorBinding,
     shader_stage: ShaderStage,
-) -> BindGroupLayoutEntry {
+) -> BindingDescriptor {
     println!("BINDING: {:?}", binding);
-    BindGroupLayoutEntry {
-        label: Some(binding.name.clone()),
-        binding: binding.binding,
-        visibility: shader_stage,
-        binding_type: BindingType::Unknown,
-        count: None,
+
+    let binding_type = BindingType::UniformBuffer;
+
+    BindingDescriptor {
+        name: binding.name.clone(),
+        index: binding.binding,
+        binding_type,
+        shader_stage,
     }
 }
 

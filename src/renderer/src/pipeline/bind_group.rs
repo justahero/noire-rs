@@ -1,6 +1,6 @@
 use std::num::NonZeroU32;
 
-use crate::ShaderStage;
+use crate::{BindingDescriptor, ShaderStage};
 
 #[derive(Debug)]
 pub enum BindingType {
@@ -12,14 +12,16 @@ pub enum BindingType {
 
 #[derive(Debug)]
 pub struct BindGroupDescriptor {
-    pub set: u32,
-    pub bindings: Vec<BindGroupLayoutEntry>,
+    /// Index of the bind group
+    pub index: u32,
+    /// The
+    pub bindings: Vec<BindingDescriptor>,
 }
 
 impl BindGroupDescriptor {
-    pub fn new(set: u32, bindings: Vec<BindGroupLayoutEntry>) -> Self {
+    pub fn new(index: u32, bindings: Vec<BindingDescriptor>) -> Self {
         Self {
-            set,
+            index,
             bindings,
         }
     }

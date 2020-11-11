@@ -1,14 +1,14 @@
 use crate::{ColorStateDescriptor, DepthStencilStateDescriptor, PrimitiveTopology, RasterizationStateDescriptor, Shader};
 
 #[derive(Debug)]
-pub struct PipelineLayoutDescriptor {
+pub struct PipelineLayout {
     /// Debug label of the pipeline layout
     pub label: Option<String>,
     /// Bind groups that this pipeline uses
     pub bind_group_layouts: Vec<wgpu::BindGroupLayout>,
 }
 
-impl Default for PipelineLayoutDescriptor {
+impl Default for PipelineLayout {
     fn default() -> Self {
         Self {
             label: None,
@@ -21,6 +21,8 @@ impl Default for PipelineLayoutDescriptor {
 pub struct PipelineDescriptor {
     /// The name of the pipeline (optional), used for debugging
     pub label: Option<String>,
+    /// THe The pipeline layout
+    pub layout: Option<PipelineLayout>,
     /// Vertex Shader
     pub vertex_shader: Shader,
     /// Fragment Shader
@@ -33,6 +35,16 @@ pub struct PipelineDescriptor {
     pub primitive_topology: PrimitiveTopology,
     /// Depth Stencil state
     pub depth_stencil_state: Option<DepthStencilStateDescriptor>,
+    /// Number of samples calculated per pixel, MSAA
+    pub sample_count: u32,
+    /// Bitmask that restricts samples of a pixel modified by this pipeline
+    pub sample_mask: u32,
+    /// When enabled, produces another sample mask per pixel based on alpha output value,
+    /// that is ANDed with the `sample_mask` and primitive coverage to restrict the set of
+    /// samples affected by a primitive.
+    /// The implicit mask produced for alpha of zero is guaranteed to be zero, and for alpha
+    /// of one is guaranteed to be all 1-s.
+    pub alpha_to_coverage_enabled: bool,
 }
 
 impl PipelineDescriptor {
@@ -42,12 +54,21 @@ impl PipelineDescriptor {
     ) -> Self {
         Self {
             label: Some(String::from("Test")),
+            layout: None,
             vertex_shader,
             fragment_shader,
             color_states: Vec::new(),
             rasterization_state: Some(RasterizationStateDescriptor::default()),
             primitive_topology: PrimitiveTopology::TriangleList,
             depth_stencil_state: Some(DepthStencilStateDescriptor::default()),
+            sample_count: 1,
+            sample_mask: !0,
+            alpha_to_coverage_enabled: false,
         }
+    }
+
+    /// Returns a reference to the associated Pipeline layout
+    pub fn get_layout(&self) -> Option<&PipelineLayout> {
+        self.layout.as_ref()
     }
 }
