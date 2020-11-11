@@ -105,6 +105,11 @@ impl<'a> RenderPass {
             .map(|c| c.into())
             .collect::<Vec<wgpu::ColorStateDescriptor>>();
 
+        let depth_stencil_state = pipeline_descriptor
+            .depth_stencil_state
+            .as_ref()
+            .map(|desc| desc.into());
+
         let _render_pipeline = self.device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: pipeline_descriptor.label.as_ref().map(|label| label.as_str()),
@@ -114,7 +119,7 @@ impl<'a> RenderPass {
                 rasterization_state: Some(rasterization_state.into()),
                 primitive_topology: pipeline_descriptor.primitive_topology.into(),
                 color_states: &color_states,
-                depth_stencil_state: Some(DepthStencilStateDescriptor::default().into()),
+                depth_stencil_state,
                 vertex_state: wgpu::VertexStateDescriptor {
                     index_format: wgpu::IndexFormat::Uint16,
                     vertex_buffers: &[],

@@ -113,13 +113,13 @@ impl Default for DepthStencilStateDescriptor {
     }
 }
 
-impl From<DepthStencilStateDescriptor> for wgpu::DepthStencilStateDescriptor {
-    fn from(val: DepthStencilStateDescriptor) -> Self {
+impl From<&DepthStencilStateDescriptor> for wgpu::DepthStencilStateDescriptor {
+    fn from(val: &DepthStencilStateDescriptor) -> Self {
         wgpu::DepthStencilStateDescriptor {
             format: val.format.into(),
             depth_write_enabled: val.depth_write_enabled,
             depth_compare: val.depth_compare.into(),
-            stencil: val.stencil.into(),
+            stencil: (&val.stencil).into(),
         }
     }
 }
@@ -132,11 +132,11 @@ pub struct StencilStateDescriptor {
     pub write_mask: u32,
 }
 
-impl From<StencilStateDescriptor> for wgpu::StencilStateDescriptor {
-    fn from(val: StencilStateDescriptor) -> Self {
+impl From<&StencilStateDescriptor> for wgpu::StencilStateDescriptor {
+    fn from(val: &StencilStateDescriptor) -> Self {
         wgpu::StencilStateDescriptor {
-            front: val.front.into(),
-            back: val.back.into(),
+            front: (&val.front).into(),
+            back: (&val.back).into(),
             read_mask: val.read_mask,
             write_mask: val.write_mask,
         }
@@ -151,8 +151,8 @@ pub struct StencilStateFaceDescriptor {
     pub pass_op: StencilOperation,
 }
 
-impl From<StencilStateFaceDescriptor> for wgpu::StencilStateFaceDescriptor {
-    fn from(val: StencilStateFaceDescriptor) -> Self {
+impl From<&StencilStateFaceDescriptor> for wgpu::StencilStateFaceDescriptor {
+    fn from(val: &StencilStateFaceDescriptor) -> Self {
         wgpu::StencilStateFaceDescriptor {
             compare: val.compare.into(),
             fail_op: val.fail_op.into(),
