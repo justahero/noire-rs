@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{PipelineDescriptor, RenderPass, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, Window};
+use crate::{RenderPass, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer};
 
 /// The main WGPU Renderer that acts as an API layer to WGPU
 pub struct Renderer {

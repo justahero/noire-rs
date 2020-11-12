@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use wgpu::Color;
 
-use crate::{DepthStencilStateDescriptor, Operations, PassDescriptor, PipelineDescriptor, PrimitiveTopology, RasterizationStateDescriptor, Renderer, Shader, ShaderStage, Surface, Texture, VertexBuffer};
+use crate::{BindGroupDescriptor, Operations, PassDescriptor, PipelineDescriptor, RasterizationStateDescriptor, Renderer, Shader, ShaderStage, Surface, Texture, VertexBuffer};
 
 pub struct RenderPass {
     /// The device to create instances with
@@ -76,14 +76,22 @@ impl<'a> RenderPass {
         pipeline_descriptor: &PipelineDescriptor,
         shaders: &HashMap<ShaderStage, Shader>,
     ) -> &mut Self {
-        // create a new pipeline
-        let bind_group_layouts = Vec::new();
+        let layout = pipeline_descriptor.get_layout().unwrap();
+        let bind_group_layouts = layout.bind_groups
+            .iter()
+            .map(|bind_group| self.create_bind_group_layout(bind_group))
+            .collect::<Vec<wgpu::BindGroupLayout>>();
+
+        let x = bind_group_layouts
+            .iter()
+            .map(|layout| layout)
+            .collect::<Vec<&wgpu::BindGroupLayout>>();
 
         let pipeline_layout =
             self.device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: None,
-                    bind_group_layouts: &bind_group_layouts,
+                    bind_group_layouts: x.as_slice(),
                     push_constant_ranges: &[],
                 });
 
@@ -134,6 +142,30 @@ impl<'a> RenderPass {
         // self.render_pass.set_pipeline(&render_pipeline);
 
         self
+    }
+
+    fn create_bind_group_layout(
+        &self,
+        descriptor: &BindGroupDescriptor,
+    ) -> wgpu::BindGroupLayout {
+        let entries = descriptor.bindings
+            .iter()
+            .map(|binding| {
+                wgpu::BindGroupLayoutEntry {
+                    binding: binding.index,
+                    visibility: binding.shader_stage.into(),
+                    ty: (&binding.binding_type).into(),
+                    count: None,
+                }
+            })
+            .collect::<Vec<wgpu::BindGroupLayoutEntry>>();
+
+        let bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
+            entries: entries.as_slice(),
+            label: None,
+        };
+
+        self.device.create_bind_group_layout(&bind_group_layout_descriptor)
     }
 
     /// Sets a vertex buffer

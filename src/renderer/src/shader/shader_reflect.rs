@@ -1,6 +1,6 @@
-use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectInterfaceVariable, ReflectShaderStageFlags}};
+use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::ReflectInterfaceVariable};
 
-use crate::{BindGroupDescriptor, BindingDescriptor, BindingType, Shader, ShaderStage, VertexAttributeDescriptor, WgpuInto};
+use crate::{BindGroupDescriptor, BindingDescriptor, BindingType, Shader, ShaderStage, UniformProperty, VertexAttributeDescriptor, WgpuInto};
 
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///
@@ -60,7 +60,10 @@ pub(crate) fn reflect_binding(
 ) -> BindingDescriptor {
     println!("BINDING: {:?}", binding);
 
-    let binding_type = BindingType::UniformBuffer;
+    let binding_type = BindingType::Uniform {
+        dynamic: true,
+        property: UniformProperty::Float,
+    };
 
     BindingDescriptor {
         name: binding.name.clone(),
