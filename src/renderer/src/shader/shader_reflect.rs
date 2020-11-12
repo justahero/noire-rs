@@ -1,4 +1,4 @@
-use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::ReflectInterfaceVariable};
+use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectDescriptorType, ReflectInterfaceVariable}};
 
 use crate::{BindGroupDescriptor, BindingDescriptor, BindingType, Shader, ShaderStage, UniformProperty, VertexAttributeDescriptor, WgpuInto};
 
@@ -60,13 +60,21 @@ pub(crate) fn reflect_binding(
 ) -> BindingDescriptor {
     println!("BINDING: {:?}", binding);
 
-    let binding_type = BindingType::Uniform {
-        dynamic: true,
-        property: UniformProperty::Float,
+    let type_description = binding.type_description.as_ref().unwrap();
+
+    let (name, binding_type) = match binding.descriptor_type {
+        ReflectDescriptorType::UniformBuffer => (
+            &type_description.type_name,
+            BindingType::Uniform {
+                dynamic: false,
+                property: UniformProperty::Float,
+            }
+        ),
+        _ => panic!("Unsupported binding type {:?}", binding.descriptor_type),
     };
 
     BindingDescriptor {
-        name: binding.name.clone(),
+        name: name.to_string(),
         index: binding.binding,
         binding_type,
         shader_stage,
