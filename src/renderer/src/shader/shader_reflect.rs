@@ -36,7 +36,6 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
 /// Returns the list of bind groups in the shader
 pub(crate) fn reflect_bind_groups(shader_module: &ShaderModule, shader_stage: ShaderStage) -> Vec<BindGroupDescriptor> {
     let descriptor_sets = shader_module.enumerate_descriptor_sets(None).unwrap();
-    println!("REFLECT BIND GROUPS: {:?}", descriptor_sets);
     descriptor_sets.iter().map(|descriptor_set| {
         reflect_bind_group(descriptor_set, shader_stage)
     })
@@ -47,10 +46,12 @@ pub(crate) fn reflect_bind_group(
     descriptor_set: &ReflectDescriptorSet,
     shader_stage: ShaderStage,
 ) -> BindGroupDescriptor {
-    let bindings: Vec<BindingDescriptor> = descriptor_set.bindings.iter().map(|binding| {
-        reflect_binding(binding, shader_stage)
-    })
-    .collect();
+    let bindings: Vec<BindingDescriptor> = descriptor_set.bindings
+        .iter()
+        .map(|binding| {
+            reflect_binding(binding, shader_stage)
+        })
+        .collect();
     BindGroupDescriptor::new(descriptor_set.set, bindings)
 }
 
@@ -61,7 +62,6 @@ pub(crate) fn reflect_binding(
     println!("BINDING: {:?}", binding);
 
     let type_description = binding.type_description.as_ref().unwrap();
-
     let (name, binding_type) = match binding.descriptor_type {
         ReflectDescriptorType::UniformBuffer => (
             &type_description.type_name,
@@ -83,12 +83,13 @@ pub(crate) fn reflect_binding(
 
 pub(crate) fn reflect_input_variables(shader_module: &ShaderModule) -> Vec<VertexAttributeDescriptor> {
     let variables = shader_module.enumerate_input_variables(None).unwrap();
+    println!("----INPUT VARIABLES: {:?}", variables);
     variables.iter().map(|variable| reflect_vertex_attribute(&variable)).collect()
 }
 
 pub(crate) fn reflect_push_constant_blocks(shader_module: &ShaderModule) {
     let block_variables = shader_module.enumerate_push_constant_blocks(None).unwrap();
-    println!("PUSH CONSTANT BLOCKS: {:?}", block_variables);
+    println!("----PUSH CONSTANT BLOCKS: {:?}", block_variables);
 }
 
 pub(crate) fn reflect_vertex_attribute(variable: &ReflectInterfaceVariable) -> VertexAttributeDescriptor {

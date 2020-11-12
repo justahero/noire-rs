@@ -82,7 +82,7 @@ impl<'a> RenderPass {
             .map(|bind_group| self.create_bind_group_layout(bind_group))
             .collect::<Vec<wgpu::BindGroupLayout>>();
 
-        let x = bind_group_layouts
+        let bind_group_layouts_ref = bind_group_layouts
             .iter()
             .map(|layout| layout)
             .collect::<Vec<&wgpu::BindGroupLayout>>();
@@ -91,7 +91,7 @@ impl<'a> RenderPass {
             self.device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: None,
-                    bind_group_layouts: x.as_slice(),
+                    bind_group_layouts: bind_group_layouts_ref.as_slice(),
                     push_constant_ranges: &[],
                 });
 
