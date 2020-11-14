@@ -3,7 +3,7 @@ use crate::{Color, Operations, Surface, Texture, Window};
 #[derive(Debug)]
 pub struct RenderPassColorAttachmentDescriptor<'a> {
     /// The color attachment, e.g. Surface
-    pub attachment: &'a Surface,
+    pub attachment: &'a mut Surface,
     /// The resolve target, e.g. Texture
     pub resolve_target: Option<&'a Texture>,
     /// The clear color operation
@@ -37,11 +37,11 @@ impl<'a> Default for PassDescriptor<'a> {
     }
 }
 
-impl<'a> From<&'a Window> for PassDescriptor<'a> {
-    fn from(window: &'a Window) -> Self {
+impl<'a> From<&'a mut Window> for PassDescriptor<'a> {
+    fn from(window: &'a mut Window) -> Self {
         let color = Color::BLACK;
         let color_attachment = RenderPassColorAttachmentDescriptor {
-            attachment: &window.surface,
+            attachment: &mut window.surface,
             resolve_target: None,
             ops: Operations::new(color),
         };

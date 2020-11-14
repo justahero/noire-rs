@@ -9,8 +9,6 @@ pub struct RenderPass {
     device: Arc<wgpu::Device>,
     /// Handle to command queue
     queue: Arc<wgpu::Queue>,
-    /// The encoder to begin / finish the render pass
-    encoder: Option<wgpu::CommandEncoder>,
 }
 
 impl<'a> RenderPass {
@@ -23,12 +21,9 @@ impl<'a> RenderPass {
             label: Some("Render Pass"),
         };
 
-        let encoder = renderer.device.create_command_encoder(&descriptor);
-
         Self {
             device: renderer.device.clone(),
             queue: renderer.queue.clone(),
-            encoder: Some(encoder),
         }
     }
 
@@ -52,7 +47,7 @@ impl<'a> RenderPass {
 
         let depth_stencil_descriptor = wgpu::RenderPassDepthStencilAttachmentDescriptor {
             attachment: &depth_texture.view,
-            depth_ops: Some(Operations::clear(0.0).into()),
+            depth_ops: Some((&Operations::clear(0.0)).into()),
             stencil_ops: None,
         };
 
@@ -61,6 +56,7 @@ impl<'a> RenderPass {
             depth_stencil_attachment: Some(depth_stencil_descriptor),
         };
 
+        /*
         let mut encoder = self.encoder.take().unwrap();
         {
             let _render_pass = encoder.begin_render_pass(&render_pass_descriptor);
@@ -68,6 +64,7 @@ impl<'a> RenderPass {
         }
 
         self.encoder = Some(encoder);
+        */
     }
 
     /// TODO create pipeline code here
@@ -171,12 +168,5 @@ impl<'a> RenderPass {
     /// Sets a vertex buffer
     pub fn set_vertex_buffer(&mut self, _vertex_buffer: &VertexBuffer) -> &mut Self {
         self
-    }
-
-    /// Finishes the Render Pass
-    pub fn finish(&mut self) {
-        assert!(self.encoder.is_some());
-        let encoder = self.encoder.take().unwrap();
-        self.queue.submit(std::iter::once(encoder.finish()));
     }
 }

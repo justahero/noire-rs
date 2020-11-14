@@ -21,10 +21,28 @@ impl<V: Default> Default for LoadOp<V> {
     }
 }
 
-impl<T> From<LoadOp<T>> for wgpu::LoadOp<T> {
-    fn from(val: LoadOp<T>) -> Self {
+impl From<&LoadOp<f32>> for wgpu::LoadOp<f32> {
+    fn from(val: &LoadOp<f32>) -> Self {
         match val {
-            LoadOp::Clear(c) => wgpu::LoadOp::Clear(c),
+            LoadOp::Clear(c) => wgpu::LoadOp::Clear(*c),
+            LoadOp::Load => wgpu::LoadOp::Load,
+        }
+    }
+}
+
+impl From<&LoadOp<u32>> for wgpu::LoadOp<u32> {
+    fn from(val: &LoadOp<u32>) -> Self {
+        match val {
+            LoadOp::Clear(c) => wgpu::LoadOp::Clear(*c),
+            LoadOp::Load => wgpu::LoadOp::Load,
+        }
+    }
+}
+
+impl From<&LoadOp<Color>> for wgpu::LoadOp<wgpu::Color> {
+    fn from(val: &LoadOp<Color>) -> Self {
+        match val {
+            LoadOp::Clear(c) => wgpu::LoadOp::Clear((*c).into()),
             LoadOp::Load => wgpu::LoadOp::Load,
         }
     }
@@ -48,10 +66,13 @@ impl<V: Default> Default for Operations<V> {
     }
 }
 
-impl<T> From<Operations<T>> for wgpu::Operations<T> {
-    fn from(val: Operations<T>) -> Self {
+impl<'a, T, U> From<&'a Operations<T>> for wgpu::Operations<U>
+where
+    wgpu::LoadOp<U>: From<&'a LoadOp<T>>,
+{
+    fn from(val: &'a Operations<T>) -> Self {
         Self {
-            load: val.load.into(),
+            load: (&val.load).into(),
             store: val.store,
         }
     }

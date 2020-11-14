@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use cgmath::vec3;
-use renderer::{Camera, Mesh, Renderer, Shader, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
+use renderer::{Camera, Mesh, PassDescriptor, Renderer, Shader, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
 
 pub struct Example {
     /// The shaders to render
@@ -41,9 +41,11 @@ impl WindowHandler for Example {
     }
 
     fn render(&mut self, window: &mut renderer::Window, renderer: &mut Renderer) {
-        let mut render_pass = renderer.create_render_pass();
-        // render_pass.set_vertex_buffer(vertex_buffer)
-        render_pass.finish();
+        let mut pass_descriptor = window.into();
+
+        renderer.begin_pass(&mut pass_descriptor, &mut |_render_pass| {
+
+        });
     }
 }
 
