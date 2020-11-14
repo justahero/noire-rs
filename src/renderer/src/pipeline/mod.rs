@@ -69,8 +69,8 @@ impl Default for RasterizationStateDescriptor {
     }
 }
 
-impl From<RasterizationStateDescriptor> for wgpu::RasterizationStateDescriptor {
-    fn from(val: RasterizationStateDescriptor) -> Self {
+impl From<&RasterizationStateDescriptor> for wgpu::RasterizationStateDescriptor {
+    fn from(val: &RasterizationStateDescriptor) -> Self {
         wgpu::RasterizationStateDescriptor {
             front_face: val.front_face.into(),
             cull_mode: val.cull_mode.into(),

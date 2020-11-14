@@ -1,4 +1,4 @@
-use crate::{ColorStateDescriptor, DepthStencilStateDescriptor, PipelineLayout, PrimitiveTopology, RasterizationStateDescriptor, Shader};
+use crate::{ColorStateDescriptor, DepthStencilStateDescriptor, IndexFormat, PipelineLayout, PrimitiveTopology, RasterizationStateDescriptor, Shader};
 
 /// Describes a Render Pipeline
 pub struct PipelineDescriptor {
@@ -12,12 +12,14 @@ pub struct PipelineDescriptor {
     pub fragment_shader: Option<Shader>,
     /// List of color state descriptors
     pub color_states: Vec<ColorStateDescriptor>,
-    /// Rasterization state
+    /// Describes the state of the rasterizer in this pipeline
     pub rasterization_state: Option<RasterizationStateDescriptor>,
     /// Defines the way draw calls are rendered
     pub primitive_topology: PrimitiveTopology,
     /// Depth Stencil state
     pub depth_stencil_state: Option<DepthStencilStateDescriptor>,
+    /// The format of index buffers used with this pipeline
+    pub index_format: IndexFormat,
     /// Number of samples calculated per pixel, MSAA
     pub sample_count: u32,
     /// Bitmask that restricts samples of a pixel modified by this pipeline
@@ -44,6 +46,7 @@ impl PipelineDescriptor {
             rasterization_state: Some(RasterizationStateDescriptor::default()),
             primitive_topology: PrimitiveTopology::TriangleList,
             depth_stencil_state: Some(DepthStencilStateDescriptor::default()),
+            index_format: IndexFormat::Uint32,
             sample_count: 1,
             sample_mask: !0,
             alpha_to_coverage_enabled: false,

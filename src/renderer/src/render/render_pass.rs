@@ -56,13 +56,20 @@ impl<'a> RenderPass<'a> {
             entry_point: "main",
         };
 
+        let vertex_state = wgpu::VertexStateDescriptor {
+            index_format: pipeline_descriptor.index_format.into(),
+            vertex_buffers: &[],
+        };
+
         let fragment_shader = shaders.get(&ShaderStage::Fragment).unwrap();
         let fragment_stage = wgpu::ProgrammableStageDescriptor {
             module: &fragment_shader.module,
             entry_point: "main",
         };
 
-        let rasterization_state = RasterizationStateDescriptor::default();
+        let rasterization_state = pipeline_descriptor.rasterization_state
+            .as_ref()
+            .map(|desc| desc.into());
 
         let color_states = pipeline_descriptor.color_states
             .iter()
@@ -80,17 +87,14 @@ impl<'a> RenderPass<'a> {
                 layout: Some(&pipeline_layout),
                 vertex_stage,
                 fragment_stage: Some(fragment_stage),
-                rasterization_state: Some(rasterization_state.into()),
+                rasterization_state,
                 primitive_topology: pipeline_descriptor.primitive_topology.into(),
                 color_states: &color_states,
                 depth_stencil_state,
-                vertex_state: wgpu::VertexStateDescriptor {
-                    index_format: wgpu::IndexFormat::Uint16,
-                    vertex_buffers: &[],
-                },
+                vertex_state,
                 sample_count: pipeline_descriptor.sample_count,
-                sample_mask: !0,
-                alpha_to_coverage_enabled: false,
+                sample_mask: pipeline_descriptor.sample_mask,
+                alpha_to_coverage_enabled: pipeline_descriptor.alpha_to_coverage_enabled,
             });
 
         // self.render_pass.set_pipeline(&render_pipeline);
