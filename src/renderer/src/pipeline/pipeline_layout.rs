@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{BindGroupDescriptor, Shader};
+use crate::{BindGroupDescriptor, Shader, ShaderError};
 
 #[derive(Debug)]
 pub struct PipelineLayout {
@@ -11,12 +11,13 @@ pub struct PipelineLayout {
 impl PipelineLayout {
     /// Creates a pipeline layout from the list of given shaders
     /// It checks all bind groups of the shaders and sees if they are the same for all shader stages.
-    pub fn from_shaders(shaders: Vec<&Shader>) -> Self {
+    pub fn from_shaders(shaders: Vec<&Shader>) -> Result<Self, ShaderError> {
         let mut bind_groups = HashMap::<u32, BindGroupDescriptor>::new();
         for shader in shaders {
             let shader_layout = shader.layout();
-            for bind_group in shader_layout.bind_groups.iter() {
+            for _bind_group in shader_layout.bind_groups.iter() {
                 // bind_groups
+                panic!("Implement mapping of bind groups");
             }
         }
 
@@ -25,8 +26,8 @@ impl PipelineLayout {
             .map(|(_index, descriptor)| descriptor)
             .collect();
 
-        PipelineLayout {
+        Ok(PipelineLayout {
             bind_groups,
-        }
+        })
     }
 }

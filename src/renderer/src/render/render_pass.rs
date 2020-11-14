@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Arc};
 
-use crate::{BindGroupDescriptor, PipelineDescriptor, RasterizationStateDescriptor, Renderer, Shader, ShaderStage, VertexBuffer};
+use crate::{BindGroupDescriptor, PipelineDescriptor, Renderer, Shader, ShaderStage, VertexBuffer};
 
 pub struct RenderPass<'a> {
     /// The device to create instances with
