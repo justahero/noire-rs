@@ -1,70 +1,27 @@
 use std::{collections::HashMap, sync::Arc};
 
-use wgpu::Color;
+use crate::{BindGroupDescriptor, PipelineDescriptor, RasterizationStateDescriptor, Renderer, Shader, ShaderStage, VertexBuffer};
 
-use crate::{BindGroupDescriptor, Operations, PassDescriptor, PipelineDescriptor, RasterizationStateDescriptor, Renderer, Shader, ShaderStage, Surface, Texture, VertexBuffer};
-
-pub struct RenderPass {
+pub struct RenderPass<'a> {
     /// The device to create instances with
     device: Arc<wgpu::Device>,
     /// Handle to command queue
     queue: Arc<wgpu::Queue>,
+    /// Internal reference to RenderPass
+    render_pass: wgpu::RenderPass<'a>,
 }
 
-impl<'a> RenderPass {
-    /// TODO merge functions 'new' and 'begin to keep reference
-    /// to internal wgpu::RenderPass reference.
-    ///
-    /// Initializes a new Renderer
-    pub fn new(renderer: &Renderer) -> Self {
-        let descriptor = wgpu::CommandEncoderDescriptor {
-            label: Some("Render Pass"),
-        };
-
+impl<'a> RenderPass<'a> {
+    /// Initializes a Render Pass to provide useful API functions
+    pub fn new(
+        renderer: &Renderer,
+        render_pass: wgpu::RenderPass<'a>,
+    ) -> Self {
         Self {
             device: renderer.device.clone(),
             queue: renderer.queue.clone(),
+            render_pass,
         }
-    }
-
-    /// Starts a new Render Pass
-    pub fn begin(
-        &mut self,
-        surface: &mut Surface,
-        depth_texture: &Texture,
-        _pass_descriptor: &mut PassDescriptor,
-        render_pass_fn: &mut dyn Fn(&mut RenderPass),
-    ) {
-        let color: wgpu::Color = Color::BLACK.into();
-        let color_descriptor = wgpu::RenderPassColorAttachmentDescriptor {
-            attachment: surface.texture(),
-            resolve_target: None,
-            ops: wgpu::Operations {
-                load: wgpu::LoadOp::Clear(color),
-                store: true,
-            },
-        };
-
-        let depth_stencil_descriptor = wgpu::RenderPassDepthStencilAttachmentDescriptor {
-            attachment: &depth_texture.view,
-            depth_ops: Some((&Operations::clear(0.0)).into()),
-            stencil_ops: None,
-        };
-
-        let render_pass_descriptor = wgpu::RenderPassDescriptor {
-            color_attachments: &[color_descriptor],
-            depth_stencil_attachment: Some(depth_stencil_descriptor),
-        };
-
-        /*
-        let mut encoder = self.encoder.take().unwrap();
-        {
-            let _render_pass = encoder.begin_render_pass(&render_pass_descriptor);
-            render_pass_fn(self);
-        }
-
-        self.encoder = Some(encoder);
-        */
     }
 
     /// TODO create pipeline code here
