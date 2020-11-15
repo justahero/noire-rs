@@ -9,7 +9,7 @@ pub struct PipelineDescriptor {
     /// Vertex Shader
     pub vertex_shader: Shader,
     /// Fragment Shader
-    pub fragment_shader: Option<Shader>,
+    pub fragment_shader: Shader,
     /// List of color state descriptors
     pub color_states: Vec<ColorStateDescriptor>,
     /// Describes the state of the rasterizer in this pipeline
@@ -35,11 +35,15 @@ pub struct PipelineDescriptor {
 impl PipelineDescriptor {
     pub fn new(
         vertex_shader: Shader,
-        fragment_shader: Option<Shader>,
+        fragment_shader: Shader,
     ) -> Self {
+        let layout = PipelineLayout::from_shaders(
+            vec![&vertex_shader, &fragment_shader]
+        ).unwrap();
+
         Self {
             label: Some(String::from("Test")),
-            layout: None,
+            layout: Some(layout),
             vertex_shader,
             fragment_shader,
             color_states: Vec::new(),

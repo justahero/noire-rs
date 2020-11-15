@@ -16,7 +16,7 @@ use crate::{BindingType, ShaderStage};
 ///
 /// The binding defines input 'uniform' variable
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BindingDescriptor {
     /// The name of the binding
     pub name: String,

@@ -212,7 +212,7 @@ impl From<PrimitiveTopology> for wgpu::PrimitiveTopology {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UniformProperty {
     UInt,
     Int,

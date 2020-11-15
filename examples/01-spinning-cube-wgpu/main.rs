@@ -1,25 +1,21 @@
 use std::collections::HashMap;
 
 use cgmath::vec3;
-use renderer::{Camera, Mesh, PassDescriptor, Renderer, Shader, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
+use renderer::{Camera, PipelineDescriptor, Renderer, Shader, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
 
 pub struct Example {
-    /// The shaders to render
-    shaders: HashMap<ShaderStage, Shader>,
     /// The cube mesh to render
     buffer: VertexBuffer,
     /// The camera to view the scene from
     camera: Camera,
+    /// Render Pipeline
+    pipeline: wgpu::RenderPipeline,
 }
 
 impl WindowHandler for Example {
     fn load(window: &renderer::Window, _resources: &resources::Resources, renderer: &mut Renderer) -> Self where Self: Sized {
         let vertex_shader = renderer.create_shader(include_str!("shaders/vertex.glsl"), ShaderStage::Vertex);
         let fragment_shader = renderer.create_shader(include_str!("shaders/fragment.glsl"), ShaderStage::Fragment);
-
-        let mut shaders = HashMap::new();
-        shaders.insert(ShaderStage::Vertex, vertex_shader);
-        shaders.insert(ShaderStage::Fragment, fragment_shader);
 
         let mesh = shape::Cube::new(1.0);
         let mut camera = Camera::default();
@@ -32,11 +28,13 @@ impl WindowHandler for Example {
             );
 
         let buffer = renderer.create_vertex_buffer(&Vec::new());
+        let pipeline_descriptor = PipelineDescriptor::new(vertex_shader, fragment_shader);
+        let pipeline = renderer.create_pipeline(&pipeline_descriptor);
 
         Example {
-            shaders,
             buffer,
             camera,
+            pipeline,
         }
     }
 

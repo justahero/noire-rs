@@ -2,7 +2,7 @@ use std::num::NonZeroU32;
 
 use crate::{BindingDescriptor, ShaderStage, UniformProperty};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BindingType {
     /// Binding type is a uniform buffer
     Uniform {
@@ -33,7 +33,7 @@ impl From<&BindingType> for wgpu::BindingType {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BindGroupDescriptor {
     /// Index of the bind group
     pub index: u32,
@@ -46,6 +46,19 @@ impl BindGroupDescriptor {
         Self {
             index,
             bindings,
+        }
+    }
+
+    /// Finds a given Binding Descriptor in this Bind Group Descriptor
+    pub fn contains(&self, other: &BindingDescriptor) -> bool {
+        if let Some(binding) = self.bindings.iter().find(|rhs| rhs.index == other.index) {
+            if binding.binding_type == other.binding_type && binding.name == other.name {
+                true
+            } else {
+                panic!("Binding {} in BindGroup {} is not consistent across shader types: ", binding.index, self.index);
+            }
+        } else {
+            false
         }
     }
 }
