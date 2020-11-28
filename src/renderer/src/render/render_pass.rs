@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::{RenderPipelineId, Renderer, VertexBuffer};
 
 pub struct RenderPass<'a> {
@@ -21,7 +19,7 @@ impl<'a> RenderPass<'a> {
         }
     }
 
-    /// Sets a vertex buffer
+    /// Sets the vertex buffer to render
     pub fn set_vertex_buffer(&mut self, _vertex_buffer: &VertexBuffer) -> &mut Self {
         self
     }
@@ -35,5 +33,10 @@ impl<'a> RenderPass<'a> {
 
         self.render_pass.set_pipeline(pipeline);
         self
+    }
+
+    /// Draws the content of the pipeline
+    pub fn draw(&mut self) {
+        self.render_pass.draw(0..3, 0..2);
     }
 }

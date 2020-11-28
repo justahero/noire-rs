@@ -52,12 +52,16 @@ impl PipelineDescriptor {
             vec![&vertex_shader, &fragment_shader]
         ).unwrap();
 
+        let color_states = vec![
+            ColorStateDescriptor::default(),
+        ];
+
         Self {
             label: Some(String::from("Test")),
             layout: Some(layout),
             vertex_shader,
             fragment_shader,
-            color_states: Vec::new(),
+            color_states,
             rasterization_state: Some(RasterizationStateDescriptor::default()),
             primitive_topology: PrimitiveTopology::TriangleList,
             depth_stencil_state: Some(DepthStencilStateDescriptor::default()),

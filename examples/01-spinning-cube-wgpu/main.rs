@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use cgmath::vec3;
 use renderer::{Camera, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
 
@@ -43,6 +41,7 @@ impl WindowHandler for Example {
 
         renderer.begin_pass(&mut pass_descriptor, &mut |render_pass| {
             render_pass.set_pipeline(&self.pipeline);
+            // render_pass.draw();
         });
     }
 }
