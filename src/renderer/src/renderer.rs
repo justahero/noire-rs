@@ -2,7 +2,7 @@ use std::{sync::Arc, collections::HashMap};
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{BindGroupDescriptor, PassDescriptor, PipelineDescriptor, RenderPass, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer};
+use crate::{BindGroupDescriptor, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer};
 
 pub struct RenderPassHandle {}
 
@@ -50,6 +50,8 @@ pub struct Renderer {
     pub queue: Arc<wgpu::Queue>,
     /// The encoder to begin / finish the render pass
     pub command_encoder: CommandEncoder,
+    /// The list of created render pipelines
+    pub render_pipelines: HashMap<RenderPipelineId, wgpu::RenderPipeline>,
 }
 
 impl Renderer {
@@ -83,6 +85,7 @@ impl Renderer {
             device: Arc::new(device),
             queue: Arc::new(queue),
             command_encoder: CommandEncoder::default(),
+            render_pipelines: HashMap::new(),
         }
     }
 
@@ -92,7 +95,7 @@ impl Renderer {
     pub fn create_pipeline(
         &mut self,
         pipeline_descriptor: &PipelineDescriptor,
-    ) -> wgpu::RenderPipeline {
+    ) -> RenderPipelineId {
         let layout = pipeline_descriptor.get_layout().unwrap();
         let bind_group_layouts = layout.bind_groups
             .iter()
@@ -157,7 +160,11 @@ impl Renderer {
             alpha_to_coverage_enabled: pipeline_descriptor.alpha_to_coverage_enabled,
         };
 
-        self.device.create_render_pipeline(&render_pipeline_descriptor)
+        let pipeline_id = RenderPipelineId::new();
+        let pipeline = self.device.create_render_pipeline(&render_pipeline_descriptor);
+        self.render_pipelines.insert(pipeline_id, pipeline);
+
+        pipeline_id
     }
 
     /// Creates a new vertex buffer

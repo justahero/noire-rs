@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use cgmath::vec3;
-use renderer::{Camera, PipelineDescriptor, Renderer, Shader, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
+use renderer::{Camera, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
 
 pub struct Example {
     /// The cube mesh to render
@@ -9,7 +9,7 @@ pub struct Example {
     /// The camera to view the scene from
     camera: Camera,
     /// Render Pipeline
-    pipeline: wgpu::RenderPipeline,
+    pipeline: RenderPipelineId,
 }
 
 impl WindowHandler for Example {
@@ -41,8 +41,8 @@ impl WindowHandler for Example {
     fn render(&mut self, window: &mut renderer::Window, renderer: &mut Renderer) {
         let mut pass_descriptor = window.into();
 
-        renderer.begin_pass(&mut pass_descriptor, &mut |_render_pass| {
-
+        renderer.begin_pass(&mut pass_descriptor, &mut |render_pass| {
+            render_pass.set_pipeline(&self.pipeline);
         });
     }
 }

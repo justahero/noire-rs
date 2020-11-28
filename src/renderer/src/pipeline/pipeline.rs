@@ -1,4 +1,15 @@
+use uuid::Uuid;
+
 use crate::{ColorStateDescriptor, DepthStencilStateDescriptor, IndexFormat, PipelineLayout, PrimitiveTopology, RasterizationStateDescriptor, Shader};
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
+pub struct RenderPipelineId(Uuid);
+
+impl RenderPipelineId {
+    pub fn new() -> Self {
+        Self(Uuid::new_v4())
+    }
+}
 
 /// Describes a Render Pipeline
 pub struct PipelineDescriptor {

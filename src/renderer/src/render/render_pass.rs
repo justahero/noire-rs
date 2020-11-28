@@ -1,31 +1,39 @@
 use std::sync::Arc;
 
-use crate::{Renderer, VertexBuffer};
+use crate::{RenderPipelineId, Renderer, VertexBuffer};
 
 pub struct RenderPass<'a> {
-    /// The device to create instances with
-    device: Arc<wgpu::Device>,
-    /// Handle to command queue
-    queue: Arc<wgpu::Queue>,
+    /// The reference to the main Renderer
+    pub renderer: &'a Renderer,
     /// Internal reference to RenderPass
-    render_pass: wgpu::RenderPass<'a>,
+    pub render_pass: wgpu::RenderPass<'a>,
 }
 
 impl<'a> RenderPass<'a> {
     /// Initializes a Render Pass to provide useful API functions
     pub fn new(
-        renderer: &Renderer,
+        renderer: &'a Renderer,
         render_pass: wgpu::RenderPass<'a>,
     ) -> Self {
         Self {
-            device: renderer.device.clone(),
-            queue: renderer.queue.clone(),
+            renderer,
             render_pass,
         }
     }
 
     /// Sets a vertex buffer
     pub fn set_vertex_buffer(&mut self, _vertex_buffer: &VertexBuffer) -> &mut Self {
+        self
+    }
+
+    /// Sets the Render Pipeline
+    pub fn set_pipeline(&mut self, pipeline_id: &RenderPipelineId) -> &mut Self {
+        let pipeline = self.renderer
+            .render_pipelines
+            .get(pipeline_id)
+            .expect("Failed to get render pipeline by id");
+
+        self.render_pass.set_pipeline(pipeline);
         self
     }
 }
