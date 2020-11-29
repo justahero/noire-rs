@@ -1,8 +1,8 @@
-use std::{sync::Arc, collections::HashMap};
+use std::sync::Arc;
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{BindGroupDescriptor, IndexBuffer, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer};
+use crate::{BindGroupDescriptor, IndexBufferId, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBufferId, wgpu_resources::WgpuResources};
 
 pub struct RenderPassHandle {}
 
@@ -46,12 +46,10 @@ pub struct Renderer {
     pub instance: wgpu::Instance,
     /// The link / connection to the graphics device, useful to create objects
     pub device: Arc<wgpu::Device>,
-    /// Handle to a command queue on the (graphics) device
-    pub queue: Arc<wgpu::Queue>,
     /// The encoder to begin / finish the render pass
     pub command_encoder: CommandEncoder,
-    /// The list of created render pipelines
-    pub render_pipelines: HashMap<RenderPipelineId, wgpu::RenderPipeline>,
+    /// The list of all WGPU specific resources, only visible to crate
+    pub(crate) resources: WgpuResources,
 }
 
 impl Renderer {
@@ -68,7 +66,7 @@ impl Renderer {
 
         let trace_path = Some(std::path::Path::new("wgpu_trace"));
 
-        let (device, queue) = adapter
+        let (device, _queue) = adapter
             .request_device(
                 &wgpu::DeviceDescriptor {
                     features: wgpu::Features::empty(),
@@ -83,9 +81,8 @@ impl Renderer {
         Self {
             instance,
             device: Arc::new(device),
-            queue: Arc::new(queue),
             command_encoder: CommandEncoder::default(),
-            render_pipelines: HashMap::new(),
+            resources: WgpuResources::default(),
         }
     }
 
@@ -162,13 +159,13 @@ impl Renderer {
 
         let pipeline_id = RenderPipelineId::new();
         let pipeline = self.device.create_render_pipeline(&render_pipeline_descriptor);
-        self.render_pipelines.insert(pipeline_id, pipeline);
+        self.resources.render_pipelines.insert(pipeline_id, pipeline);
 
         pipeline_id
     }
 
     /// Creates a new vertex buffer
-    pub fn create_vertex_buffer(&mut self, data: &Vec<u8>) -> VertexBuffer {
+    pub fn create_vertex_buffer(&mut self, data: &Vec<u8>) -> VertexBufferId {
         let buffer = self.device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
@@ -176,19 +173,33 @@ impl Renderer {
                 usage: BufferUsage::VERTEX,
             }
         );
-        VertexBuffer::new(buffer)
+
+        let vertex_buffer_id = VertexBufferId::new();
+        self.resources.vertex_buffers.insert(
+            vertex_buffer_id,
+            buffer,
+        );
+
+        vertex_buffer_id
     }
 
     /// Creates a new index buffer
-    pub fn create_index_buffer(&mut self, indices: &Vec<u32>) -> IndexBuffer {
+    pub fn create_index_buffer(&mut self, indices: &Indices) -> IndexBufferId {
         let buffer = self.device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Index Buffer"),
-                contents: bytemuck::cast_slice(indices),
+                contents: &indices.as_bytes(),
                 usage: wgpu::BufferUsage::INDEX,
             }
         );
-        IndexBuffer::new(buffer)
+
+        let index_buffer_id = IndexBufferId::new();
+        self.resources.index_buffers.insert(
+            index_buffer_id,
+            buffer,
+        );
+
+        index_buffer_id
     }
 
     /// Creates a new render pass

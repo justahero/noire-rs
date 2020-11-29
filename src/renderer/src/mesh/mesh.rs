@@ -113,6 +113,15 @@ pub enum Indices {
     U32(Vec<u32>),
 }
 
+impl Indices {
+    pub fn as_bytes(&self) -> &[u8] {
+        match self {
+            Indices::U16(v) => bytemuck::cast_slice(v),
+            Indices::U32(v) => bytemuck::cast_slice(v),
+        }
+    }
+}
+
 /// A Mesh struct that contains vertices, normals, tex coords.
 #[derive(Debug)]
 pub struct Mesh {

@@ -1,4 +1,15 @@
+use uuid::Uuid;
+
 use crate::{VertexFormat, InputStepMode};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct VertexBufferId(Uuid);
+
+impl VertexBufferId {
+    pub fn new() -> Self {
+        Self(Uuid::new_v4())
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub struct VertexAttributeDescriptor {
@@ -92,19 +103,6 @@ impl<'a> From<&'a WgpuVertexBufferDescriptor> for wgpu::VertexBufferDescriptor<'
             stride: descriptor.stride,
             step_mode: descriptor.step_mode,
             attributes: &descriptor.attributes,
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct VertexBuffer {
-    pub vertex_buffer: wgpu::Buffer,
-}
-
-impl VertexBuffer {
-    pub fn new(vertex_buffer: wgpu::Buffer) -> Self {
-        VertexBuffer {
-            vertex_buffer,
         }
     }
 }
