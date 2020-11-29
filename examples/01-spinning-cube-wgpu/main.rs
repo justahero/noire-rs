@@ -1,9 +1,9 @@
 use cgmath::vec3;
-use renderer::{Camera, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
+use renderer::{Camera, Mesh, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, WindowHandler, WindowSettings, point3, shape};
 
 pub struct Example {
     /// The cube mesh to render
-    buffer: VertexBuffer,
+    mesh: Mesh,
     /// The camera to view the scene from
     camera: Camera,
     /// Render Pipeline
@@ -15,7 +15,7 @@ impl WindowHandler for Example {
         let vertex_shader = renderer.create_shader(include_str!("shaders/vertex.glsl"), ShaderStage::Vertex);
         let fragment_shader = renderer.create_shader(include_str!("shaders/fragment.glsl"), ShaderStage::Fragment);
 
-        let mesh = shape::Cube::new(1.0);
+        let mesh: Mesh = shape::Cube::new(1.0).into();
         let mut camera = Camera::default();
         camera
             .perspective(window.aspect())
@@ -25,12 +25,11 @@ impl WindowHandler for Example {
                 vec3(0.0, 1.0, 0.0),
             );
 
-        let buffer = renderer.create_vertex_buffer(&Vec::new());
         let pipeline_descriptor = PipelineDescriptor::new(vertex_shader, fragment_shader);
         let pipeline = renderer.create_pipeline(&pipeline_descriptor);
 
         Example {
-            buffer,
+            mesh,
             camera,
             pipeline,
         }
@@ -41,7 +40,8 @@ impl WindowHandler for Example {
 
         renderer.begin_pass(&mut pass_descriptor, &mut |render_pass| {
             render_pass.set_pipeline(&self.pipeline);
-            // render_pass.draw();
+            // render_pass.set_vertex_buffer(&self.mesh.vertex_buffer());
+            render_pass.draw();
         });
     }
 }

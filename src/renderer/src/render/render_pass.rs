@@ -37,6 +37,6 @@ impl<'a> RenderPass<'a> {
 
     /// Draws the content of the pipeline
     pub fn draw(&mut self) {
-        self.render_pass.draw(0..3, 0..2);
+        self.render_pass.draw(0..3, 0..1);
     }
 }

@@ -1,6 +1,6 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, fmt::Display};
 
-use crate::PrimitiveTopology;
+use crate::{PrimitiveTopology, VertexBufferDescriptor, VertexFormat};
 
 #[derive(Debug)]
 pub enum VertexAttributeValues {
@@ -20,8 +20,36 @@ impl VertexAttributeValues {
         }
     }
 
+    /// Returns true if there are no vert, false otherwise
     pub fn is_empty(&self) -> bool {
         self.len() == 0
+    }
+
+    /// Returns the internal bytes
+    pub fn get_bytes(&self) -> &[u8] {
+        match self {
+            VertexAttributeValues::Float(values) => bytemuck::cast_slice(values.as_slice()),
+            VertexAttributeValues::Float2(values) => bytemuck::cast_slice(values.as_slice()),
+            VertexAttributeValues::Float3(values) => bytemuck::cast_slice(values.as_slice()),
+            VertexAttributeValues::Float4(values) => bytemuck::cast_slice(values.as_slice()),
+        }
+    }
+}
+
+impl From<&VertexAttributeValues> for VertexFormat {
+    fn from(values: &VertexAttributeValues) -> Self {
+        match values {
+            VertexAttributeValues::Float(_) => VertexFormat::Float,
+            VertexAttributeValues::Float2(_) => VertexFormat::Float2,
+            VertexAttributeValues::Float3(_) => VertexFormat::Float3,
+            VertexAttributeValues::Float4(_) => VertexFormat::Float4,
+        }
+    }
+}
+
+impl From<Vec<f32>> for VertexAttributeValues {
+    fn from(vec: Vec<f32>) -> Self {
+        VertexAttributeValues::Float(vec)
     }
 }
 
@@ -57,6 +85,24 @@ impl VertexAttribute {
             values: VertexAttributeValues::Float2(texcoords),
         }
     }
+
+    /// Returns the vertex size of this attribute
+    pub fn vertex_size(&self) -> usize {
+        let format: VertexFormat = (&self.values).into();
+        format.size() as usize
+    }
+}
+
+impl Display for VertexAttribute {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl From<&VertexAttribute> for VertexFormat {
+    fn from(attribute: &VertexAttribute) -> VertexFormat {
+        (&attribute.values).into()
+    }
 }
 
 #[derive(Debug)]
@@ -88,9 +134,64 @@ impl Mesh {
         }
     }
 
+    /// Returns the count of all vertices
+    pub fn vertex_count(&self) -> usize {
+        let mut vertex_count: Option<usize> = None;
+
+        for attribute in self.attributes.iter() {
+            let attributes_size = attribute.values.len();
+            if let Some(previous) = vertex_count {
+                assert_eq!(
+                    previous,
+                    attributes_size,
+                    "Attribute {} has different vertex count ({}) than other attributes", previous, attribute
+                );
+            }
+            vertex_count = Some(attributes_size);
+        }
+
+        vertex_count.unwrap_or(0)
+    }
+
+    /// Returns the stride of a single vertex
+    pub fn vertex_stride(&self) -> usize {
+        self.attributes
+            .iter()
+            .map(|attribute| attribute.vertex_size())
+            .sum()
+    }
+
     /// Returns all bytes as u8 vector
-    pub fn slice(&self) -> Vec<u8> {
-        Vec::new()
+    pub fn vertex_data(&self) -> Vec<u8> {
+        let vertex_count = self.vertex_count();
+        let vertex_size = self.vertex_stride();
+        let mut interleaved_data = vec![0; vertex_count * vertex_size];
+
+        let mut attribute_offset = 0;
+        for attribute in self.attributes.iter() {
+            let vertex_format: VertexFormat = attribute.into();
+            let attribute_size = vertex_format.size() as usize;
+            let attribute_bytes = attribute.values.get_bytes();
+
+            for (vertex_index, attribute_bytes) in attribute_bytes.chunks_exact(attribute_size).enumerate() {
+                let offset = vertex_index * vertex_size + attribute_offset;
+                interleaved_data[offset..offset + attribute_size].copy_from_slice(attribute_bytes);
+            }
+
+            attribute_offset += attribute_size;
+        }
+
+        interleaved_data
+    }
+
+    /// Returns vertex buffer descriptor
+    pub fn vertex_buffer_descriptor(&self) -> VertexBufferDescriptor {
+        let vertex_formats = self.attributes
+            .iter()
+            .map(|attribute| attribute.into())
+            .collect::<Vec<VertexFormat>>();
+
+        VertexBufferDescriptor::new(vertex_formats)
     }
 }
 
@@ -232,5 +333,19 @@ pub mod shape {
                 indices: Some(indices),
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{Mesh, shape};
+
+    #[test]
+    fn cube_vertex() {
+        let cube: Mesh = shape::Cube::new(1.0).into();
+
+        assert_eq!(cube.vertex_count(), 3 * 8);
+        assert_eq!(cube.vertex_stride(), (3 + 3 + 2) * std::mem::size_of::<f32>());
+        assert_eq!(cube.vertex_data().len(), (3 + 3 + 2) * 8 * std::mem::size_of::<f32>());
     }
 }
