@@ -1,6 +1,8 @@
+pub mod index_buffer;
 pub mod vertex;
 pub mod vertex_buffer;
 
+pub use index_buffer::*;
 pub use vertex::*;
 pub use vertex_buffer::*;
 

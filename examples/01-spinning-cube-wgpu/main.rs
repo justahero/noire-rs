@@ -1,9 +1,9 @@
 use cgmath::vec3;
-use renderer::{Camera, Mesh, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, WindowHandler, WindowSettings, point3, shape};
+use renderer::{Camera, Mesh, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
 
 pub struct Example {
     /// The cube mesh to render
-    mesh: Mesh,
+    vertex_buffer: VertexBuffer,
     /// The camera to view the scene from
     camera: Camera,
     /// Render Pipeline
@@ -16,6 +16,7 @@ impl WindowHandler for Example {
         let fragment_shader = renderer.create_shader(include_str!("shaders/fragment.glsl"), ShaderStage::Fragment);
 
         let mesh: Mesh = shape::Cube::new(1.0).into();
+        let vertex_buffer = renderer.create_vertex_buffer(&mesh.vertex_data());
         let mut camera = Camera::default();
         camera
             .perspective(window.aspect())
@@ -29,7 +30,7 @@ impl WindowHandler for Example {
         let pipeline = renderer.create_pipeline(&pipeline_descriptor);
 
         Example {
-            mesh,
+            vertex_buffer,
             camera,
             pipeline,
         }
@@ -40,7 +41,7 @@ impl WindowHandler for Example {
 
         renderer.begin_pass(&mut pass_descriptor, &mut |render_pass| {
             render_pass.set_pipeline(&self.pipeline);
-            // render_pass.set_vertex_buffer(&self.mesh.vertex_buffer());
+            render_pass.set_vertex_buffer(&self.vertex_buffer);
             render_pass.draw();
         });
     }

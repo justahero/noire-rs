@@ -1,4 +1,4 @@
-use crate::{RenderPipelineId, Renderer, VertexBuffer};
+use crate::{IndexBuffer, RenderPipelineId, Renderer, VertexBuffer};
 
 pub struct RenderPass<'a> {
     /// The reference to the main Renderer
@@ -17,6 +17,11 @@ impl<'a> RenderPass<'a> {
             renderer,
             render_pass,
         }
+    }
+
+    /// Sets the index buffer to render
+    pub fn set_index_buffer(&mut self, _index_buffer: &IndexBuffer) -> &mut Self {
+        self
     }
 
     /// Sets the vertex buffer to render

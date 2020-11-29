@@ -2,7 +2,7 @@ use std::{sync::Arc, collections::HashMap};
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{BindGroupDescriptor, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer};
+use crate::{BindGroupDescriptor, IndexBuffer, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer};
 
 pub struct RenderPassHandle {}
 
@@ -177,6 +177,18 @@ impl Renderer {
             }
         );
         VertexBuffer::new(buffer)
+    }
+
+    /// Creates a new index buffer
+    pub fn create_index_buffer(&mut self, indices: &Vec<u32>) -> IndexBuffer {
+        let buffer = self.device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Index Buffer"),
+                contents: bytemuck::cast_slice(indices),
+                usage: wgpu::BufferUsage::INDEX,
+            }
+        );
+        IndexBuffer::new(buffer)
     }
 
     /// Creates a new render pass
