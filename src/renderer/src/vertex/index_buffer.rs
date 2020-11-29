@@ -9,15 +9,19 @@ impl IndexBufferId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub struct IndexBuffer {
-    pub index_buffer: wgpu::Buffer,
+    /// Id of this buffer
+    pub uuid: Uuid,
+    /// Number of indices to cover
+    pub count: u32,
 }
 
 impl IndexBuffer {
-    pub fn new(index_buffer: wgpu::Buffer) -> Self {
-        IndexBuffer {
-            index_buffer,
+    pub fn new(indices_count: u32) -> Self {
+        Self {
+            uuid: Uuid::new_v4(),
+            count: indices_count,
         }
     }
 }

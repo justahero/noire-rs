@@ -120,6 +120,14 @@ impl Indices {
             Indices::U32(v) => bytemuck::cast_slice(v),
         }
     }
+
+    /// Returns the indices count
+    pub fn len(&self) -> u32 {
+        match self {
+            Indices::U16(v) => v.len() as u32,
+            Indices::U32(v) => v.len() as u32,
+        }
+    }
 }
 
 /// A Mesh struct that contains vertices, normals, tex coords.

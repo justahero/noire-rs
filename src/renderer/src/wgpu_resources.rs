@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{IndexBufferId, RenderPipelineId, VertexBufferId};
+use crate::{IndexBuffer, RenderPipelineId, VertexBuffer};
 
 /// Internal struct to keep all WGPU related structs
 #[derive(Debug)]
@@ -8,9 +8,9 @@ pub(crate) struct WgpuResources {
     /// List of all Render pipelines
     pub render_pipelines: HashMap<RenderPipelineId, wgpu::RenderPipeline>,
     /// Map of all vertex buffers
-    pub vertex_buffers: HashMap<VertexBufferId, wgpu::Buffer>,
+    pub vertex_buffers: HashMap<VertexBuffer, wgpu::Buffer>,
     /// Map of all index buffers
-    pub index_buffers: HashMap<IndexBufferId, wgpu::Buffer>,
+    pub index_buffers: HashMap<IndexBuffer, wgpu::Buffer>,
 }
 
 impl Default for WgpuResources {
@@ -32,16 +32,16 @@ impl WgpuResources {
     }
 
     /// Returns the index buffer by id, fails otherwise
-    pub fn get_index_buffer(&self, index_buffer_id: &IndexBufferId) -> &wgpu::Buffer {
+    pub fn get_index_buffer(&self, index_buffer: &IndexBuffer) -> &wgpu::Buffer {
         self.index_buffers
-            .get(index_buffer_id)
+            .get(index_buffer)
             .expect("No Index Buffer with id found")
     }
 
     /// Returns the vertex buffer by id, fails otherwise
-    pub fn get_vertex_buffer(&self, vertex_buffer_id: &VertexBufferId) -> &wgpu::Buffer {
+    pub fn get_vertex_buffer(&self, vertex_buffer: &VertexBuffer) -> &wgpu::Buffer {
         self.vertex_buffers
-            .get(vertex_buffer_id)
+            .get(vertex_buffer)
             .expect("No Vertex Buffer with id found")
     }
 }

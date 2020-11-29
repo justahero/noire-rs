@@ -1,11 +1,11 @@
 use cgmath::vec3;
-use renderer::{Camera, IndexBufferId, Mesh, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBufferId, WindowHandler, WindowSettings, point3, shape};
+use renderer::{Camera, IndexBuffer, Mesh, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
 
 pub struct Example {
     /// The cube mesh to render
-    vertex_buffer: VertexBufferId,
+    vertex_buffer: VertexBuffer,
     /// The index data to reference vertex buffer
-    index_buffer: IndexBufferId,
+    index_buffer: IndexBuffer,
     /// The camera to view the scene from
     camera: Camera,
     /// Render Pipeline
@@ -48,7 +48,7 @@ impl WindowHandler for Example {
             render_pass.set_pipeline(&self.pipeline);
             render_pass.set_vertex_buffer(0, &self.vertex_buffer);
             render_pass.set_index_buffer(&self.index_buffer);
-            render_pass.draw();
+            render_pass.draw_indexed(0..self.index_buffer.count, 0, 0..1);
         });
     }
 }

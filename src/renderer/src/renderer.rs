@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{BindGroupDescriptor, IndexBufferId, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBufferId, wgpu_resources::WgpuResources};
+use crate::{BindGroupDescriptor, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, wgpu_resources::WgpuResources};
 
 pub struct RenderPassHandle {}
 
@@ -165,7 +165,7 @@ impl Renderer {
     }
 
     /// Creates a new vertex buffer
-    pub fn create_vertex_buffer(&mut self, data: &Vec<u8>) -> VertexBufferId {
+    pub fn create_vertex_buffer(&mut self, data: &Vec<u8>) -> VertexBuffer {
         let buffer = self.device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Vertex Buffer"),
@@ -174,7 +174,7 @@ impl Renderer {
             }
         );
 
-        let vertex_buffer_id = VertexBufferId::new();
+        let vertex_buffer_id = VertexBuffer::new();
         self.resources.vertex_buffers.insert(
             vertex_buffer_id,
             buffer,
@@ -184,7 +184,7 @@ impl Renderer {
     }
 
     /// Creates a new index buffer
-    pub fn create_index_buffer(&mut self, indices: &Indices) -> IndexBufferId {
+    pub fn create_index_buffer(&mut self, indices: &Indices) -> IndexBuffer {
         let buffer = self.device.create_buffer_init(
             &wgpu::util::BufferInitDescriptor {
                 label: Some("Index Buffer"),
@@ -193,13 +193,13 @@ impl Renderer {
             }
         );
 
-        let index_buffer_id = IndexBufferId::new();
+        let index_buffer = IndexBuffer::new(indices.len());
         self.resources.index_buffers.insert(
-            index_buffer_id,
+            index_buffer,
             buffer,
         );
 
-        index_buffer_id
+        index_buffer
     }
 
     /// Creates a new render pass

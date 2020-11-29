@@ -1,4 +1,6 @@
-use crate::{IndexBufferId, RenderPipelineId, Renderer, VertexBufferId, wgpu_resources::WgpuResources};
+use std::ops::Range;
+
+use crate::{IndexBuffer, RenderPipelineId, Renderer, VertexBuffer, wgpu_resources::WgpuResources};
 
 pub struct RenderPass<'a> {
     /// The reference to the main Renderer
@@ -20,14 +22,14 @@ impl<'a> RenderPass<'a> {
     }
 
     /// Sets the index buffer to render
-    pub fn set_index_buffer(&mut self, index_buffer: &IndexBufferId) -> &mut Self {
+    pub fn set_index_buffer(&mut self, index_buffer: &IndexBuffer) -> &mut Self {
         let index_buffer = self.resources.get_index_buffer(index_buffer);
         self.render_pass.set_index_buffer(index_buffer.slice(..));
         self
     }
 
     /// Sets the vertex buffer to render
-    pub fn set_vertex_buffer(&mut self, slot: u32, vertex_buffer: &VertexBufferId) -> &mut Self {
+    pub fn set_vertex_buffer(&mut self, slot: u32, vertex_buffer: &VertexBuffer) -> &mut Self {
         let vertex_buffer = self.resources.get_vertex_buffer(vertex_buffer);
         self.render_pass.set_vertex_buffer(slot, vertex_buffer.slice(..));
         self
@@ -40,8 +42,8 @@ impl<'a> RenderPass<'a> {
         self
     }
 
-    /// Draws the content of the pipeline
-    pub fn draw(&mut self) {
-        self.render_pass.draw(0..3, 0..1);
+    /// Draws the content of the pipeline using indices
+    pub fn draw_indexed(&mut self, indices: Range<u32>, base_vertex: i32, instances: Range<u32>) {
+        self.render_pass.draw_indexed(indices, base_vertex, instances);
     }
 }

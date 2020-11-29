@@ -3,11 +3,16 @@ use uuid::Uuid;
 use crate::{VertexFormat, InputStepMode};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct VertexBufferId(Uuid);
+pub struct VertexBuffer {
+    /// The id of this Vertex buffer
+    pub uuid: Uuid,
+}
 
-impl VertexBufferId {
+impl VertexBuffer {
     pub fn new() -> Self {
-        Self(Uuid::new_v4())
+        Self {
+            uuid: Uuid::new_v4(),
+        }
     }
 }
 
