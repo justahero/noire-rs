@@ -1,6 +1,4 @@
-use std::num::NonZeroU32;
-
-use crate::{BindingDescriptor, ShaderStage, UniformProperty};
+use crate::{ShaderStage, UniformProperty};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BindingType {
@@ -33,16 +31,55 @@ impl From<&BindingType> for wgpu::BindingType {
     }
 }
 
+/// Defines a particular binding between Shader input variable and outside parameters.
+///
+/// Example:
+/// const VERTEX_SHADER: &str = r#"
+/// #version 450
+///
+/// uniform vec3 color;
+/// layout(location=0) in vec2 position;
+///
+/// void main() {
+///     gl_Position = vec4(position, 0.0, 1.0);
+/// }
+/// "#;
+///
+/// The binding defines input 'uniform' variable
+///
+#[derive(Debug, Clone)]
+pub struct BindGroupEntry {
+    /// The name of the binding
+    pub name: String,
+    /// The index of binding group
+    pub index: u32,
+    /// The binding type
+    pub binding_type: BindingType,
+    /// The shader stage this binding is associated with
+    pub shader_stage: ShaderStage,
+}
+
+impl BindGroupEntry {
+}
+
+bitflags::bitflags! {
+    pub struct BindingShaderStage: u32 {
+        const VERTEX = 1;
+        const FRAGMENT = 2;
+        const COMPUTE = 4;
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct BindGroupDescriptor {
     /// Index of the bind group
     pub index: u32,
-    /// The
-    pub bindings: Vec<BindingDescriptor>,
+    /// The list of bind group entries
+    pub bindings: Vec<BindGroupEntry>,
 }
 
 impl BindGroupDescriptor {
-    pub fn new(index: u32, bindings: Vec<BindingDescriptor>) -> Self {
+    pub fn new(index: u32, bindings: Vec<BindGroupEntry>) -> Self {
         Self {
             index,
             bindings,
@@ -50,7 +87,7 @@ impl BindGroupDescriptor {
     }
 
     /// Finds a given Binding Descriptor in this Bind Group Descriptor
-    pub fn contains(&self, other: &BindingDescriptor) -> bool {
+    pub fn contains(&self, other: &BindGroupEntry) -> bool {
         if let Some(binding) = self.bindings.iter().find(|rhs| rhs.index == other.index) {
             if binding.binding_type == other.binding_type && binding.name == other.name {
                 true
@@ -61,47 +98,4 @@ impl BindGroupDescriptor {
             false
         }
     }
-}
-
-/// Describes a single binding inside a BindGroup
-///
-/// For example in shader
-///
-/// layout(set = 0, binding = 1) uniform;
-///
-#[derive(Debug)]
-pub struct BindGroupLayoutEntry {
-    /// Debug label
-    pub label: Option<String>,
-    /// The Binding index, must match shader index and unique inside a BindGroupLayout
-    pub binding: u32,
-    /// Which shader can see this binding
-    pub visibility: ShaderStage,
-    /// The type of binding
-    pub binding_type: BindingType,
-    /// Indices if this entry is an array, must be 1 or greater
-    pub count: Option<NonZeroU32>,
-}
-
-impl From<&BindGroupLayoutEntry> for wgpu::BindGroupLayoutEntry {
-    fn from(entry: &BindGroupLayoutEntry) -> Self {
-        Self {
-            binding: entry.binding,
-            visibility: entry.visibility.into(),
-            // TODO currently set one type directly
-            ty: wgpu::BindingType::UniformBuffer {
-                dynamic: true,
-                min_binding_size: None,
-            },
-            count: entry.count,
-        }
-    }
-}
-
-#[derive(Debug)]
-pub struct BindGroupLayoutDescriptor {
-    /// Debug label of the bind group layout
-    pub label: Option<String>,
-    /// Array of entrie in this BindGroupLayout
-    pub entries: Vec<BindGroupLayoutEntry>,
 }

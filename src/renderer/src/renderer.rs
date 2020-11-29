@@ -99,6 +99,8 @@ impl Renderer {
             .map(|bind_group| create_bind_group_layout(&self.device, bind_group))
             .collect::<Vec<wgpu::BindGroupLayout>>();
 
+        dbg!(&bind_group_layouts);
+
         let bind_group_layouts_ref = bind_group_layouts
             .iter()
             .map(|layout| layout)
@@ -108,7 +110,8 @@ impl Renderer {
             self.device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                     label: None,
-                    bind_group_layouts: bind_group_layouts_ref.as_slice(),
+                    // bind_group_layouts: bind_group_layouts_ref.as_slice(),
+                    bind_group_layouts: &[],
                     push_constant_ranges: &[],
                 });
 
