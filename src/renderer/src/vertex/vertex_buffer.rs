@@ -18,6 +18,8 @@ impl VertexBuffer {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct VertexAttributeDescriptor {
+    /// The attribute name
+    pub name: String,
     /// Byte offset of the start of the input
     pub offset: u64,
     /// Location for this input, must match the location in shader
@@ -36,10 +38,16 @@ impl From<&VertexAttributeDescriptor> for wgpu::VertexAttributeDescriptor {
     }
 }
 
-#[derive(Debug, Clone)]
+impl VertexAttributeDescriptor {
+    pub fn size(&self) -> u64 {
+        self.format.size()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct VertexBufferDescriptor {
     /// Debug label
-    pub label: Option<String>,
+    pub label: String,
     /// buffer address stride
     pub stride: u64,
     /// Step mode of the buffer
@@ -54,6 +62,7 @@ impl VertexBufferDescriptor {
         let mut attributes = Vec::new();
         for (location, format) in verts.iter().enumerate() {
             let descriptor = VertexAttributeDescriptor {
+                name: "".to_string(),
                 location: location as u32,
                 offset,
                 format: format.clone(),
@@ -66,16 +75,29 @@ impl VertexBufferDescriptor {
         let stride = verts.iter().map(|f| f.size()).sum();
 
         Self {
-            label: None,
+            label: "".to_string(),
             stride,
             step_mode: InputStepMode::Vertex,
             attributes,
         }
     }
 
+    /// Creates a vertex buffer descriptor from an attribute
+    pub fn from_attribute(
+        attribute: VertexAttributeDescriptor,
+        step_mode: InputStepMode
+    ) -> Self {
+        Self {
+            label: attribute.name.clone(),
+            stride: attribute.format.size(),
+            step_mode,
+            attributes: vec![attribute.clone()],
+        }
+    }
+
     /// Returns the size of all vertex attributes
-    pub fn vertex_size(&self) -> u64 {
-        self.attributes.iter().map(|desc| desc.format.size()).sum()
+    pub fn stride(&self) -> u64 {
+        self.attributes.iter().map(|desc| desc.size()).sum()
     }
 }
 
@@ -126,13 +148,15 @@ mod tests {
         assert_eq!(
             vec![
                 VertexAttributeDescriptor {
+                    name: "".to_string(),
                     location: 0,
                     offset: 0,
                     format: VertexFormat::Float3,
                 },
                 VertexAttributeDescriptor {
+                    name: "".to_string(),
                     location: 1,
-                    offset: VertexFormat::Float3.size(),
+                    offset: 3 * 4,
                     format: VertexFormat::Float2,
                 },
             ],

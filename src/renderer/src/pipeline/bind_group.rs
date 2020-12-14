@@ -47,7 +47,7 @@ impl From<&BindingType> for wgpu::BindingType {
 ///
 /// The binding defines input 'uniform' variable
 ///
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BindGroupEntry {
     /// The name of the binding
     pub name: String,
@@ -70,7 +70,7 @@ bitflags::bitflags! {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct BindGroupDescriptor {
     /// Index of the bind group
     pub index: u32,

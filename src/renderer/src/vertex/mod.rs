@@ -21,7 +21,7 @@ impl From<IndexFormat> for wgpu::IndexFormat {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InputStepMode {
     /// Input data is advanced by Vertex
     Vertex,

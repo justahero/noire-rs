@@ -86,9 +86,8 @@ impl Renderer {
         }
     }
 
-
-    /// For now this returns the internal wgpu RenderPipeline until it's a bit clearer
-    /// where and how to handle them
+    /// This creates and stores a new wgpu::RenderPipeline, the function returns an ID
+    /// to reference it later
     pub fn create_pipeline(
         &mut self,
         pipeline_descriptor: &PipelineDescriptor,
@@ -98,8 +97,6 @@ impl Renderer {
             .iter()
             .map(|bind_group| create_bind_group_layout(&self.device, bind_group))
             .collect::<Vec<wgpu::BindGroupLayout>>();
-
-        dbg!(&bind_group_layouts);
 
         let bind_group_layouts_ref = bind_group_layouts
             .iter()
