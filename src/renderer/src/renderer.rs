@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{BindGroupDescriptor, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, wgpu_resources::WgpuResources};
+use crate::{BindGroupDescriptor, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, wgpu_resources::WgpuResources, WgpuVertexBufferDescriptor};
 
 pub struct RenderPassHandle {}
 
@@ -109,9 +109,8 @@ impl Renderer {
         let pipeline_layout =
             self.device
                 .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                    label: None,
-                    // bind_group_layouts: bind_group_layouts_ref.as_slice(),
-                    bind_group_layouts: &[],
+                    label: Some("Pipeline layout"),
+                    bind_group_layouts: bind_group_layouts_ref.as_slice(),
                     push_constant_ranges: &[],
                 });
 
@@ -121,9 +120,17 @@ impl Renderer {
             entry_point: "main",
         };
 
+        let vertex_buffer_descriptors = layout.vertex_buffer_descriptors
+            .iter()
+            .map(|v| v.into())
+            .collect::<Vec<WgpuVertexBufferDescriptor>>();
+
         let vertex_state = wgpu::VertexStateDescriptor {
             index_format: pipeline_descriptor.index_format.into(),
-            vertex_buffers: &[],
+            vertex_buffers: &vertex_buffer_descriptors
+                .iter()
+                .map(|v| v.into())
+                .collect::<Vec<wgpu::VertexBufferDescriptor>>()
         };
 
         let fragment_stage = wgpu::ProgrammableStageDescriptor {

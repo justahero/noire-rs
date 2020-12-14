@@ -1,11 +1,13 @@
 use std::collections::HashMap;
 
-use crate::{BindGroupDescriptor, Shader, ShaderError};
+use crate::{BindGroupDescriptor, Shader, ShaderError, ShaderLayout, VertexBufferDescriptor};
 
 #[derive(Debug)]
 pub struct PipelineLayout {
     /// The list of bind group descriptors
     pub bind_groups: Vec<BindGroupDescriptor>,
+    /// The list of vertex buffer descriptors
+    pub vertex_buffer_descriptors: Vec<VertexBufferDescriptor>,
 }
 
 impl PipelineLayout {
@@ -13,8 +15,13 @@ impl PipelineLayout {
     /// It checks all bind groups of the shaders and sees if they are the same for all shader stages.
     pub fn from_shaders(shaders: Vec<&Shader>) -> Result<Self, ShaderError> {
         let mut bind_groups = HashMap::<u32, BindGroupDescriptor>::new();
-        for shader in shaders {
-            let mut shader_layout = shader.layout();
+
+        let mut shader_layouts = shaders
+            .iter()
+            .map(|shader| shader.layout())
+            .collect::<Vec<ShaderLayout>>();
+
+        for shader_layout in shader_layouts.iter_mut() {
             for shader_bind_group in shader_layout.bind_groups.iter_mut() {
                 match bind_groups.get_mut(&shader_bind_group.index) {
                     Some(bind_group) => {
@@ -36,8 +43,13 @@ impl PipelineLayout {
             .map(|(_index, descriptor)| descriptor)
             .collect();
 
+        let vertex_buffer_descriptors = shader_layouts[0].vertex_buffer_descriptors.iter()
+            .map(|vb| vb.clone())
+            .collect::<Vec<VertexBufferDescriptor>>();
+
         Ok(PipelineLayout {
             bind_groups,
+            vertex_buffer_descriptors,
         })
     }
 }

@@ -1,13 +1,17 @@
 use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectDescriptorType, ReflectInterfaceVariable}};
 
-use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, Shader, ShaderStage, UniformProperty, VertexAttributeDescriptor, WgpuInto};
+use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, Shader, ShaderStage, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, WgpuInto};
 
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ShaderLayout {
+    /// Name of the entry point
+    pub entry_point: String,
     /// The list of bind groups
     pub bind_groups: Vec<BindGroupDescriptor>,
+    /// The list of vertex buffer descriptors
+    pub vertex_buffer_descriptors: Vec<VertexBufferDescriptor>,
 }
 
 impl ShaderLayout {
@@ -20,7 +24,7 @@ impl ShaderLayout {
 /// Reflect the given shader
 pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     let shader_module = ShaderModule::load_u8_data(spv_data).unwrap();
-    let _entry_point_name = shader_module.get_entry_point_name();
+    let entry_point = shader_module.get_entry_point_name();
     let shader_stage: ShaderStage = shader_module.get_shader_stage().into();
 
     let bind_groups: Vec<BindGroupDescriptor> = reflect_bind_groups(&shader_module, shader_stage);
@@ -30,7 +34,9 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     reflect_push_constant_blocks(&shader_module);
 
     ShaderLayout {
+        entry_point,
         bind_groups,
+        vertex_buffer_descriptors: Vec::new(),
     }
 }
 
@@ -49,9 +55,7 @@ pub(crate) fn reflect_bind_group(
 ) -> BindGroupDescriptor {
     let bindings: Vec<BindGroupEntry> = descriptor_set.bindings
         .iter()
-        .map(|binding| {
-            reflect_binding(binding, shader_stage)
-        })
+        .map(|binding| reflect_binding(binding, shader_stage))
         .collect();
     BindGroupDescriptor::new(descriptor_set.set, bindings)
 }

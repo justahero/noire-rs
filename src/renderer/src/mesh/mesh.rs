@@ -361,8 +361,8 @@ mod tests {
     fn cube_vertex() {
         let cube: Mesh = shape::Cube::new(1.0).into();
 
-        assert_eq!(cube.vertex_count(), 3 * 8);
+        assert_eq!(cube.vertex_count(), 24);
         assert_eq!(cube.vertex_stride(), (3 + 3 + 2) * std::mem::size_of::<f32>());
-        assert_eq!(cube.vertex_data().len(), (3 + 3 + 2) * 8 * std::mem::size_of::<f32>());
+        assert_eq!(cube.vertex_data().len(), cube.vertex_count() * cube.vertex_stride());
     }
 }

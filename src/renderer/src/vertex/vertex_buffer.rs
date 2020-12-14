@@ -16,7 +16,7 @@ impl VertexBuffer {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct VertexAttributeDescriptor {
     /// Byte offset of the start of the input
     pub offset: u64,
@@ -36,7 +36,7 @@ impl From<&VertexAttributeDescriptor> for wgpu::VertexAttributeDescriptor {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct VertexBufferDescriptor {
     /// Debug label
     pub label: Option<String>,
@@ -51,7 +51,6 @@ pub struct VertexBufferDescriptor {
 impl VertexBufferDescriptor {
     pub fn new(verts: Vec<VertexFormat>) -> Self {
         let mut offset = 0;
-        let mut stride = 0;
         let mut attributes = Vec::new();
         for (location, format) in verts.iter().enumerate() {
             let descriptor = VertexAttributeDescriptor {
@@ -61,9 +60,10 @@ impl VertexBufferDescriptor {
             };
 
             offset += format.size();
-            stride += format.size();
             attributes.push(descriptor.into());
         }
+
+        let stride = verts.iter().map(|f| f.size()).sum();
 
         Self {
             label: None,
