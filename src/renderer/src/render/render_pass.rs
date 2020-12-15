@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use crate::{IndexBuffer, RenderPipelineId, Renderer, VertexBuffer, wgpu_resources::WgpuResources};
+use crate::{BindGroupDescriptorId, BindGroupId, IndexBuffer, RenderPipelineId, Renderer, VertexBuffer, wgpu_resources::WgpuResources};
 
 pub struct RenderPass<'a> {
     /// The reference to the main Renderer
@@ -39,6 +39,19 @@ impl<'a> RenderPass<'a> {
     pub fn set_pipeline(&mut self, pipeline_id: &RenderPipelineId) -> &mut Self {
         let pipeline = self.resources.get_pipeline(pipeline_id);
         self.render_pass.set_pipeline(pipeline);
+        self
+    }
+
+    /// Sets the bind group
+    /// TODO check how this works better, pass offsets
+    pub fn set_bind_group(
+        &mut self,
+        binding: u32,
+        bind_group_descriptor_id: &BindGroupDescriptorId,
+        bind_group_id: &BindGroupId,
+    ) -> &mut Self {
+        let bind_group = self.resources.get_bind_group(bind_group_id);
+        self.render_pass.set_bind_group(binding, bind_group, &[]);
         self
     }
 

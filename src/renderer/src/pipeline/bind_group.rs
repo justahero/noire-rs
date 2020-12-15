@@ -1,4 +1,15 @@
+use uuid::Uuid;
+
 use crate::{ShaderStage, TextureComponentType, TextureViewDimension, UniformProperty};
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
+pub struct BindGroupId(Uuid);
+
+impl BindGroupId {
+    pub fn new() -> Self {
+        Self(Uuid::new_v4())
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BindingType {
@@ -64,14 +75,12 @@ pub struct BindGroupEntry {
     pub shader_stage: ShaderStage,
 }
 
-impl BindGroupEntry {
-}
+#[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
+pub struct BindGroupDescriptorId(Uuid);
 
-bitflags::bitflags! {
-    pub struct BindingShaderStage: u32 {
-        const VERTEX = 1;
-        const FRAGMENT = 2;
-        const COMPUTE = 4;
+impl BindGroupDescriptorId {
+    pub fn new() -> Self {
+        Self(Uuid::new_v4())
     }
 }
 
@@ -81,6 +90,8 @@ pub struct BindGroupDescriptor {
     pub index: u32,
     /// The list of bind group entries
     pub bindings: Vec<BindGroupEntry>,
+    /// A generated id associated with this Bind Group Descriptor
+    pub id: BindGroupDescriptorId,
 }
 
 impl BindGroupDescriptor {
@@ -88,6 +99,7 @@ impl BindGroupDescriptor {
         Self {
             index,
             bindings,
+            id: BindGroupDescriptorId::new(),
         }
     }
 

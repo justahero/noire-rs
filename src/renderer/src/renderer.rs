@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{BindGroupDescriptor, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, wgpu_resources::WgpuResources, WgpuVertexBufferDescriptor};
+use crate::{BindGroupDescriptor, BindGroupDescriptorId, BindGroupId, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, WgpuVertexBufferDescriptor, wgpu_resources::WgpuResources};
 
 pub struct RenderPassHandle {}
 
@@ -86,6 +86,47 @@ impl Renderer {
         }
     }
 
+    /// Creates a new bind group layout
+    pub fn create_bind_group_layout(
+        &mut self,
+        descriptor: &BindGroupDescriptor,
+    ) {
+        if self.resources.get_bind_group_layout(&descriptor.id).is_none() {
+            let entries = descriptor.bindings
+                .iter()
+                .map(|binding| {
+                    wgpu::BindGroupLayoutEntry {
+                        binding: binding.index,
+                        visibility: binding.shader_stage.into(),
+                        ty: (&binding.binding_type).into(),
+                        count: None,
+                    }
+                })
+                .collect::<Vec<wgpu::BindGroupLayoutEntry>>();
+
+            let bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
+                entries: entries.as_slice(),
+                label: None,
+            };
+
+            let bind_group_layout = self.device.create_bind_group_layout(&bind_group_layout_descriptor);
+            self.resources.bind_group_layouts.insert(descriptor.id, bind_group_layout);
+        }
+    }
+
+    /// Creates a new Bind Group with some data
+    pub fn create_bind_group(
+        &mut self,
+        bind_group_descriptor_id: &BindGroupDescriptorId,
+    ) -> BindGroupId {
+        // fetch bind group layout
+        let bind_group_layout = self.resources
+            .get_bind_group_layout(bind_group_descriptor_id)
+            .expect("Bind Group Layout not found");
+
+        BindGroupId::new()
+    }
+
     /// This creates and stores a new wgpu::RenderPipeline, the function returns an ID
     /// to reference it later
     pub fn create_pipeline(
@@ -93,14 +134,15 @@ impl Renderer {
         pipeline_descriptor: &PipelineDescriptor,
     ) -> RenderPipelineId {
         let layout = pipeline_descriptor.get_layout().unwrap();
-        let bind_group_layouts = layout.bind_groups
-            .iter()
-            .map(|bind_group| create_bind_group_layout(&self.device, bind_group))
-            .collect::<Vec<wgpu::BindGroupLayout>>();
+        dbg!(&layout.bind_groups);
 
-        let bind_group_layouts_ref = bind_group_layouts
+        layout.bind_groups
             .iter()
-            .map(|layout| layout)
+            .for_each(|bind_group| self.create_bind_group_layout(bind_group));
+
+        let bind_group_layouts_ref = layout.bind_groups
+            .iter()
+            .map(|descriptor| self.resources.get_bind_group_layout(&descriptor.id).unwrap())
             .collect::<Vec<&wgpu::BindGroupLayout>>();
 
         let pipeline_layout =
@@ -270,30 +312,6 @@ impl Renderer {
         let descriptor = TextureDescriptor::depth(width, height);
         Texture::new(descriptor, &self.device)
     }
-}
-
-fn create_bind_group_layout(
-    device: &wgpu::Device,
-    descriptor: &BindGroupDescriptor,
-) -> wgpu::BindGroupLayout {
-    let entries = descriptor.bindings
-        .iter()
-        .map(|binding| {
-            wgpu::BindGroupLayoutEntry {
-                binding: binding.index,
-                visibility: binding.shader_stage.into(),
-                ty: (&binding.binding_type).into(),
-                count: None,
-            }
-        })
-        .collect::<Vec<wgpu::BindGroupLayoutEntry>>();
-
-    let bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
-        entries: entries.as_slice(),
-        label: None,
-    };
-
-    device.create_bind_group_layout(&bind_group_layout_descriptor)
 }
 
 /// Creates a new internal RenderPass reference

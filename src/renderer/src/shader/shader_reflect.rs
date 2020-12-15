@@ -85,6 +85,8 @@ impl From<&ReflectTypeDescription> for UniformProperty {
             match (number_type, components) {
                 (NumberType::UInt(_, _), 0) => UniformProperty::UInt,
                 (NumberType::Int(_, _), 0) => UniformProperty::Int,
+                (NumberType::Float(_, _), 0) => UniformProperty::Float,
+                (NumberType::Float(_, _), 2) => UniformProperty::Vec2,
                 (NumberType::Float(_, _), 3) => UniformProperty::Vec3,
                 (number_type, components) => panic!(
                     "Unexpected uniform property format {:?} {}",
@@ -287,9 +289,9 @@ mod tests {
         assert_eq!(layout.entry_point, "main");
         assert_eq!(
             vec![
-                BindGroupDescriptor {
-                    index: 0,
-                    bindings: vec![
+                BindGroupDescriptor::new(
+                    0,
+                    vec![
                         BindGroupEntry {
                             index: 0,
                             name: "Uniforms".into(),
@@ -303,10 +305,10 @@ mod tests {
                             shader_stage: ShaderStage::Vertex,
                         },
                     ],
-                },
-                BindGroupDescriptor {
-                    index: 1,
-                    bindings: vec![
+                ),
+                BindGroupDescriptor::new(
+                    1,
+                    vec![
                         BindGroupEntry {
                             index: 1,
                             name: "colorMap".into(),
@@ -316,8 +318,8 @@ mod tests {
                             },
                             shader_stage: ShaderStage::Vertex,
                         },
-                    ]
-                }
+                    ],
+                ),
             ],
             layout.bind_groups,
         );
@@ -351,9 +353,9 @@ mod tests {
         assert_eq!(layout.entry_point, "main");
         assert_eq!(
             vec![
-                BindGroupDescriptor {
-                    index: 0,
-                    bindings: vec![
+                BindGroupDescriptor::new(
+                    0,
+                    vec![
                         BindGroupEntry {
                             index: 0,
                             name: "UniformBufferObject".into(),
@@ -367,7 +369,7 @@ mod tests {
                             shader_stage: ShaderStage::Vertex,
                         }
                     ],
-                }
+                ),
             ],
             layout.bind_groups,
         );

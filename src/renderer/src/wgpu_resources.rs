@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{IndexBuffer, RenderPipelineId, VertexBuffer};
+use crate::{BindGroupDescriptorId, BindGroupId, IndexBuffer, RenderPipelineId, VertexBuffer};
 
 /// Internal struct to keep all WGPU related structs
 #[derive(Debug)]
@@ -11,6 +11,10 @@ pub(crate) struct WgpuResources {
     pub vertex_buffers: HashMap<VertexBuffer, wgpu::Buffer>,
     /// Map of all index buffers
     pub index_buffers: HashMap<IndexBuffer, wgpu::Buffer>,
+    /// The list of all bind group layouts
+    pub bind_group_layouts: HashMap<BindGroupDescriptorId, wgpu::BindGroupLayout>,
+    /// The list of all bind groups
+    pub bind_groups: HashMap<BindGroupId, wgpu::BindGroup>,
 }
 
 impl Default for WgpuResources {
@@ -19,6 +23,8 @@ impl Default for WgpuResources {
             render_pipelines: HashMap::new(),
             vertex_buffers: HashMap::new(),
             index_buffers: HashMap::new(),
+            bind_group_layouts: HashMap::new(),
+            bind_groups: HashMap::new(),
         }
     }
 }
@@ -43,5 +49,20 @@ impl WgpuResources {
         self.vertex_buffers
             .get(vertex_buffer)
             .expect("No Vertex Buffer with id found")
+    }
+
+    /// Returns the bind group layout by id
+    pub fn get_bind_group_layout(
+        &self,
+        bind_group_layout_id: &BindGroupDescriptorId,
+    ) -> Option<&wgpu::BindGroupLayout> {
+        self.bind_group_layouts.get(bind_group_layout_id)
+    }
+
+    /// Returns the bind group by id
+    pub fn get_bind_group(&self, bind_group_id: &BindGroupId) -> &wgpu::BindGroup {
+        self.bind_groups
+            .get(bind_group_id)
+            .expect("No bind group with id found")
     }
 }
