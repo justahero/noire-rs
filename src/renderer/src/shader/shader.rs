@@ -122,12 +122,13 @@ fn compile_shader(source_text: &str, stage: ShaderStage) -> Result<shaderc::Comp
     let mut compiler = shaderc::Compiler::new().ok_or(CompilerError::CompilerNotLoaded)?;
     let mut options = shaderc::CompileOptions::new().unwrap();
     options.add_macro_definition("main", Some("main"));
-    options.set_target_env(shaderc::TargetEnv::Vulkan, shaderc::EnvVersion::Vulkan1_2 as u32);
+    options.set_target_env(shaderc::TargetEnv::Vulkan, shaderc::EnvVersion::Vulkan1_0 as u32);
     options.set_auto_bind_uniforms(false);
     options.set_optimization_level(shaderc::OptimizationLevel::Performance);
     options.set_source_language(shaderc::SourceLanguage::GLSL);
-    options.set_target_spirv(shaderc::SpirvVersion::V1_3);
+    options.set_target_spirv(shaderc::SpirvVersion::V1_0);
     options.set_suppress_warnings();
+    // options.set_warnings_as_errors();
     options.set_generate_debug_info();
 
     let artifact = compiler.compile_into_spirv(

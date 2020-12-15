@@ -1,4 +1,4 @@
-use crate::{ShaderStage, UniformProperty};
+use crate::{ShaderStage, TextureComponentType, TextureViewDimension, UniformProperty};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BindingType {
@@ -6,6 +6,11 @@ pub enum BindingType {
     Uniform {
         dynamic: bool,
         property: UniformProperty,
+    },
+    /// A sampled texture
+    SampledTexture {
+        dimension: TextureViewDimension,
+        component_type: TextureComponentType,
     },
     Unknown,
 }

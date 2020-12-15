@@ -1,11 +1,14 @@
 use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectDescriptorType, ReflectInterfaceVariable, ReflectTypeDescription, ReflectTypeFlags}};
 
-use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Shader, ShaderStage, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
+use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Shader, ShaderStage, TextureComponentType, TextureViewDimension, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
 
 #[derive(Debug)]
 enum NumberType {
+    /// Float type, including number of components & type size in bits
     Float(u32, u32),
+    /// Int type, including number of components & type size in bits
     Int(u32, u32),
+    /// UInt type, including number of components & type size in bits
     UInt(u32, u32),
 }
 
@@ -60,6 +63,60 @@ impl From<&ReflectTypeDescription> for VertexFormat {
     }
 }
 
+impl From<&ReflectTypeDescription> for UniformProperty {
+    fn from(description: &ReflectTypeDescription) -> Self {
+        let flags = &description.type_flags;
+        let traits = &description.traits;
+        let number_type: NumberType = description.into();
+
+        if flags.contains(ReflectTypeFlags::MATRIX) {
+            let columns = traits.numeric.matrix.column_count;
+            let rows = traits.numeric.matrix.row_count;
+            match (number_type, columns, rows) {
+                (NumberType::Float(_, _), 3, 3) => UniformProperty::Mat3,
+                (NumberType::Float(_, _), 4, 4) => UniformProperty::Mat4,
+                (number_type, columns, rows) => panic!(
+                    "Unexpected matrix format found {:?} {}x{}",
+                    number_type, columns, rows,
+                ),
+            }
+        } else {
+            let components = traits.numeric.vector.component_count;
+            match (number_type, components) {
+                (NumberType::UInt(_, _), 0) => UniformProperty::UInt,
+                (NumberType::Int(_, _), 0) => UniformProperty::Int,
+                (NumberType::Float(_, _), 3) => UniformProperty::Vec3,
+                (number_type, components) => panic!(
+                    "Unexpected uniform property format {:?} {}",
+                    number_type, components
+                ),
+            }
+        }
+    }
+}
+
+impl From<spirv_reflect::types::ReflectDimension> for TextureViewDimension {
+    fn from(dim: spirv_reflect::types::ReflectDimension) -> Self {
+        match dim {
+            spirv_reflect::types::ReflectDimension::Type1d => TextureViewDimension::D1,
+            spirv_reflect::types::ReflectDimension::Type2d => TextureViewDimension::D2,
+            spirv_reflect::types::ReflectDimension::Type3d => TextureViewDimension::D3,
+            spirv_reflect::types::ReflectDimension::Cube => TextureViewDimension::Cube,
+            _ => panic!("Unsupported image dimension found: {:?}", dim),
+        }
+    }
+}
+
+impl From<&ReflectTypeDescription> for TextureViewDimension {
+    fn from(description: &ReflectTypeDescription) -> Self {
+        if description.type_flags.contains(ReflectTypeFlags::EXTERNAL_IMAGE) {
+            description.traits.image.dim.into()
+        } else {
+            panic!("Resource type {} is not an sampler / texture")
+        }
+    }
+}
+
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///
 #[derive(Debug, Clone)]
@@ -104,20 +161,21 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
 /// Returns the list of bind groups in the shader
 pub(crate) fn reflect_bind_groups(shader_module: &ShaderModule, shader_stage: ShaderStage) -> Vec<BindGroupDescriptor> {
     let descriptor_sets = shader_module.enumerate_descriptor_sets(None).unwrap();
-    descriptor_sets.iter().map(|descriptor_set| {
-        reflect_bind_group(descriptor_set, shader_stage)
-    })
-    .collect()
+    descriptor_sets
+        .iter()
+        .map(|descriptor_set| reflect_bind_group(descriptor_set, shader_stage))
+        .collect()
 }
 
-pub(crate) fn reflect_bind_group(
+fn reflect_bind_group(
     descriptor_set: &ReflectDescriptorSet,
     shader_stage: ShaderStage,
 ) -> BindGroupDescriptor {
-    let bindings: Vec<BindGroupEntry> = descriptor_set.bindings
+    let bindings = descriptor_set.bindings
         .iter()
-        .map(|binding| reflect_binding(binding, shader_stage))
+        .map(|descriptor_binding| reflect_binding(descriptor_binding, shader_stage))
         .collect();
+
     BindGroupDescriptor::new(descriptor_set.set, bindings)
 }
 
@@ -126,12 +184,20 @@ pub(crate) fn reflect_binding(
     shader_stage: ShaderStage,
 ) -> BindGroupEntry {
     let type_description = binding.type_description.as_ref().unwrap();
+
     let (name, binding_type) = match binding.descriptor_type {
         ReflectDescriptorType::UniformBuffer => (
             &type_description.type_name,
             BindingType::Uniform {
                 dynamic: false,
-                property: UniformProperty::Float,
+                property: reflect_uniform(type_description),
+            }
+        ),
+        ReflectDescriptorType::CombinedImageSampler => (
+            &binding.name,
+            BindingType::SampledTexture {
+                dimension: type_description.into(),
+                component_type: TextureComponentType::Float,
             }
         ),
         _ => panic!("Unsupported binding type {:?}", binding.descriptor_type),
@@ -172,36 +238,115 @@ pub(crate) fn reflect_vertex_attribute(variable: &ReflectInterfaceVariable) -> V
     }
 }
 
+fn reflect_uniform(type_description: &ReflectTypeDescription) -> UniformProperty {
+    if type_description.type_flags.contains(ReflectTypeFlags::STRUCT) {
+        let uniforms = type_description.members
+            .iter()
+            .map(|description| reflect_uniform(description))
+            .collect();
+
+        UniformProperty::Struct(uniforms)
+    } else {
+        type_description.into()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Renderer, Shader, ShaderLayout, ShaderStage, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
+    use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Renderer, Shader, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
 
-    const VERTEX_SHADER: &str = r#"
-    #version 450
-
-    layout(set = 0, binding = 0) uniform UniformBufferObject {
-        mat4 modelViewProjection;
-        mat4 modelView;
-    } ubo;
-
-    layout(location = 0) in vec3 i_position;
-    layout(location = 1) in uvec3 i_normal;
-    layout(location = 2) in vec2 i_texture;
-
-    layout (location = 0) out vec3 vertex;
-
-    void main() {
-        gl_Position = ubo.modelViewProjection * vec4(i_position, 1.0);
-
-        vertex = vec3(ubo.modelView * vec4(i_position, 1.0));
+    fn shader_layout(source: &str) -> ShaderLayout {
+        let renderer = futures::executor::block_on(Renderer::new());
+        let shader = Shader::compile(source, ShaderStage::Vertex, &renderer.device).unwrap();
+        ShaderLayout::from_shader(&shader)
     }
-    "#;
 
     #[test]
-    fn enumerate_variables_in_layout() {
-        let renderer = futures::executor::block_on(Renderer::new());
-        let shader = Shader::compile(&VERTEX_SHADER, ShaderStage::Vertex, &renderer.device).unwrap();
-        let layout = ShaderLayout::from_shader(&shader);
+    fn test_bind_group_uniforms() {
+        const VERTEX_SHADER: &str = r#"
+        #version 450
+
+        layout(location = 0) in vec3 i_position;
+        layout(location = 0) out vec3 outVertex;
+        layout(location = 1) out vec4 outFragColor;
+
+        layout(binding = 0) uniform Uniforms {
+            vec3 light;
+            mat4 modelView;
+        } ubo;
+
+        layout(set = 1, binding = 1) uniform sampler2D colorMap;
+
+        void main() {
+            outVertex = vec3(ubo.modelView * vec4(i_position, 1.0));
+            outFragColor = texture(colorMap, i_position.xy);
+        }
+        "#;
+
+        let layout = shader_layout(&VERTEX_SHADER);
+        assert_eq!(layout.entry_point, "main");
+        assert_eq!(
+            vec![
+                BindGroupDescriptor {
+                    index: 0,
+                    bindings: vec![
+                        BindGroupEntry {
+                            index: 0,
+                            name: "Uniforms".into(),
+                            binding_type: BindingType::Uniform {
+                                dynamic: false,
+                                property: UniformProperty::Struct(vec![
+                                    UniformProperty::Vec3,
+                                    UniformProperty::Mat4,
+                                ]),
+                            },
+                            shader_stage: ShaderStage::Vertex,
+                        },
+                    ],
+                },
+                BindGroupDescriptor {
+                    index: 1,
+                    bindings: vec![
+                        BindGroupEntry {
+                            index: 1,
+                            name: "colorMap".into(),
+                            binding_type: BindingType::SampledTexture {
+                                dimension: TextureViewDimension::D2,
+                                component_type: TextureComponentType::Float,
+                            },
+                            shader_stage: ShaderStage::Vertex,
+                        },
+                    ]
+                }
+            ],
+            layout.bind_groups,
+        );
+    }
+
+    #[test]
+    fn test_shader_layout() {
+        const VERTEX_SHADER: &str = r#"
+        #version 450
+
+        layout(set = 0, binding = 0) uniform UniformBufferObject {
+            mat4 modelViewProjection;
+            mat4 modelView;
+        } ubo;
+
+        layout(location = 0) in vec3 i_position;
+        layout(location = 1) in uvec3 i_normal;
+        layout(location = 2) in vec2 i_texture;
+
+        layout (location = 0) out vec3 vertex;
+
+        void main() {
+            gl_Position = ubo.modelViewProjection * vec4(i_position, 1.0);
+
+            vertex = vec3(ubo.modelView * vec4(i_position, 1.0));
+        }
+        "#;
+
+        let layout = shader_layout(&VERTEX_SHADER);
 
         assert_eq!(layout.entry_point, "main");
         assert_eq!(
@@ -210,11 +355,14 @@ mod tests {
                     index: 0,
                     bindings: vec![
                         BindGroupEntry {
-                            name: String::from("UniformBufferObject"),
                             index: 0,
+                            name: "UniformBufferObject".into(),
                             binding_type: BindingType::Uniform {
                                 dynamic: false,
-                                property: UniformProperty::Float,
+                                property: UniformProperty::Struct(vec![
+                                    UniformProperty::Mat4,
+                                    UniformProperty::Mat4,
+                                ]),
                             },
                             shader_stage: ShaderStage::Vertex,
                         }
