@@ -1754,6 +1754,7 @@ dependencies = [
  "bevy_ecs 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "bytemuck 1.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cgmath 0.17.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "resources 0.1.0",
  "shaderc 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)",

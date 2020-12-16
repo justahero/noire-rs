@@ -46,6 +46,11 @@ impl Surface {
         &self.output.as_ref().unwrap().output.view
     }
 
+    /// Returns the aspect ratio of the underlying window
+    pub fn aspect(&self) -> f32 {
+        (self.width() as f32) / (self.height() as f32)
+    }
+
     /// Returns width of the surface
     pub fn width(&self) -> u32 {
         self.window.inner_size().width
