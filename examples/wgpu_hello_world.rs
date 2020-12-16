@@ -53,8 +53,10 @@ impl WindowHandler for Example {
     }
 
     fn render(&mut self, window: &mut Window, renderer: &mut Renderer) {
-        let mut render_pass = renderer.create_render_pass();
-        //render_pass.begin();
+        let mut pass_descriptor = window.into();
+
+        renderer.begin_pass(&mut pass_descriptor, &mut |_render_pass| {
+        });
     }
 }
 
