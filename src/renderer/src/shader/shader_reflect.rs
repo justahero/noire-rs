@@ -26,8 +26,6 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     let bind_groups: Vec<BindGroupDescriptor> = reflect_bind_groups(&shader_module, shader_stage);
     let _input_variables: Vec<VertexAttributeDescriptor> = reflect_input_variables(&shader_module);
 
-    reflect_descriptor_bindings(&shader_module);
-    reflect_descriptor_sets(&shader_module);
     reflect_push_constant_blocks(&shader_module);
 
     ShaderLayout {
@@ -75,23 +73,12 @@ pub(crate) fn reflect_input_variables(shader_module: &ShaderModule) -> Vec<Verte
     variables.iter().map(|variable| reflect_vertex_attribute(&variable)).collect()
 }
 
-pub(crate) fn reflect_descriptor_bindings(shader_module: &ShaderModule) {
-    let descriptors = shader_module.enumerate_descriptor_bindings(None).unwrap();
-    println!("DESCRIPTOR BINDINGS: {:?}", descriptors);
-}
-
-pub(crate) fn reflect_descriptor_sets(shader_module: &ShaderModule) {
-    let descriptor_sets = shader_module.enumerate_descriptor_sets(None).unwrap();
-    println!("DESCRIPTOR SETS: {:?}", descriptor_sets);
-}
-
 pub(crate) fn reflect_push_constant_blocks(shader_module: &ShaderModule) {
     let block_variables = shader_module.enumerate_push_constant_blocks(None).unwrap();
     println!("PUSH CONSTANT BLOCKS: {:?}", block_variables);
 }
 
 pub(crate) fn reflect_vertex_attribute(variable: &ReflectInterfaceVariable) -> VertexAttributeDescriptor {
-    println!("REFLECT VERTEX ATTRIBUTRE: {:?}", variable);
     VertexAttributeDescriptor {
         location: variable.location,
         offset: 0,
