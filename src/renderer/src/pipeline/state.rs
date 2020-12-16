@@ -10,9 +10,9 @@ pub struct ColorStateDescriptor {
 impl Default for ColorStateDescriptor {
     fn default() -> Self {
         Self {
-            format: TextureFormat::Rgba8UnormSrgb,
-            color_blend: BlendDescriptor::REPLACE,
-            alpha_blend: BlendDescriptor::REPLACE,
+            format: TextureFormat::Bgra8UnormSrgb,
+            color_blend: BlendDescriptor::COLOR_BLEND,
+            alpha_blend: BlendDescriptor::ALPHA_BLEND,
             write_mask: ColorWrite::ALL,
         }
     }
@@ -47,6 +47,18 @@ impl From<BlendDescriptor> for wgpu::BlendDescriptor {
 }
 
 impl BlendDescriptor {
+    pub const COLOR_BLEND: Self = Self {
+        src_factor: BlendFactor::SrcAlpha,
+        dst_factor: BlendFactor::OneMinusSrcAlpha,
+        operation: BlendOperation::Add,
+    };
+
+    pub const ALPHA_BLEND: Self = Self {
+        src_factor: BlendFactor::One,
+        dst_factor: BlendFactor::One,
+        operation: BlendOperation::Add,
+    };
+
     pub const REPLACE: Self = Self {
         src_factor: BlendFactor::One,
         dst_factor: BlendFactor::Zero,
