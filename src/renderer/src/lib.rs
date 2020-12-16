@@ -22,7 +22,7 @@ pub use converter::*;
 pub use mesh::*;
 pub use pipeline::*;
 pub use render::*;
-pub use renderer::*;
+pub use crate::renderer::*;
 pub use shader::*;
 pub use surface::*;
 pub use texture::*;

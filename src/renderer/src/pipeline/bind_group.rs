@@ -84,7 +84,7 @@ impl BindGroupDescriptorId {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub struct BindGroupDescriptor {
     /// Index of the bind group
     pub index: u32,
@@ -92,6 +92,12 @@ pub struct BindGroupDescriptor {
     pub bindings: Vec<BindGroupEntry>,
     /// A generated id associated with this Bind Group Descriptor
     pub id: BindGroupDescriptorId,
+}
+
+impl PartialEq for BindGroupDescriptor {
+    fn eq(&self, other: &Self) -> bool {
+        self.index.eq(&other.index) && self.bindings.eq(&other.bindings)
+    }
 }
 
 impl BindGroupDescriptor {
