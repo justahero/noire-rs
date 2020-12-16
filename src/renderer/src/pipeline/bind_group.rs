@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::{ShaderStage, TextureComponentType, TextureViewDimension, UniformProperty};
+use crate::{ShaderStage, TextureComponentType, TextureViewDimension, Uniform};
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 pub struct BindGroupId(Uuid);
@@ -16,7 +16,7 @@ pub enum BindingType {
     /// Binding type is a uniform buffer
     Uniform {
         dynamic: bool,
-        property: UniformProperty,
+        uniform: Uniform,
     },
     /// A sampled texture
     SampledTexture {
@@ -29,7 +29,7 @@ pub enum BindingType {
 impl BindingType {
     pub fn get_size(&self) -> Option<u64> {
         match self {
-            BindingType::Uniform { property, .. } => Some(property.get_size()),
+            BindingType::Uniform { uniform, .. } => Some(uniform.get_size()),
             _ => None,
         }
     }

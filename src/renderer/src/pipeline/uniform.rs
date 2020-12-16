@@ -1,3 +1,4 @@
+/// A Uniform is a variable that can be bound as part of bind group to a shader
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Uniform {
     /// The name of the uniform
@@ -7,6 +8,13 @@ pub struct Uniform {
 }
 
 impl Uniform {
+    pub fn new(name: &str, property: UniformProperty) -> Self {
+        Self {
+            name: name.to_string(),
+            property,
+        }
+    }
+
     pub fn get_size(&self) -> u64 {
         self.property.get_size()
     }
@@ -24,8 +32,8 @@ pub enum UniformProperty {
     Vec4,
     Mat3,
     Mat4,
-    Struct(Vec<UniformProperty>),
-    Array(Box<UniformProperty>, usize),
+    Struct(Vec<Uniform>),
+    Array(Box<Uniform>, usize),
 }
 
 impl UniformProperty {
@@ -44,7 +52,7 @@ impl UniformProperty {
             UniformProperty::Struct(properties) => {
                 properties.iter().map(|p| p.get_size()).sum()
             }
-            UniformProperty::Array(property, length) => property.get_size() * *length as u64,
+            UniformProperty::Array(uniform, length) => uniform.get_size() * *length as u64,
         }
     }
 }

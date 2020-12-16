@@ -1,6 +1,6 @@
-use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectDescriptorType, ReflectInterfaceVariable, ReflectTypeDescription, ReflectTypeFlags}};
+use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectBlockVariable, ReflectDescriptorType, ReflectInterfaceVariable, ReflectTypeDescription, ReflectTypeFlags}};
 
-use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Shader, ShaderStage, TextureComponentType, TextureViewDimension, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
+use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Shader, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
 
 #[derive(Debug)]
 enum NumberType {
@@ -185,30 +185,29 @@ fn reflect_binding(
     binding: &ReflectDescriptorBinding,
     shader_stage: ShaderStage,
 ) -> BindGroupEntry {
-    dbg!(&binding);
+    // dbg!(&binding);
 
     let type_description = binding.type_description.as_ref().unwrap();
+    let name = binding.name.to_string();
 
-    let (name, binding_type) = match binding.descriptor_type {
-        ReflectDescriptorType::UniformBuffer => (
-            &type_description.type_name,
+    let binding_type = match binding.descriptor_type {
+        ReflectDescriptorType::UniformBuffer => {
             BindingType::Uniform {
                 dynamic: false,
-                property: reflect_uniform(type_description),
+                uniform: reflect_uniform(&binding.block),
             }
-        ),
-        ReflectDescriptorType::CombinedImageSampler => (
-            &binding.name,
+        }
+        ReflectDescriptorType::CombinedImageSampler => {
             BindingType::SampledTexture {
                 dimension: type_description.into(),
                 component_type: TextureComponentType::Float,
             }
-        ),
-        _ => panic!("Unsupported binding type {:?}", binding.descriptor_type),
+        }
+        _ => panic!("Unsupported binding descriptor type {:?}", binding.descriptor_type),
     };
 
     BindGroupEntry {
-        name: name.to_string(),
+        name,
         index: binding.binding,
         binding_type,
         shader_stage,
@@ -242,22 +241,35 @@ pub(crate) fn reflect_vertex_attribute(variable: &ReflectInterfaceVariable) -> V
     }
 }
 
-fn reflect_uniform(type_description: &ReflectTypeDescription) -> UniformProperty {
-    if type_description.type_flags.contains(ReflectTypeFlags::STRUCT) {
-        let uniforms = type_description.members
-            .iter()
-            .map(|description| reflect_uniform(description))
-            .collect();
-
-        UniformProperty::Struct(uniforms)
+fn reflect_uniform(variable: &ReflectBlockVariable) -> Uniform {
+    let description = variable.type_description.as_ref().unwrap();
+    if description.type_flags.contains(ReflectTypeFlags::STRUCT) {
+        reflect_uniform_struct(&variable)
     } else {
-        type_description.into()
+        Uniform {
+            name: variable.name.to_string(),
+            property: description.into(),
+        }
+    }
+}
+
+fn reflect_uniform_struct(block_variable: &ReflectBlockVariable) -> Uniform {
+    // dbg!(&block_variable);
+    let description = block_variable.type_description.as_ref().unwrap();
+    let members = block_variable.members
+        .iter()
+        .map(|variable| reflect_uniform(variable))
+        .collect();
+
+    Uniform {
+        name: description.type_name.to_string(),
+        property: UniformProperty::Struct(members),
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Renderer, Shader, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
+    use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Renderer, Shader, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
 
     fn shader_layout(source: &str) -> ShaderLayout {
         let renderer = futures::executor::block_on(Renderer::new());
@@ -296,13 +308,16 @@ mod tests {
                     vec![
                         BindGroupEntry {
                             index: 0,
-                            name: "Uniforms".into(),
+                            name: "ubo".into(),
                             binding_type: BindingType::Uniform {
                                 dynamic: false,
-                                property: UniformProperty::Struct(vec![
-                                    UniformProperty::Vec3,
-                                    UniformProperty::Mat4,
-                                ]),
+                                uniform: Uniform::new(
+                                    "Uniforms",
+                                    UniformProperty::Struct(vec![
+                                        Uniform::new("light", UniformProperty::Vec3),
+                                        Uniform::new("modelView", UniformProperty::Mat4),
+                                    ]),
+                                ),
                             },
                             shader_stage: ShaderStage::Vertex,
                         },
@@ -360,13 +375,18 @@ mod tests {
                     vec![
                         BindGroupEntry {
                             index: 0,
-                            name: "UniformBufferObject".into(),
+                            name: "ubo".into(),
                             binding_type: BindingType::Uniform {
                                 dynamic: false,
-                                property: UniformProperty::Struct(vec![
-                                    UniformProperty::Mat4,
-                                    UniformProperty::Mat4,
-                                ]),
+                                uniform: Uniform::new(
+                                    "UniformBufferObject",
+                                    UniformProperty::Struct(
+                                        vec![
+                                            Uniform::new("modelViewProjection", UniformProperty::Mat4),
+                                            Uniform::new("modelView", UniformProperty::Mat4),
+                                        ]
+                                    ),
+                                ),
                             },
                             shader_stage: ShaderStage::Vertex,
                         }
