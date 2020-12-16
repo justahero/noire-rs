@@ -11,7 +11,7 @@ bytemuck = "1.4.1"
 cgmath = "0.17.0"
 futures = "0.3.5"
 resources = { path = "../resources", version = "0.1.0" }
-shaderc = { version = "0.6.2" }
+shaderc = { version = "0.7.0" }
 spirv-reflect = "0.2.3"
 uuid = { version = "0.8.1", features = ["v4", "serde"] }
 wgpu = "0.6.0"

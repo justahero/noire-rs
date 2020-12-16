@@ -19,7 +19,7 @@ pub trait WindowHandler {
     fn update(&mut self, _resources: &Resources) {}
 
     /// Renders data to the frame buffer
-    fn render(&mut self, _window: &mut Window, app: &mut Renderer);
+    fn render(&mut self, _window: &mut Window, _renderer: &mut Renderer);
 
     /// Runs the main event loop in context of the window
     fn run(settings: WindowSettings)

@@ -12,6 +12,7 @@ mod shader;
 mod surface;
 mod texture;
 mod vertex;
+mod wgpu_resources;
 mod window;
 
 pub use buffer::*;

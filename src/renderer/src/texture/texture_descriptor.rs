@@ -17,7 +17,7 @@ impl From<Extend3d> for wgpu::Extent3d {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TextureDimension {
     D1 = 1,
     D2 = 2,
@@ -34,7 +34,7 @@ impl From<TextureDimension> for wgpu::TextureDimension {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TextureViewDimension {
     D1,
     D2,
@@ -55,6 +55,14 @@ impl From<TextureViewDimension> for wgpu::TextureViewDimension {
             TextureViewDimension::D3 => wgpu::TextureViewDimension::D3,
         }
     }
+}
+
+/// Possible types for a sampled texture
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum TextureComponentType {
+    Float,
+    Int,
+    UInt,
 }
 
 #[derive(Debug, Clone)]

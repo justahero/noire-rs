@@ -1,6 +1,8 @@
+pub mod index_buffer;
 pub mod vertex;
 pub mod vertex_buffer;
 
+pub use index_buffer::*;
 pub use vertex::*;
 pub use vertex_buffer::*;
 
@@ -19,7 +21,7 @@ impl From<IndexFormat> for wgpu::IndexFormat {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InputStepMode {
     /// Input data is advanced by Vertex
     Vertex,

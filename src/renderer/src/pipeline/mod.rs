@@ -2,10 +2,12 @@ use crate::TextureFormat;
 
 pub mod bind_group;
 pub mod pipeline;
+pub mod pipeline_layout;
 pub mod state;
 
 pub use bind_group::*;
 pub use pipeline::*;
+pub use pipeline_layout::*;
 pub use state::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -42,6 +44,7 @@ impl From<CullMode> for wgpu::CullMode {
     }
 }
 
+#[derive(Debug)]
 pub struct RasterizationStateDescriptor {
     pub front_face: FrontFace,
     pub cull_mode: CullMode,
@@ -64,8 +67,8 @@ impl Default for RasterizationStateDescriptor {
     }
 }
 
-impl From<RasterizationStateDescriptor> for wgpu::RasterizationStateDescriptor {
-    fn from(val: RasterizationStateDescriptor) -> Self {
+impl From<&RasterizationStateDescriptor> for wgpu::RasterizationStateDescriptor {
+    fn from(val: &RasterizationStateDescriptor) -> Self {
         wgpu::RasterizationStateDescriptor {
             front_face: val.front_face.into(),
             cull_mode: val.cull_mode.into(),
@@ -110,13 +113,13 @@ impl Default for DepthStencilStateDescriptor {
     }
 }
 
-impl From<DepthStencilStateDescriptor> for wgpu::DepthStencilStateDescriptor {
-    fn from(val: DepthStencilStateDescriptor) -> Self {
+impl From<&DepthStencilStateDescriptor> for wgpu::DepthStencilStateDescriptor {
+    fn from(val: &DepthStencilStateDescriptor) -> Self {
         wgpu::DepthStencilStateDescriptor {
             format: val.format.into(),
             depth_write_enabled: val.depth_write_enabled,
             depth_compare: val.depth_compare.into(),
-            stencil: val.stencil.into(),
+            stencil: (&val.stencil).into(),
         }
     }
 }
@@ -129,11 +132,11 @@ pub struct StencilStateDescriptor {
     pub write_mask: u32,
 }
 
-impl From<StencilStateDescriptor> for wgpu::StencilStateDescriptor {
-    fn from(val: StencilStateDescriptor) -> Self {
+impl From<&StencilStateDescriptor> for wgpu::StencilStateDescriptor {
+    fn from(val: &StencilStateDescriptor) -> Self {
         wgpu::StencilStateDescriptor {
-            front: val.front.into(),
-            back: val.back.into(),
+            front: (&val.front).into(),
+            back: (&val.back).into(),
             read_mask: val.read_mask,
             write_mask: val.write_mask,
         }
@@ -148,8 +151,8 @@ pub struct StencilStateFaceDescriptor {
     pub pass_op: StencilOperation,
 }
 
-impl From<StencilStateFaceDescriptor> for wgpu::StencilStateFaceDescriptor {
-    fn from(val: StencilStateFaceDescriptor) -> Self {
+impl From<&StencilStateFaceDescriptor> for wgpu::StencilStateFaceDescriptor {
+    fn from(val: &StencilStateFaceDescriptor) -> Self {
         wgpu::StencilStateFaceDescriptor {
             compare: val.compare.into(),
             fail_op: val.fail_op.into(),
@@ -203,6 +206,43 @@ impl From<PrimitiveTopology> for wgpu::PrimitiveTopology {
             PrimitiveTopology::LineStrip => wgpu::PrimitiveTopology::LineStrip,
             PrimitiveTopology::TriangleList => wgpu::PrimitiveTopology::TriangleList,
             PrimitiveTopology::TriangleStrip => wgpu::PrimitiveTopology::TriangleStrip,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum UniformProperty {
+    UInt,
+    Int,
+    IVec2,
+    Float,
+    UVec4,
+    Vec2,
+    Vec3,
+    Vec4,
+    Mat3,
+    Mat4,
+    Struct(Vec<UniformProperty>),
+    Array(Box<UniformProperty>, usize),
+}
+
+impl UniformProperty {
+    pub fn get_size(&self) -> u64 {
+        match self {
+            UniformProperty::UInt => 4,
+            UniformProperty::Int => 4,
+            UniformProperty::IVec2 => 4 * 2,
+            UniformProperty::Float => 4,
+            UniformProperty::UVec4 => 4 * 4,
+            UniformProperty::Vec2 => 4 * 2,
+            UniformProperty::Vec3 => 4 * 3,
+            UniformProperty::Vec4 => 4 * 4,
+            UniformProperty::Mat3 => 4 * 4 * 3,
+            UniformProperty::Mat4 => 4 * 4 * 4,
+            UniformProperty::Struct(properties) => {
+                properties.iter().map(|p| p.get_size()).sum()
+            }
+            UniformProperty::Array(property, length) => property.get_size() * *length as u64,
         }
     }
 }

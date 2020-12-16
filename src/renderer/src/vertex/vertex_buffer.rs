@@ -1,7 +1,25 @@
-use crate::{IndexFormat, VertexFormat, InputStepMode};
+use uuid::Uuid;
 
-#[derive(Debug, PartialEq)]
+use crate::{VertexFormat, InputStepMode};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct VertexBuffer {
+    /// The id of this Vertex buffer
+    pub uuid: Uuid,
+}
+
+impl VertexBuffer {
+    pub fn new() -> Self {
+        Self {
+            uuid: Uuid::new_v4(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct VertexAttributeDescriptor {
+    /// The attribute name
+    pub name: String,
     /// Byte offset of the start of the input
     pub offset: u64,
     /// Location for this input, must match the location in shader
@@ -20,10 +38,16 @@ impl From<&VertexAttributeDescriptor> for wgpu::VertexAttributeDescriptor {
     }
 }
 
-#[derive(Debug)]
+impl VertexAttributeDescriptor {
+    pub fn size(&self) -> u64 {
+        self.format.size()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct VertexBufferDescriptor {
     /// Debug label
-    pub label: Option<String>,
+    pub label: String,
     /// buffer address stride
     pub stride: u64,
     /// Step mode of the buffer
@@ -35,54 +59,78 @@ pub struct VertexBufferDescriptor {
 impl VertexBufferDescriptor {
     pub fn new(verts: Vec<VertexFormat>) -> Self {
         let mut offset = 0;
-        let mut stride = 0;
         let mut attributes = Vec::new();
         for (location, format) in verts.iter().enumerate() {
             let descriptor = VertexAttributeDescriptor {
+                name: "".to_string(),
                 location: location as u32,
                 offset,
                 format: format.clone(),
             };
 
             offset += format.size();
-            stride += format.size();
-            attributes.push(descriptor);
+            attributes.push(descriptor.into());
         }
 
+        let stride = verts.iter().map(|f| f.size()).sum();
+
         Self {
-            label: None,
+            label: "".to_string(),
             stride,
             step_mode: InputStepMode::Vertex,
             attributes,
         }
     }
 
-    /// Returns the size of all vertex attributes
-    pub fn vertex_size(&self) -> u64 {
-        self.attributes.iter().map(|desc| desc.format.size()).sum()
-    }
-}
-
-/// Describes vertex input state for a render pipeline
-#[derive(Debug)]
-pub struct VertexStateDescriptor {
-    /// The format of any index buffer used with the pipeline
-    pub index_format: IndexFormat,
-    /// The format of any vertex buffers used with this pipeline
-    pub vertex_buffers: Vec<VertexBufferDescriptor>,
-}
-
-impl VertexStateDescriptor {
-    pub fn new() -> Self {
+    /// Creates a vertex buffer descriptor from an attribute
+    pub fn from_attribute(
+        attribute: VertexAttributeDescriptor,
+        step_mode: InputStepMode
+    ) -> Self {
         Self {
-            index_format: IndexFormat::Uint16,
-            vertex_buffers: Vec::new(),
+            label: attribute.name.clone(),
+            stride: attribute.format.size(),
+            step_mode,
+            attributes: vec![attribute.clone()],
         }
     }
 
-    /// Add a vertex buffer descriptor
-    pub fn add(&mut self, descriptor: VertexBufferDescriptor) {
-        self.vertex_buffers.push(descriptor);
+    /// Returns the size of all vertex attributes
+    pub fn stride(&self) -> u64 {
+        self.attributes.iter().map(|desc| desc.size()).sum()
+    }
+}
+
+#[derive(Debug)]
+pub struct WgpuVertexBufferDescriptor {
+    pub stride: wgpu::BufferAddress,
+    pub step_mode: wgpu::InputStepMode,
+    pub attributes: Vec<wgpu::VertexAttributeDescriptor>,
+}
+
+impl From<&VertexBufferDescriptor> for WgpuVertexBufferDescriptor {
+    fn from(descriptor: &VertexBufferDescriptor) -> Self {
+        let attributes = descriptor
+            .attributes
+            .iter()
+            .map(|item| item.into())
+            .collect::<Vec<wgpu::VertexAttributeDescriptor>>();
+
+        WgpuVertexBufferDescriptor {
+            stride: descriptor.stride.into(),
+            step_mode: descriptor.step_mode.into(),
+            attributes,
+        }
+    }
+}
+
+impl<'a> From<&'a WgpuVertexBufferDescriptor> for wgpu::VertexBufferDescriptor<'a> {
+    fn from(descriptor: &'a WgpuVertexBufferDescriptor) -> Self {
+        wgpu::VertexBufferDescriptor {
+            stride: descriptor.stride,
+            step_mode: descriptor.step_mode,
+            attributes: &descriptor.attributes,
+        }
     }
 }
 
@@ -100,13 +148,15 @@ mod tests {
         assert_eq!(
             vec![
                 VertexAttributeDescriptor {
+                    name: "".to_string(),
                     location: 0,
                     offset: 0,
                     format: VertexFormat::Float3,
                 },
                 VertexAttributeDescriptor {
+                    name: "".to_string(),
                     location: 1,
-                    offset: VertexFormat::Float3.size(),
+                    offset: 3 * 4,
                     format: VertexFormat::Float2,
                 },
             ],

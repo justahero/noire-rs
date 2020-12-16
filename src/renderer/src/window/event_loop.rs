@@ -8,7 +8,7 @@ pub struct EventLoop {
     pub event_loop: winit::event_loop::EventLoop<()>,
 }
 
-impl EventLoop {
+impl<'a> EventLoop {
     pub fn new() -> Self {
         Self {
             event_loop: winit::event_loop::EventLoop::new(),
@@ -16,7 +16,7 @@ impl EventLoop {
     }
 
     /// Runs the window event loop
-    pub fn run<T>(self, settings: &WindowSettings, mut app: App)
+    pub fn run<T>(self, settings: &WindowSettings, app: App)
     where
         T: WindowHandler + Sized + 'static
     {

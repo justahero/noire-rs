@@ -3,6 +3,8 @@ use fmt::Display;
 use wgpu::ShaderModuleSource;
 use spirv_reflect::types::ReflectShaderStageFlags;
 
+use crate::ShaderLayout;
+
 type ShaderResult = Result<Shader, ShaderError>;
 
 #[derive(Debug)]
@@ -120,18 +122,23 @@ fn compile_shader(source_text: &str, stage: ShaderStage) -> Result<shaderc::Comp
     let mut compiler = shaderc::Compiler::new().ok_or(CompilerError::CompilerNotLoaded)?;
     let mut options = shaderc::CompileOptions::new().unwrap();
     options.add_macro_definition("main", Some("main"));
-    options.set_auto_bind_uniforms(true);
+    options.set_target_env(shaderc::TargetEnv::Vulkan, shaderc::EnvVersion::Vulkan1_0 as u32);
+    options.set_auto_bind_uniforms(false);
     options.set_optimization_level(shaderc::OptimizationLevel::Performance);
     options.set_source_language(shaderc::SourceLanguage::GLSL);
+    options.set_target_spirv(shaderc::SpirvVersion::V1_0);
     options.set_suppress_warnings();
-    let binary = compiler.compile_into_spirv(
+    // options.set_warnings_as_errors();
+    options.set_generate_debug_info();
+
+    let artifact = compiler.compile_into_spirv(
         source_text,
         stage.into(),
         &format!("{}_shader.glsl", stage.to_string()),
         "main",
         Some(&options)
     ).map_err(|e| CompilerError::CompilationFailed(e.to_string()))?;
-    Ok(binary)
+    Ok(artifact)
 }
 
 impl Shader {
@@ -170,5 +177,10 @@ impl Shader {
     /// Returns the shader as vec of u32.
     pub fn as_binary(&self) -> &[u32] {
         self.source.as_binary()
+    }
+
+    /// Returns the Shader Layout
+    pub fn layout(&self) -> ShaderLayout {
+        ShaderLayout::from_shader(self)
     }
 }
