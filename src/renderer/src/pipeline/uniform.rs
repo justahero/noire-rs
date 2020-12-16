@@ -1,6 +1,15 @@
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Uniform {
+    /// The name of the uniform
+    pub name: String,
+    /// The property / type of the uniform
+    pub property: UniformProperty,
+}
 
+impl Uniform {
+    pub fn get_size(&self) -> u64 {
+        self.property.get_size()
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
