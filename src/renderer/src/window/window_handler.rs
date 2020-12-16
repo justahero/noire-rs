@@ -16,7 +16,7 @@ pub trait WindowHandler {
     fn resize(&mut self, _width: u32, _height: u32) {}
 
     /// Method to update all entities in the window.
-    fn update(&mut self, _resources: &Resources);
+    fn update(&mut self, _resources: &Resources) {}
 
     /// Renders data to the frame buffer
     fn render(&mut self, _window: &mut Window, app: &mut Renderer);
