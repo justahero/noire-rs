@@ -185,8 +185,6 @@ fn reflect_binding(
     binding: &ReflectDescriptorBinding,
     shader_stage: ShaderStage,
 ) -> BindGroupEntry {
-    // dbg!(&binding);
-
     let type_description = binding.type_description.as_ref().unwrap();
     let name = binding.name.to_string();
 
@@ -254,7 +252,6 @@ fn reflect_uniform(variable: &ReflectBlockVariable) -> Uniform {
 }
 
 fn reflect_uniform_struct(block_variable: &ReflectBlockVariable) -> Uniform {
-    // dbg!(&block_variable);
     let description = block_variable.type_description.as_ref().unwrap();
     let members = block_variable.members
         .iter()
@@ -398,30 +395,15 @@ mod tests {
         assert_eq!(
             vec![
                 VertexBufferDescriptor::from_attribute(
-                    VertexAttributeDescriptor {
-                        name: "i_position".into(),
-                        offset: 0,
-                        location: 0,
-                        format: VertexFormat::Float3,
-                    },
+                    VertexAttributeDescriptor::new("i_position", 0, 0, VertexFormat::Float3),
                     InputStepMode::Vertex,
                 ),
                 VertexBufferDescriptor::from_attribute(
-                    VertexAttributeDescriptor {
-                        name: "i_normal".into(),
-                        offset: 0,
-                        location: 1,
-                        format: VertexFormat::Uint3,
-                    },
+                    VertexAttributeDescriptor::new("i_normal", 0, 1, VertexFormat::Uint3),
                     InputStepMode::Vertex,
                 ),
                 VertexBufferDescriptor::from_attribute(
-                    VertexAttributeDescriptor {
-                        name: "i_texture".into(),
-                        offset: 0,
-                        location: 2,
-                        format: VertexFormat::Float2,
-                    },
+                    VertexAttributeDescriptor::new("i_texture", 0, 2, VertexFormat::Float2),
                     InputStepMode::Vertex,
                 ),
             ],

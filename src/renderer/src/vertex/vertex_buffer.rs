@@ -39,6 +39,15 @@ impl From<&VertexAttributeDescriptor> for wgpu::VertexAttributeDescriptor {
 }
 
 impl VertexAttributeDescriptor {
+    pub fn new(name: &str, offset: u64, location: u32, format: VertexFormat) -> Self {
+        Self {
+            name: name.to_string(),
+            offset,
+            location,
+            format,
+        }
+    }
+
     pub fn size(&self) -> u64 {
         self.format.size()
     }
