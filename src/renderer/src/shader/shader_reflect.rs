@@ -181,10 +181,12 @@ fn reflect_bind_group(
     BindGroupDescriptor::new(descriptor_set.set, bindings)
 }
 
-pub(crate) fn reflect_binding(
+fn reflect_binding(
     binding: &ReflectDescriptorBinding,
     shader_stage: ShaderStage,
 ) -> BindGroupEntry {
+    dbg!(&binding);
+
     let type_description = binding.type_description.as_ref().unwrap();
 
     let (name, binding_type) = match binding.descriptor_type {
