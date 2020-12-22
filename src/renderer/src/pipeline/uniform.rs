@@ -47,7 +47,7 @@ impl UniformProperty {
             UniformProperty::Vec2 => 4 * 2,
             UniformProperty::Vec3 => 4 * 3,
             UniformProperty::Vec4 => 4 * 4,
-            UniformProperty::Mat3 => 4 * 4 * 3,
+            UniformProperty::Mat3 => 3 * 3 * 4,
             UniformProperty::Mat4 => 4 * 4 * 4,
             UniformProperty::Struct(properties) => {
                 properties.iter().map(|p| p.get_size()).sum()
