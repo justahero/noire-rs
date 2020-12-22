@@ -262,14 +262,8 @@ impl Renderer {
         }
         let mut encoder = self.command_encoder.take().unwrap();
         {
-            let wgpu_render_pass = create_render_pass(
-                pass_descriptor,
-                &mut encoder,
-            );
-            let mut render_pass = RenderPass::new(
-                self,
-                wgpu_render_pass,
-            );
+            let wgpu_render_pass = create_render_pass(pass_descriptor, &mut encoder);
+            let mut render_pass = RenderPass::new(self, wgpu_render_pass);
             run_pass(&mut render_pass);
         }
     }

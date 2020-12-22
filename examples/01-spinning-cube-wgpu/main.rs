@@ -1,9 +1,22 @@
-use cgmath::vec3;
+use cgmath::{vec3, SquareMatrix};
 use renderer::{
-    point3, shape, BindGroupDescriptor, BindGroupEntry, BindingType, Camera, IndexBuffer, Mesh,
-    PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, UniformProperty, VertexBuffer,
+    point3, shape, Camera, IndexBuffer, Mesh,
+    PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBuffer,
     WindowHandler, WindowSettings,
 };
+
+#[derive(Debug)]
+struct Uniforms {
+    pub model_view_projection: cgmath::Matrix4<f32>,
+}
+
+impl Uniforms {
+    pub fn new() -> Self {
+        Self {
+            model_view_projection: cgmath::Matrix4::identity().into(),
+        }
+    }
+}
 
 pub struct Example {
     /// The cube mesh to render
@@ -14,8 +27,8 @@ pub struct Example {
     camera: Camera,
     /// Render Pipeline
     pipeline: RenderPipelineId,
-    /// Bind group descriptor
-    bind_group_descriptor: BindGroupDescriptor,
+    /// Uniforms
+    uniforms: Uniforms,
 }
 
 impl WindowHandler for Example {
@@ -45,26 +58,15 @@ impl WindowHandler for Example {
 
         let pipeline_descriptor = PipelineDescriptor::new(vertex_shader, fragment_shader);
         let pipeline = renderer.create_pipeline(&pipeline_descriptor);
-
-        let bind_group_descriptor = BindGroupDescriptor::new(
-            0,
-            vec![BindGroupEntry {
-                name: "u_cameraPos".into(),
-                index: 0,
-                binding_type: BindingType::Uniform {
-                    dynamic: false,
-                    property: UniformProperty::Vec3,
-                },
-                shader_stage: ShaderStage::Vertex,
-            }],
-        );
+        let pipeline_layout = pipeline_descriptor.get_layout().unwrap();
+        // let bind_group_layout = renderer.resources.get_bind_group_layout();
 
         Example {
             vertex_buffer,
             index_buffer,
             camera,
             pipeline,
-            bind_group_descriptor,
+            uniforms: Uniforms::new(),
         }
     }
 

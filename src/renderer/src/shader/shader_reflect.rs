@@ -1,6 +1,6 @@
 use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectBlockVariable, ReflectDescriptorType, ReflectInterfaceVariable, ReflectTypeDescription, ReflectTypeFlags}};
 
-use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Shader, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
+use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
 
 #[derive(Debug)]
 enum NumberType {
@@ -58,7 +58,7 @@ impl From<&ReflectTypeDescription> for VertexFormat {
             NumberType::UInt(2, 32) => VertexFormat::Uint2,
             NumberType::UInt(3, 32) => VertexFormat::Uint3,
             NumberType::UInt(4, 32) => VertexFormat::Uint4,
-            _ => panic!("Unexpected vertex format found: {:?}", number)
+            _ => panic!("Unexpected vertex format found: {:?}", number),
         }
     }
 }
@@ -119,25 +119,6 @@ impl From<&ReflectTypeDescription> for TextureViewDimension {
     }
 }
 
-/// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
-///
-#[derive(Debug, Clone)]
-pub struct ShaderLayout {
-    /// Name of the entry point
-    pub entry_point: String,
-    /// The list of bind groups
-    pub bind_groups: Vec<BindGroupDescriptor>,
-    /// The list of vertex buffer descriptors
-    pub vertex_buffer_descriptors: Vec<VertexBufferDescriptor>,
-}
-
-impl ShaderLayout {
-    /// Creates a new shader layout by using reflection.
-    pub fn from_shader(shader: &Shader) -> ShaderLayout {
-        reflect(shader.as_bytes())
-    }
-}
-
 /// Reflect the given shader
 pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
     match ShaderModule::load_u8_data(spv_data) {
@@ -161,7 +142,10 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
 }
 
 /// Returns the list of bind groups in the shader
-pub(crate) fn reflect_bind_groups(shader_module: &ShaderModule, shader_stage: ShaderStage) -> Vec<BindGroupDescriptor> {
+pub(crate) fn reflect_bind_groups(
+    shader_module: &ShaderModule,
+    shader_stage: ShaderStage,
+) -> Vec<BindGroupDescriptor> {
     let descriptor_sets = shader_module.enumerate_descriptor_sets(None).unwrap();
     descriptor_sets
         .iter()
@@ -189,19 +173,18 @@ fn reflect_binding(
     let name = binding.name.to_string();
 
     let binding_type = match binding.descriptor_type {
-        ReflectDescriptorType::UniformBuffer => {
-            BindingType::Uniform {
-                dynamic: false,
-                uniform: reflect_uniform(&binding.block),
-            }
-        }
-        ReflectDescriptorType::CombinedImageSampler => {
-            BindingType::SampledTexture {
-                dimension: type_description.into(),
-                component_type: TextureComponentType::Float,
-            }
-        }
-        _ => panic!("Unsupported binding descriptor type {:?}", binding.descriptor_type),
+        ReflectDescriptorType::UniformBuffer => BindingType::Uniform {
+            dynamic: false,
+            uniform: reflect_uniform(&binding.block),
+        },
+        ReflectDescriptorType::CombinedImageSampler => BindingType::SampledTexture {
+            dimension: type_description.into(),
+            component_type: TextureComponentType::Float,
+        },
+        _ => panic!(
+            "Unsupported binding descriptor type {:?}",
+            binding.descriptor_type
+        ),
     };
 
     BindGroupEntry {
@@ -230,7 +213,9 @@ pub(crate) fn reflect_push_constant_blocks(shader_module: &ShaderModule) {
     // println!("----PUSH CONSTANT BLOCKS: {:?}", block_variables);
 }
 
-pub(crate) fn reflect_vertex_attribute(variable: &ReflectInterfaceVariable) -> VertexAttributeDescriptor {
+pub(crate) fn reflect_vertex_attribute(
+    variable: &ReflectInterfaceVariable,
+) -> VertexAttributeDescriptor {
     VertexAttributeDescriptor {
         name: variable.name.clone(),
         location: variable.location,
@@ -337,6 +322,8 @@ mod tests {
             ],
             layout.bind_groups,
         );
+        assert!(layout.bind_groups[0].find_bind_group("ubo").is_some());
+        assert!(layout.find_bind_group("ubo").is_some());
     }
 
     #[test]
