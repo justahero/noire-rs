@@ -4,7 +4,7 @@ use crate::{BindGroupDescriptorId, BindGroupId, IndexBuffer, RenderPipelineId, V
 
 /// Internal struct to keep all WGPU related structs
 #[derive(Debug)]
-pub(crate) struct WgpuResources {
+pub struct WgpuResources {
     /// List of all Render pipelines
     pub render_pipelines: HashMap<RenderPipelineId, wgpu::RenderPipeline>,
     /// Map of all vertex buffers

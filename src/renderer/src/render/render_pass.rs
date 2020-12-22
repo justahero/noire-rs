@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use crate::{BindGroupDescriptorId, BindGroupId, IndexBuffer, RenderPipelineId, Renderer, VertexBuffer, wgpu_resources::WgpuResources};
+use crate::{BindGroupId, IndexBuffer, RenderPipelineId, Renderer, VertexBuffer, wgpu_resources::WgpuResources};
 
 pub struct RenderPass<'a> {
     /// The reference to the main Renderer
@@ -47,7 +47,6 @@ impl<'a> RenderPass<'a> {
     pub fn set_bind_group(
         &mut self,
         binding: u32,
-        bind_group_descriptor_id: &BindGroupDescriptorId,
         bind_group_id: &BindGroupId,
     ) -> &mut Self {
         let bind_group = self.resources.get_bind_group(bind_group_id);

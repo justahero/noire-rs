@@ -1,8 +1,8 @@
-use std::{sync::Arc, borrow::Cow};
+use std::{sync::Arc};
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{BindGroupDescriptor, BindGroupDescriptorId, BindGroupId, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, WgpuVertexBufferDescriptor, wgpu_resources::WgpuResources};
+use crate::{BindGroupDescriptor, BindGroupDescriptorId, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, WgpuVertexBufferDescriptor, wgpu_resources::WgpuResources};
 
 pub struct RenderPassHandle {}
 
@@ -49,7 +49,7 @@ pub struct Renderer {
     /// The encoder to begin / finish the render pass
     pub command_encoder: CommandEncoder,
     /// The list of all WGPU specific resources, only visible to crate
-    pub(crate) resources: WgpuResources,
+    pub resources: WgpuResources,
 }
 
 impl Renderer {
@@ -133,7 +133,7 @@ impl Renderer {
         pipeline_descriptor: &PipelineDescriptor,
     ) -> RenderPipelineId {
         let layout = pipeline_descriptor.get_layout().unwrap();
-
+        dbg!(&layout.bind_groups);
         layout.bind_groups
             .iter()
             .for_each(|bind_group| self.create_bind_group_layout(bind_group));

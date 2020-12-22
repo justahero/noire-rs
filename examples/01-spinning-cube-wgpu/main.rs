@@ -1,27 +1,30 @@
 use bytemuck::{Pod, Zeroable};
-use cgmath::{vec3, SquareMatrix};
-use renderer::{
-    point3, shape, Camera, IndexBuffer, Mesh,
-    PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBuffer,
-    WindowHandler, WindowSettings,
-};
+use cgmath::*;
+use noire::math::convert_to_matrix3;
+use renderer::{BindGroupDescriptorId, BindGroupId, Camera, IndexBuffer, Mesh, PipelineDescriptor, RenderPipelineId, Renderer, ShaderStage, VertexBuffer, WindowHandler, WindowSettings, point3, shape};
 
 use wgpu::util::DeviceExt;
 
 #[derive(Debug, Copy, Clone)]
 struct Uniforms {
     pub model_view_projection: cgmath::Matrix4<f32>,
+    pub model_view: cgmath::Matrix4<f32>,
+    pub normal_matrix: cgmath::Matrix3<f32>,
 }
 
 impl Uniforms {
     pub fn new() -> Self {
         Self {
             model_view_projection: cgmath::Matrix4::identity().into(),
+            model_view: cgmath::Matrix4::identity().into(),
+            normal_matrix: cgmath::Matrix3::identity().into(),
         }
     }
 
     pub fn update_view_proj(&mut self, camera: &Camera) {
         self.model_view_projection = camera.projection * camera.view;
+        self.model_view = camera.view;
+        self.normal_matrix = convert_to_matrix3(&self.model_view).invert().unwrap().transpose();
     }
 }
 
@@ -41,8 +44,10 @@ pub struct Example {
     uniforms: Uniforms,
     /// Uniform buffer
     uniform_buffer: wgpu::Buffer,
-    /// Bind group for uniforms
-    uniform_bind_group: wgpu::BindGroup,
+    /// Bind group id
+    uniform_bind_group_id: BindGroupId,
+    /// Uniform bind group descriptor id
+    bind_group_descriptor_id: BindGroupDescriptorId,
 }
 
 impl WindowHandler for Example {
@@ -88,16 +93,18 @@ impl WindowHandler for Example {
 
         let uniform_bind_group = renderer.device.create_bind_group(
             &wgpu::BindGroupDescriptor {
-                label: Some("uniform_bind_group"),
+                layout: &bind_group_layout,
                 entries: &[
                     wgpu::BindGroupEntry {
                         binding: 0,
                         resource: wgpu::BindingResource::Buffer(uniform_buffer.slice(..)),
                     }
                 ],
-                layout: &bind_group_layout,
+                label: Some("uniform_bind_group"),
             }
         );
+        let uniform_bind_group_id = BindGroupId::new();
+        renderer.resources.bind_groups.insert(uniform_bind_group_id, uniform_bind_group);
 
         Example {
             vertex_buffer,
@@ -106,7 +113,8 @@ impl WindowHandler for Example {
             pipeline,
             uniforms,
             uniform_buffer,
-            uniform_bind_group,
+            uniform_bind_group_id,
+            bind_group_descriptor_id: bind_group_descriptor.id,
         }
     }
 
@@ -117,7 +125,7 @@ impl WindowHandler for Example {
             render_pass.set_pipeline(&self.pipeline);
             render_pass.set_vertex_buffer(0, &self.vertex_buffer);
             render_pass.set_index_buffer(&self.index_buffer);
-            // render_pass.set_bind_group(0, self.bind_group_id);
+            render_pass.set_bind_group(0, &self.uniform_bind_group_id);
             render_pass.draw_indexed(0..self.index_buffer.count, 0, 0..1);
         });
     }
