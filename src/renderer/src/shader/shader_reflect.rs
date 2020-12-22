@@ -157,7 +157,6 @@ fn reflect_bind_group(
     descriptor_set: &ReflectDescriptorSet,
     shader_stage: ShaderStage,
 ) -> BindGroupDescriptor {
-    dbg!(&descriptor_set);
     let bindings = descriptor_set.bindings
         .iter()
         .map(|descriptor_binding| reflect_binding(descriptor_binding, shader_stage))
