@@ -52,4 +52,11 @@ impl PipelineLayout {
             vertex_buffer_descriptors,
         })
     }
+
+    /// Returns the bind group descriptor by name
+    pub fn find_bind_group_descriptor(&self, name: &str) -> Option<&BindGroupDescriptor> {
+        self.bind_groups
+            .iter()
+            .find(|descriptor| descriptor.find_bind_group_entry(name).is_some())
+    }
 }

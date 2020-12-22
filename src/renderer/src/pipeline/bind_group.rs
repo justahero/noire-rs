@@ -121,4 +121,11 @@ impl BindGroupDescriptor {
             false
         }
     }
+
+    /// Checks if there is a Bind Group with the name
+    pub fn find_bind_group_entry(&self, name: &str) -> Option<&BindGroupEntry> {
+        self.bindings
+            .iter()
+            .find(|entry| entry.name == name)
+    }
 }

@@ -1,3 +1,4 @@
+use bytemuck::{Pod, Zeroable};
 use cgmath::{vec3, SquareMatrix};
 use renderer::{
     point3, shape, Camera, IndexBuffer, Mesh,
@@ -5,7 +6,9 @@ use renderer::{
     WindowHandler, WindowSettings,
 };
 
-#[derive(Debug)]
+use wgpu::util::DeviceExt;
+
+#[derive(Debug, Copy, Clone)]
 struct Uniforms {
     pub model_view_projection: cgmath::Matrix4<f32>,
 }
@@ -16,7 +19,14 @@ impl Uniforms {
             model_view_projection: cgmath::Matrix4::identity().into(),
         }
     }
+
+    pub fn update_view_proj(&mut self, camera: &Camera) {
+        self.model_view_projection = camera.projection * camera.view;
+    }
 }
+
+unsafe impl Zeroable for Uniforms {}
+unsafe impl Pod for Uniforms {}
 
 pub struct Example {
     /// The cube mesh to render
@@ -29,6 +39,10 @@ pub struct Example {
     pipeline: RenderPipelineId,
     /// Uniforms
     uniforms: Uniforms,
+    /// Uniform buffer
+    uniform_buffer: wgpu::Buffer,
+    /// Bind group for uniforms
+    uniform_bind_group: wgpu::BindGroup,
 }
 
 impl WindowHandler for Example {
@@ -58,15 +72,41 @@ impl WindowHandler for Example {
 
         let pipeline_descriptor = PipelineDescriptor::new(vertex_shader, fragment_shader);
         let pipeline = renderer.create_pipeline(&pipeline_descriptor);
-        let pipeline_layout = pipeline_descriptor.get_layout().unwrap();
-        // let bind_group_layout = renderer.resources.get_bind_group_layout();
+        let bind_group_descriptor = pipeline_descriptor.get_layout().unwrap().find_bind_group_descriptor("ubo").unwrap();
+        let bind_group_layout = renderer.get_bind_group_layout(bind_group_descriptor.id).unwrap();
+
+        let mut uniforms = Uniforms::new();
+        uniforms.update_view_proj(&camera);
+
+        let uniform_buffer = renderer.device.create_buffer_init(
+            &wgpu::util::BufferInitDescriptor {
+                label: Some("Uniform Buffer"),
+                contents: bytemuck::cast_slice(&[uniforms]),
+                usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST,
+            }
+        );
+
+        let uniform_bind_group = renderer.device.create_bind_group(
+            &wgpu::BindGroupDescriptor {
+                label: Some("uniform_bind_group"),
+                entries: &[
+                    wgpu::BindGroupEntry {
+                        binding: 0,
+                        resource: wgpu::BindingResource::Buffer(uniform_buffer.slice(..)),
+                    }
+                ],
+                layout: &bind_group_layout,
+            }
+        );
 
         Example {
             vertex_buffer,
             index_buffer,
             camera,
             pipeline,
-            uniforms: Uniforms::new(),
+            uniforms,
+            uniform_buffer,
+            uniform_bind_group,
         }
     }
 

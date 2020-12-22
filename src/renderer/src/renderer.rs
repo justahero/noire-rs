@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, borrow::Cow};
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
@@ -91,6 +91,7 @@ impl Renderer {
         &mut self,
         descriptor: &BindGroupDescriptor,
     ) {
+        dbg!(&descriptor);
         if self.resources.get_bind_group_layout(&descriptor.id).is_none() {
             let entries = descriptor.bindings
                 .iter()
@@ -104,9 +105,11 @@ impl Renderer {
                 })
                 .collect::<Vec<wgpu::BindGroupLayoutEntry>>();
 
+            let label = descriptor.bindings.first().unwrap().name.clone();
+
             let bind_group_layout_descriptor = wgpu::BindGroupLayoutDescriptor {
                 entries: entries.as_slice(),
-                label: None,
+                label: Some(&label),
             };
 
             let bind_group_layout = self.device.create_bind_group_layout(&bind_group_layout_descriptor);
@@ -114,17 +117,13 @@ impl Renderer {
         }
     }
 
-    /// Creates a new Bind Group with some data
-    pub fn create_bind_group(
-        &mut self,
-        bind_group_descriptor_id: &BindGroupDescriptorId,
-    ) -> BindGroupId {
-        // fetch bind group layout
-        let bind_group_layout = self.resources
-            .get_bind_group_layout(bind_group_descriptor_id)
-            .expect("Bind Group Layout not found");
-
-        BindGroupId::new()
+    /// Returns internal wgpu bind group layout
+    /// TODO remove this function later
+    pub fn get_bind_group_layout(
+        &self,
+        bind_group_descriptor_id: BindGroupDescriptorId,
+    ) -> Option<&wgpu::BindGroupLayout> {
+        self.resources.get_bind_group_layout(&bind_group_descriptor_id)
     }
 
     /// This creates and stores a new wgpu::RenderPipeline, the function returns an ID
@@ -134,7 +133,6 @@ impl Renderer {
         pipeline_descriptor: &PipelineDescriptor,
     ) -> RenderPipelineId {
         let layout = pipeline_descriptor.get_layout().unwrap();
-        dbg!(&layout.bind_groups);
 
         layout.bind_groups
             .iter()
