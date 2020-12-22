@@ -53,6 +53,7 @@ name = "filewatch"
 
 [dependencies]
 backtrace   = "0.3.46"
+bytemuck    = "1.4.1"
 cgmath      = "0.17.0"
 futures     = "0.3.5"
 gl          = "0.14.0"
