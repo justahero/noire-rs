@@ -95,6 +95,8 @@ impl Renderer {
             let entries = descriptor.bindings
                 .iter()
                 .map(|binding| {
+                    // convert shader stage
+
                     wgpu::BindGroupLayoutEntry {
                         binding: binding.index,
                         visibility: binding.shader_stage.into(),

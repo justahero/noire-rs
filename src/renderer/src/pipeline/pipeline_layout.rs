@@ -26,7 +26,19 @@ impl PipelineLayout {
                 match bind_groups.get_mut(&shader_bind_group.index) {
                     Some(bind_group) => {
                         for shader_binding in shader_bind_group.bindings.iter() {
-                            if !bind_group.contains(shader_binding) {
+                            if let Some(binding) = bind_group
+                                .bindings
+                                .iter_mut()
+                                .find(|rhs| rhs.index == shader_binding.index)
+                            {
+                                binding.shader_stage |= shader_binding.shader_stage;
+                                if binding.binding_type != shader_binding.binding_type
+                                    || binding.name != shader_binding.name
+                                    || binding.index != shader_binding.index
+                                {
+                                    panic!("Binding {:?} in BindGroup {:?} is not consistent across shader types", binding, shader_binding);
+                                }
+                            } else {
                                 bind_group.bindings.push(shader_binding.clone());
                             }
                         }

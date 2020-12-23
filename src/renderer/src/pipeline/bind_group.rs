@@ -47,6 +47,42 @@ impl From<&BindingType> for wgpu::BindingType {
     }
 }
 
+bitflags::bitflags! {
+    #[repr(transparent)]
+    pub struct BindingShaderStage: u32 {
+        /// Type for vertex shader stage
+        const VERTEX = 1;
+        /// Type for fragment shader stage
+        const FRAGMENT = 2;
+        /// Type for compute shader stage
+        const COMPUTE = 4;
+    }
+}
+
+impl From<BindingShaderStage> for wgpu::ShaderStage {
+    fn from(stage: BindingShaderStage) -> Self {
+        if stage == BindingShaderStage::VERTEX | BindingShaderStage::FRAGMENT {
+            wgpu::ShaderStage::VERTEX | wgpu::ShaderStage::FRAGMENT
+        } else if stage == BindingShaderStage::VERTEX {
+            wgpu::ShaderStage::VERTEX
+        } else if stage == BindingShaderStage::FRAGMENT {
+            wgpu::ShaderStage::FRAGMENT
+        } else {
+            panic!("Invalid binding shader stage")
+        }
+    }
+}
+
+impl From<ShaderStage> for BindingShaderStage {
+    fn from(stage: ShaderStage) -> Self {
+        match stage {
+            ShaderStage::Vertex => BindingShaderStage::VERTEX,
+            ShaderStage::Fragment => BindingShaderStage::FRAGMENT,
+            ShaderStage::Compute => BindingShaderStage::COMPUTE,
+        }
+    }
+}
+
 /// Defines a particular binding between Shader input variable and outside parameters.
 ///
 /// Example:
@@ -72,7 +108,7 @@ pub struct BindGroupEntry {
     /// The binding type
     pub binding_type: BindingType,
     /// The shader stage this binding is associated with
-    pub shader_stage: ShaderStage,
+    pub shader_stage: BindingShaderStage,
 }
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
@@ -106,19 +142,6 @@ impl BindGroupDescriptor {
             index,
             bindings,
             id: BindGroupDescriptorId::new(),
-        }
-    }
-
-    /// Finds a given Binding Descriptor in this Bind Group Descriptor
-    pub fn contains(&self, other: &BindGroupEntry) -> bool {
-        if let Some(binding) = self.bindings.iter().find(|rhs| rhs.index == other.index) {
-            if binding.binding_type == other.binding_type && binding.name == other.name {
-                true
-            } else {
-                panic!("Binding {} in BindGroup {} is not consistent across shader types: ", binding.index, self.index);
-            }
-        } else {
-            false
         }
     }
 

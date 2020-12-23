@@ -191,7 +191,7 @@ fn reflect_binding(
         name,
         index: binding.binding,
         binding_type,
-        shader_stage,
+        shader_stage: shader_stage.into(),
     }
 }
 
