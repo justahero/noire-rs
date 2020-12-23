@@ -142,7 +142,7 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
 }
 
 /// Returns the list of bind groups in the shader
-pub(crate) fn reflect_bind_groups(
+fn reflect_bind_groups(
     shader_module: &ShaderModule,
     shader_stage: ShaderStage,
 ) -> Vec<BindGroupDescriptor> {
