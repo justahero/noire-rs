@@ -251,7 +251,7 @@ fn reflect_uniform_struct(block_variable: &ReflectBlockVariable) -> Uniform {
 
 #[cfg(test)]
 mod tests {
-    use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, Renderer, Shader, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
+    use crate::{BindGroupDescriptor, BindGroupEntry, BindingShaderStage, BindingType, InputStepMode, Renderer, Shader, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
 
     fn shader_layout(source: &str) -> ShaderLayout {
         let renderer = futures::executor::block_on(Renderer::new());
@@ -301,7 +301,7 @@ mod tests {
                                     ]),
                                 ),
                             },
-                            shader_stage: ShaderStage::Vertex,
+                            shader_stage: BindingShaderStage::VERTEX,
                         },
                     ],
                 ),
@@ -315,15 +315,15 @@ mod tests {
                                 dimension: TextureViewDimension::D2,
                                 component_type: TextureComponentType::Float,
                             },
-                            shader_stage: ShaderStage::Vertex,
+                            shader_stage: BindingShaderStage::VERTEX,
                         },
                     ],
                 ),
             ],
             layout.bind_groups,
         );
-        // assert!(layout.bind_groups[0].find_bind_group("ubo").is_some());
-        // assert!(layout.find_bind_group("ubo").is_some());
+        assert!(layout.bind_groups[0].find_bind_group_entry("ubo").is_some());
+        assert!(layout.bind_groups[1].find_bind_group_entry("colorMap").is_some());
     }
 
     #[test]
@@ -372,7 +372,7 @@ mod tests {
                                     ),
                                 ),
                             },
-                            shader_stage: ShaderStage::Vertex,
+                            shader_stage: BindingShaderStage::VERTEX,
                         }
                     ],
                 ),

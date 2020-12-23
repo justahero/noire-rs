@@ -1,6 +1,6 @@
 #version 450
 
-layout (binding = 0) uniform UniformBufferObject {
+layout(set = 0, binding = 0) uniform UniformBufferObject {
     mat4 modelViewProjection;
     mat4 modelView;
     mat3 normalMatrix;

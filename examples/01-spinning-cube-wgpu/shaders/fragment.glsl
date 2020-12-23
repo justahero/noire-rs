@@ -1,6 +1,6 @@
 #version 450
 
-layout(set = 0, binding = 0) uniform Locals {
+layout(set = 1, binding = 0) uniform Locals {
     vec3 u_cameraPos;
     vec2 u_resolution;
     float u_time;

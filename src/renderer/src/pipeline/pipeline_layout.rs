@@ -86,7 +86,7 @@ mod tests {
     fn test_multiple_shaders() {
         const VERTEX_SHADER: &str = r#"
         #version 450
-        layout (binding = 0) uniform UniformBufferObject {
+        layout (set = 0, binding = 0) uniform UniformBufferObject {
             mat4 modelViewProjection;
             mat4 modelView;
             mat3 normalMatrix;
@@ -105,7 +105,7 @@ mod tests {
 
         const FRAGMENT_SHADER: &str = r#"
         #version 450
-        layout(set = 0, binding = 0) uniform Locals {
+        layout(set = 1, binding = 0) uniform Locals {
             vec3 u_cameraPos;
             vec2 u_resolution;
             float u_time;
