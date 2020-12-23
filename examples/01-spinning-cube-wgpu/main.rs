@@ -75,6 +75,7 @@ impl WindowHandler for Example {
             vec3(0.0, 1.0, 0.0),
         );
 
+        // TODO try to minimize the following code
         let pipeline_descriptor = PipelineDescriptor::new(vertex_shader, fragment_shader);
         let pipeline = renderer.create_pipeline(&pipeline_descriptor);
         let bind_group_descriptor = pipeline_descriptor.get_layout().unwrap().find_bind_group_descriptor("ubo").unwrap();
