@@ -91,7 +91,6 @@ impl Renderer {
         &mut self,
         descriptor: &BindGroupDescriptor,
     ) {
-        dbg!(&descriptor);
         if self.resources.get_bind_group_layout(&descriptor.id).is_none() {
             let entries = descriptor.bindings
                 .iter()
@@ -133,7 +132,7 @@ impl Renderer {
         pipeline_descriptor: &PipelineDescriptor,
     ) -> RenderPipelineId {
         let layout = pipeline_descriptor.get_layout().unwrap();
-        dbg!(&layout.bind_groups);
+
         layout.bind_groups
             .iter()
             .for_each(|bind_group| self.create_bind_group_layout(bind_group));
