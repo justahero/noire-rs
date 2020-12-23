@@ -52,6 +52,7 @@ impl Display for ShaderError {
     }
 }
 
+/// TODO change into bit flags
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ShaderStage {
     /// Type for vertex shader stage
