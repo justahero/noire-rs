@@ -39,6 +39,27 @@ impl From<FilterMode> for wgpu::FilterMode {
     }
 }
 
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub enum SamplerBorderColor {
+    /// [0, 0, 0, 0]
+    TransparentBlack,
+    /// [0, 0, 0, 1]
+    OpaqueBlack,
+    /// [0, 0, 0, 1]
+    OpaqueWhite,
+}
+
+impl From<SamplerBorderColor> for wgpu::SamplerBorderColor {
+    fn from(val: SamplerBorderColor) -> Self {
+        match val {
+            SamplerBorderColor::TransparentBlack => wgpu::SamplerBorderColor::TransparentBlack,
+            SamplerBorderColor::OpaqueBlack => wgpu::SamplerBorderColor::OpaqueBlack,
+            SamplerBorderColor::OpaqueWhite => wgpu::SamplerBorderColor::OpaqueWhite,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct SamplerDescriptor {
     /// Debug label of the sampler
@@ -63,6 +84,8 @@ pub struct SamplerDescriptor {
     pub compare: Option<CompareFunction>,
     /// Valid values: 1, 2, 4, 8, 16
     pub anisotropy_clamp: Option<NonZeroU8>,
+    /// Border color to use when address mode is [`AddressMode::ClampToBorder`]
+    pub border_color: Option<SamplerBorderColor>,
 }
 
 impl Default for SamplerDescriptor {
@@ -79,6 +102,7 @@ impl Default for SamplerDescriptor {
             lod_max_clamp: 100.0,
             compare: Some(CompareFunction::LessEqual),
             anisotropy_clamp: std::num::NonZeroU8::new(1),
+            border_color: None,
         }
     }
 }
@@ -97,6 +121,7 @@ impl<'a> From<&SamplerDescriptor> for wgpu::SamplerDescriptor<'a> {
             lod_max_clamp: descriptor.lod_max_clamp,
             compare: descriptor.compare.map(|c| c.into()),
             anisotropy_clamp: descriptor.anisotropy_clamp,
+            border_color: descriptor.border_color.map(SamplerBorderColor::into),
         }
     }
 }

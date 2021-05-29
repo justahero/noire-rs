@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
-use crate::{BindGroupDescriptor, Shader, ShaderError, ShaderLayout, VertexBufferDescriptor};
+use crate::{BindGroupDescriptor, Shader, ShaderError, ShaderLayout, VertexBufferLayout};
 
 #[derive(Debug)]
 pub struct PipelineLayout {
     /// The list of bind group descriptors
     pub bind_groups: Vec<BindGroupDescriptor>,
     /// The list of vertex buffer descriptors
-    pub vertex_buffer_descriptors: Vec<VertexBufferDescriptor>,
+    pub vertex_buffer_layouts: Vec<VertexBufferLayout>,
 }
 
 impl PipelineLayout {
@@ -55,13 +55,13 @@ impl PipelineLayout {
             .map(|(_index, descriptor)| descriptor)
             .collect();
 
-        let vertex_buffer_descriptors = shader_layouts[0].vertex_buffer_descriptors.iter()
+        let vertex_buffer_layouts = shader_layouts[0].vertex_buffer_layouts.iter()
             .map(|vb| vb.clone())
-            .collect::<Vec<VertexBufferDescriptor>>();
+            .collect::<Vec<VertexBufferLayout>>();
 
         Ok(PipelineLayout {
             bind_groups,
-            vertex_buffer_descriptors,
+            vertex_buffer_layouts,
         })
     }
 

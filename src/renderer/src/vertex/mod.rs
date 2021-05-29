@@ -12,6 +12,12 @@ pub enum IndexFormat {
     Uint32,
 }
 
+impl Default for IndexFormat {
+    fn default() -> Self {
+        IndexFormat::Uint32
+    }
+}
+
 impl From<IndexFormat> for wgpu::IndexFormat {
     fn from(format: IndexFormat) -> Self {
         match format {

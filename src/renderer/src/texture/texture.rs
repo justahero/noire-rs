@@ -107,7 +107,7 @@ pub struct TextureViewDescriptor {
     /// Base mip level
     pub base_mip_level: u32,
     /// Mip level count
-    pub level_count: Option<NonZeroU32>,
+    pub mip_level_count: Option<NonZeroU32>,
     /// Base Array Layer
     pub base_array_layer: u32,
     /// Layer count
@@ -122,7 +122,7 @@ impl TextureViewDescriptor {
             dimension: Some(TextureViewDimension::D2),
             aspect: TextureAspect::All,
             base_mip_level: 0,
-            level_count: NonZeroU32::new(1),
+            mip_level_count: NonZeroU32::new(1),
             base_array_layer: 0,
             array_layer_count: NonZeroU32::new(1),
         }
@@ -137,7 +137,7 @@ impl<'a> From<TextureViewDescriptor> for wgpu::TextureViewDescriptor<'a> {
             dimension: descriptor.dimension.map(|d| d.into()),
             aspect: descriptor.aspect.into(),
             base_mip_level: descriptor.base_mip_level,
-            level_count: descriptor.level_count,
+            mip_level_count: descriptor.mip_level_count,
             base_array_layer: descriptor.base_array_layer,
             array_layer_count: descriptor.array_layer_count,
         }

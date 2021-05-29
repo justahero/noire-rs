@@ -36,7 +36,7 @@ impl From<&WindowSettings> for SwapChainDescriptor {
         };
 
         SwapChainDescriptor {
-            usage: TextureUsage::OUTPUT_ATTACHMENT,
+            usage: TextureUsage::RENDER_ATTACHMENT,
             format: TextureFormat::Bgra8UnormSrgb,
             width: window.width,
             height: window.height,
@@ -55,7 +55,7 @@ impl From<&winit::window::Window> for SwapChainDescriptor {
         };
 
         SwapChainDescriptor {
-            usage: TextureUsage::OUTPUT_ATTACHMENT,
+            usage: TextureUsage::RENDER_ATTACHMENT,
             format: TextureFormat::Bgra8UnormSrgb,
             width: size.width,
             height: size.height,

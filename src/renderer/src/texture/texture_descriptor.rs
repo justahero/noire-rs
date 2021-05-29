@@ -1,5 +1,6 @@
 use crate::{TextureFormat, TextureUsage};
 
+#[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct Extend3d {
     pub width: u32,
@@ -7,12 +8,22 @@ pub struct Extend3d {
     pub depth: u32,
 }
 
+impl Default for Extend3d {
+    fn default() -> Self {
+        Self {
+            width: 1,
+            height: 1,
+            depth: 1,
+        }
+    }
+}
+
 impl From<Extend3d> for wgpu::Extent3d {
     fn from(val: Extend3d) -> Self {
         Self {
             width: val.width,
             height: val.height,
-            depth: val.depth,
+            depth_or_array_layers: val.depth,
         }
     }
 }

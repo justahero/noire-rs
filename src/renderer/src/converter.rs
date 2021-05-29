@@ -27,7 +27,7 @@ impl WgpuFrom<&WindowSettings> for wgpu::SwapChainDescriptor {
         };
 
         wgpu::SwapChainDescriptor {
-            usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+            usage: wgpu::TextureUsage::RENDER_ATTACHMENT,
             format: wgpu::TextureFormat::Bgra8UnormSrgb,
             width: window.width,
             height: window.height,
@@ -55,7 +55,7 @@ impl WgpuFrom<&winit::window::Window> for SwapChainDescriptor {
         };
 
         Self {
-            usage: TextureUsage::OUTPUT_ATTACHMENT,
+            usage: TextureUsage::RENDER_ATTACHMENT,
             format: TextureFormat::Bgra8UnormSrgb,
             width: size.width,
             height: size.height,

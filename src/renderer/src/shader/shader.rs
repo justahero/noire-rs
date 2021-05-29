@@ -1,6 +1,5 @@
 use std::{borrow::Cow, fmt, fs::File, io::Read, path};
 use fmt::Display;
-use wgpu::ShaderModuleSource;
 use spirv_reflect::types::ReflectShaderStageFlags;
 
 use crate::ShaderLayout;
@@ -148,8 +147,12 @@ impl Shader {
         let source = compile_shader(source, stage)
             .map_err(|e| ShaderError::CompileError(e.to_string()))?;
 
-        let module_source = ShaderModuleSource::SpirV(Cow::from(source.as_binary()));
-        let module = device.create_shader_module(module_source);
+        let flags = wgpu::ShaderFlags::VALIDATION;
+        let module = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+            label: None,
+            source: wgpu::ShaderSource::SpirV(Cow::from(source.as_binary())),
+            flags,
+        });
 
         Ok(Self {
             stage,

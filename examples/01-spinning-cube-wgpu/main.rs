@@ -115,7 +115,10 @@ impl WindowHandler for Example {
 
         // TODO try to minimize the following code
         let pipeline_descriptor = PipelineDescriptor::new(vertex_shader, fragment_shader);
+        let pipeline_layout = pipeline_descriptor.get_layout().unwrap();
         let pipeline = renderer.create_pipeline(&pipeline_descriptor);
+
+        // dbg!(&pipeline_layout);
 
         // 1st bind group with uniforms
         let mut uniforms = Uniforms::new();
@@ -129,7 +132,7 @@ impl WindowHandler for Example {
             }
         );
 
-        let bind_group_descriptor = pipeline_descriptor.get_layout().unwrap().find_bind_group_descriptor("ubo").unwrap();
+        let bind_group_descriptor = pipeline_layout.find_bind_group_descriptor("ubo").unwrap();
         let bind_group_layout = renderer.get_bind_group_layout(bind_group_descriptor.id).unwrap();
         let uniform_bind_group = renderer.device.create_bind_group(
             &wgpu::BindGroupDescriptor {
@@ -160,7 +163,7 @@ impl WindowHandler for Example {
             }
         );
 
-        let bind_group_descriptor = pipeline_descriptor.get_layout().unwrap().find_bind_group_descriptor("").unwrap();
+        let bind_group_descriptor = pipeline_layout.find_bind_group_descriptor("").unwrap();
         let bind_group_layout = renderer.get_bind_group_layout(bind_group_descriptor.id).unwrap();
         let locals_bind_group = renderer.device.create_bind_group(
             &wgpu::BindGroupDescriptor {

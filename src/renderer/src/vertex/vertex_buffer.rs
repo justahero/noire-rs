@@ -23,27 +23,27 @@ pub struct VertexAttributeDescriptor {
     /// Byte offset of the start of the input
     pub offset: u64,
     /// Location for this input, must match the location in shader
-    pub location: u32,
+    pub shader_location: u32,
     /// Format of the input
     pub format: VertexFormat,
 }
 
-impl From<&VertexAttributeDescriptor> for wgpu::VertexAttributeDescriptor {
+impl From<&VertexAttributeDescriptor> for wgpu::VertexAttribute {
     fn from(val: &VertexAttributeDescriptor) -> Self {
-        wgpu::VertexAttributeDescriptor {
+        wgpu::VertexAttribute {
             offset: val.offset,
             format: val.format.into(),
-            shader_location: val.location,
+            shader_location: val.shader_location,
         }
     }
 }
 
 impl VertexAttributeDescriptor {
-    pub fn new(name: &str, offset: u64, location: u32, format: VertexFormat) -> Self {
+    pub fn new(name: &str, offset: u64, shader_location: u32, format: VertexFormat) -> Self {
         Self {
             name: name.to_string(),
             offset,
-            location,
+            shader_location,
             format,
         }
     }
@@ -54,7 +54,7 @@ impl VertexAttributeDescriptor {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct VertexBufferDescriptor {
+pub struct VertexBufferLayout {
     /// Debug label
     pub label: String,
     /// buffer address stride
@@ -65,14 +65,14 @@ pub struct VertexBufferDescriptor {
     pub attributes: Vec<VertexAttributeDescriptor>,
 }
 
-impl VertexBufferDescriptor {
+impl VertexBufferLayout {
     pub fn new(verts: Vec<VertexFormat>) -> Self {
         let mut offset = 0;
         let mut attributes = Vec::new();
         for (location, format) in verts.iter().enumerate() {
             let descriptor = VertexAttributeDescriptor {
                 name: "".to_string(),
-                location: location as u32,
+                shader_location: location as u32,
                 offset,
                 format: format.clone(),
             };
@@ -111,21 +111,21 @@ impl VertexBufferDescriptor {
 }
 
 #[derive(Debug)]
-pub struct WgpuVertexBufferDescriptor {
+pub struct WgpuVertexBufferLayout {
     pub stride: wgpu::BufferAddress,
     pub step_mode: wgpu::InputStepMode,
-    pub attributes: Vec<wgpu::VertexAttributeDescriptor>,
+    pub attributes: Vec<wgpu::VertexAttribute>,
 }
 
-impl From<&VertexBufferDescriptor> for WgpuVertexBufferDescriptor {
-    fn from(descriptor: &VertexBufferDescriptor) -> Self {
+impl From<&VertexBufferLayout> for WgpuVertexBufferLayout {
+    fn from(descriptor: &VertexBufferLayout) -> Self {
         let attributes = descriptor
             .attributes
             .iter()
             .map(|item| item.into())
-            .collect::<Vec<wgpu::VertexAttributeDescriptor>>();
+            .collect::<Vec<wgpu::VertexAttribute>>();
 
-        WgpuVertexBufferDescriptor {
+        WgpuVertexBufferLayout {
             stride: descriptor.stride.into(),
             step_mode: descriptor.step_mode.into(),
             attributes,
@@ -133,10 +133,10 @@ impl From<&VertexBufferDescriptor> for WgpuVertexBufferDescriptor {
     }
 }
 
-impl<'a> From<&'a WgpuVertexBufferDescriptor> for wgpu::VertexBufferDescriptor<'a> {
-    fn from(descriptor: &'a WgpuVertexBufferDescriptor) -> Self {
-        wgpu::VertexBufferDescriptor {
-            stride: descriptor.stride,
+impl<'a> From<&'a WgpuVertexBufferLayout> for wgpu::VertexBufferLayout<'a> {
+    fn from(descriptor: &'a WgpuVertexBufferLayout) -> Self {
+        wgpu::VertexBufferLayout {
+            array_stride: descriptor.stride,
             step_mode: descriptor.step_mode,
             attributes: &descriptor.attributes,
         }
@@ -145,7 +145,7 @@ impl<'a> From<&'a WgpuVertexBufferDescriptor> for wgpu::VertexBufferDescriptor<'
 
 #[cfg(test)]
 mod tests {
-    use crate::{VertexBufferDescriptor, VertexFormat, VertexAttributeDescriptor};
+    use crate::{VertexBufferLayout, VertexFormat, VertexAttributeDescriptor};
 
     #[test]
     fn it_sets_up_vertex_buffer_descriptor() {

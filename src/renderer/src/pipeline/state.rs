@@ -1,44 +1,61 @@
 use crate::TextureFormat;
 
-pub struct ColorStateDescriptor {
+#[derive(Clone, Copy, Debug)]
+pub struct BlendState {
+    pub color: BlendComponent,
+    pub alpha: BlendComponent,
+}
+
+impl From<BlendState> for wgpu::BlendState {
+    fn from(state: BlendState) -> Self {
+        Self {
+            color: state.color.into(),
+            alpha: state.alpha.into(),
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct ColorTargetState {
     pub format: TextureFormat,
-    pub alpha_blend: BlendDescriptor,
-    pub color_blend: BlendDescriptor,
+    pub blend: Option<BlendState>,
     pub write_mask: ColorWrite,
 }
 
-impl Default for ColorStateDescriptor {
+impl Default for ColorTargetState {
     fn default() -> Self {
         Self {
             format: TextureFormat::Bgra8UnormSrgb,
-            color_blend: BlendDescriptor::COLOR_BLEND,
-            alpha_blend: BlendDescriptor::ALPHA_BLEND,
+            blend: Some(BlendState {
+                color: BlendComponent::COLOR_BLEND,
+                alpha: BlendComponent::ALPHA_BLEND,
+            }),
             write_mask: ColorWrite::ALL,
         }
     }
 }
 
-impl From<&ColorStateDescriptor> for wgpu::ColorStateDescriptor {
-    fn from(val: &ColorStateDescriptor) -> Self {
-        wgpu::ColorStateDescriptor {
+impl From<&ColorTargetState> for wgpu::ColorTargetState {
+    fn from(val: &ColorTargetState) -> Self {
+        wgpu::ColorTargetState {
             format: val.format.into(),
-            alpha_blend: (&val.alpha_blend).into(),
-            color_blend: (&val.color_blend).into(),
+            blend: val.blend.map(BlendState::into),
             write_mask: val.write_mask.into(),
         }
     }
 }
 
-#[derive(Debug)]
-pub struct BlendDescriptor {
+#[derive(Debug, Clone, Copy)]
+pub struct BlendComponent {
     pub src_factor: BlendFactor,
     pub dst_factor: BlendFactor,
     pub operation: BlendOperation,
 }
 
-impl From<&BlendDescriptor> for wgpu::BlendDescriptor {
-    fn from(val: &BlendDescriptor) -> Self {
-        wgpu::BlendDescriptor {
+impl From<BlendComponent> for wgpu::BlendComponent {
+    fn from(val: BlendComponent) -> Self {
+        wgpu::BlendComponent {
             src_factor: val.src_factor.into(),
             dst_factor: val.dst_factor.into(),
             operation: val.operation.into(),
@@ -46,7 +63,7 @@ impl From<&BlendDescriptor> for wgpu::BlendDescriptor {
     }
 }
 
-impl BlendDescriptor {
+impl BlendComponent {
     pub const COLOR_BLEND: Self = Self {
         src_factor: BlendFactor::SrcAlpha,
         dst_factor: BlendFactor::OneMinusSrcAlpha,
@@ -68,19 +85,32 @@ impl BlendDescriptor {
 
 #[derive(Debug, Clone, Copy)]
 pub enum BlendFactor {
+    /// 0.0
     Zero,
+    /// 1.0
     One,
-    SrcColor,
-    OneMinusSrcColor,
+    /// Source
+    Src,
+    /// 1.0 - Source
+    OneMinusSrc,
+    /// Source Alpha
     SrcAlpha,
+    /// 1.0 - Source Alpha
     OneMinusSrcAlpha,
-    DstColor,
-    OneMinusDstColor,
+    /// Dest color
+    Dst,
+    /// 1.0 - Dest color
+    OneMinusDst,
+    /// Dest Alpha
     DstAlpha,
+    /// 1.0 - Dest Alpha
     OneMinusDstAlpha,
+    /// Source Alpha Saturated
     SrcAlphaSaturated,
-    BlendColor,
-    OneMinusBlendColor,
+    /// Constant
+    Constant,
+    /// 1.0 - Constant
+    OneMinusConstant,
 }
 
 impl From<BlendFactor> for wgpu::BlendFactor {
@@ -88,17 +118,17 @@ impl From<BlendFactor> for wgpu::BlendFactor {
         match val {
             BlendFactor::Zero => wgpu::BlendFactor::Zero,
             BlendFactor::One => wgpu::BlendFactor::One,
-            BlendFactor::SrcColor => wgpu::BlendFactor::SrcColor,
-            BlendFactor::OneMinusSrcColor => wgpu::BlendFactor::OneMinusSrcColor,
+            BlendFactor::Src => wgpu::BlendFactor::Src,
+            BlendFactor::OneMinusSrc => wgpu::BlendFactor::OneMinusSrc,
             BlendFactor::SrcAlpha => wgpu::BlendFactor::SrcAlpha,
             BlendFactor::OneMinusSrcAlpha => wgpu::BlendFactor::OneMinusSrcAlpha,
-            BlendFactor::DstColor => wgpu::BlendFactor::DstColor,
-            BlendFactor::OneMinusDstColor => wgpu::BlendFactor::OneMinusDstColor,
+            BlendFactor::Dst => wgpu::BlendFactor::Dst,
+            BlendFactor::OneMinusDst => wgpu::BlendFactor::OneMinusDst,
             BlendFactor::DstAlpha => wgpu::BlendFactor::DstAlpha,
             BlendFactor::OneMinusDstAlpha => wgpu::BlendFactor::OneMinusDstAlpha,
             BlendFactor::SrcAlphaSaturated => wgpu::BlendFactor::SrcAlphaSaturated,
-            BlendFactor::BlendColor => wgpu::BlendFactor::BlendColor,
-            BlendFactor::OneMinusBlendColor => wgpu::BlendFactor::OneMinusBlendColor,
+            BlendFactor::Constant => wgpu::BlendFactor::Constant,
+            BlendFactor::OneMinusConstant => wgpu::BlendFactor::OneMinusConstant,
         }
     }
 }

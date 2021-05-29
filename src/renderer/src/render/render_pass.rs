@@ -1,6 +1,6 @@
 use std::ops::Range;
 
-use crate::{BindGroupId, IndexBuffer, RenderPipelineId, Renderer, VertexBuffer, wgpu_resources::WgpuResources};
+use crate::{BindGroupId, IndexBuffer, IndexFormat, RenderPipelineId, Renderer, VertexBuffer, wgpu_resources::WgpuResources};
 
 pub struct RenderPass<'a> {
     /// The reference to the main Renderer
@@ -24,7 +24,8 @@ impl<'a> RenderPass<'a> {
     /// Sets the index buffer to render
     pub fn set_index_buffer(&mut self, index_buffer: &IndexBuffer) -> &mut Self {
         let index_buffer = self.resources.get_index_buffer(index_buffer);
-        self.render_pass.set_index_buffer(index_buffer.slice(..));
+        let index_format = IndexFormat::Uint32.into();
+        self.render_pass.set_index_buffer(index_buffer.slice(..), index_format);
         self
     }
 

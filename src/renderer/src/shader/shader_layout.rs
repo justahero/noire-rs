@@ -1,4 +1,4 @@
-use crate::{BindGroupDescriptor, Shader, VertexBufferDescriptor, shader_reflect::reflect};
+use crate::{BindGroupDescriptor, Shader, VertexBufferLayout, shader_reflect::reflect};
 
 /// A ShaderLayout describes the layout of the loaded shader, analyzed by reflection.
 ///
@@ -9,7 +9,7 @@ pub struct ShaderLayout {
     /// The list of bind groups
     pub bind_groups: Vec<BindGroupDescriptor>,
     /// The list of vertex buffer descriptors
-    pub vertex_buffer_descriptors: Vec<VertexBufferDescriptor>,
+    pub vertex_buffer_layouts: Vec<VertexBufferLayout>,
 }
 
 impl ShaderLayout {

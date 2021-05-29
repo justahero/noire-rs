@@ -2,7 +2,7 @@ use std::{sync::Arc};
 
 use wgpu::{BufferUsage, util::DeviceExt};
 
-use crate::{BindGroupDescriptor, BindGroupDescriptorId, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, WgpuVertexBufferDescriptor, wgpu_resources::WgpuResources};
+use crate::{BindGroupDescriptor, BindGroupDescriptorId, IndexBuffer, Indices, PassDescriptor, PipelineDescriptor, RenderPass, RenderPipelineId, Shader, ShaderStage, Surface, Texture, TextureDescriptor, TextureFormat, VertexBuffer, wgpu_resources::WgpuResources};
 
 pub struct RenderPassHandle {}
 
@@ -71,7 +71,7 @@ impl Renderer {
                 &wgpu::DeviceDescriptor {
                     features: wgpu::Features::empty(),
                     limits: wgpu::Limits::default(),
-                    shader_validation: true,
+                    label: None,
                 },
                 trace_path
             )
@@ -152,57 +152,23 @@ impl Renderer {
                     push_constant_ranges: &[],
                 });
 
-        // set up shaders
-        let vertex_stage = wgpu::ProgrammableStageDescriptor {
-            module: &pipeline_descriptor.vertex_shader.module,
-            entry_point: "main",
-        };
-
-        let vertex_buffer_descriptors = layout.vertex_buffer_descriptors
-            .iter()
-            .map(|v| v.into())
-            .collect::<Vec<WgpuVertexBufferDescriptor>>();
-
-        let vertex_state = wgpu::VertexStateDescriptor {
-            index_format: pipeline_descriptor.index_format.into(),
-            vertex_buffers: &vertex_buffer_descriptors
-                .iter()
-                .map(|v| v.into())
-                .collect::<Vec<wgpu::VertexBufferDescriptor>>()
-        };
-
-        let fragment_stage = wgpu::ProgrammableStageDescriptor {
-            module: &pipeline_descriptor.fragment_shader.module,
-            entry_point: "main",
-        };
-
-        let rasterization_state = pipeline_descriptor.rasterization_state
-            .as_ref()
-            .map(|desc| desc.into());
-
-        let color_states = pipeline_descriptor.color_states
-            .iter()
-            .map(|c| c.into())
-            .collect::<Vec<wgpu::ColorStateDescriptor>>();
-
-        let depth_stencil_state = pipeline_descriptor
-            .depth_stencil_state
-            .as_ref()
-            .map(|desc| desc.into());
-
         let render_pipeline_descriptor = wgpu::RenderPipelineDescriptor {
             label: pipeline_descriptor.label.as_ref().map(|label| label.as_str()),
             layout: Some(&pipeline_layout),
-            vertex_stage,
-            fragment_stage: Some(fragment_stage),
-            rasterization_state,
-            primitive_topology: pipeline_descriptor.primitive_topology.into(),
-            color_states: &color_states,
-            depth_stencil_state,
-            vertex_state,
-            sample_count: pipeline_descriptor.sample_count,
-            sample_mask: pipeline_descriptor.sample_mask,
-            alpha_to_coverage_enabled: pipeline_descriptor.alpha_to_coverage_enabled,
+            vertex: wgpu::VertexState {
+                module: &pipeline_descriptor.vertex_shader.module,
+                entry_point: "main",
+                buffers: &[],
+
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &pipeline_descriptor.fragment_shader.module,
+                entry_point: "main",
+                targets: &[], // TODO add source_description
+            }),
+            primitive: pipeline_descriptor.primitive.into(),
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
         };
 
         let pipeline_id = RenderPipelineId::new();
@@ -315,8 +281,8 @@ fn create_render_pass<'a>(
     let color_attachments = pass_descriptor.color_attachments
         .iter_mut()
         .map(|descriptor| {
-            wgpu::RenderPassColorAttachmentDescriptor {
-                attachment: descriptor.attachment.texture(),
+            wgpu::RenderPassColorAttachment {
+                view: descriptor.attachment.texture(),
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
@@ -324,13 +290,13 @@ fn create_render_pass<'a>(
                 },
             }
         })
-        .collect::<Vec<wgpu::RenderPassColorAttachmentDescriptor>>();
+        .collect::<Vec<wgpu::RenderPassColorAttachment>>();
 
     let depth_stencil_attachment = pass_descriptor.depth_stencil_attachment
         .as_ref()
         .map(|descriptor| {
-            wgpu::RenderPassDepthStencilAttachmentDescriptor {
-                attachment: &descriptor.attachment.view,
+            wgpu::RenderPassDepthStencilAttachment {
+                view: &descriptor.attachment.view,
                 depth_ops: descriptor.depth_ops
                     .as_ref()
                     .map(|ops| ops.into()),
@@ -343,5 +309,6 @@ fn create_render_pass<'a>(
     encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
         color_attachments: &color_attachments,
         depth_stencil_attachment,
+        label: Some("Begin Render Pass"),
     })
 }

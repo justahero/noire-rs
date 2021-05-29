@@ -1,6 +1,6 @@
 use std::{borrow::Cow, fmt::Display};
 
-use crate::{PrimitiveTopology, VertexBufferDescriptor, VertexFormat};
+use crate::{PrimitiveTopology, VertexBufferLayout, VertexFormat};
 
 #[derive(Debug)]
 pub enum VertexAttributeValues {
@@ -39,10 +39,10 @@ impl VertexAttributeValues {
 impl From<&VertexAttributeValues> for VertexFormat {
     fn from(values: &VertexAttributeValues) -> Self {
         match values {
-            VertexAttributeValues::Float(_) => VertexFormat::Float,
-            VertexAttributeValues::Float2(_) => VertexFormat::Float2,
-            VertexAttributeValues::Float3(_) => VertexFormat::Float3,
-            VertexAttributeValues::Float4(_) => VertexFormat::Float4,
+            VertexAttributeValues::Float(_) => VertexFormat::Float32,
+            VertexAttributeValues::Float2(_) => VertexFormat::Float32x2,
+            VertexAttributeValues::Float3(_) => VertexFormat::Float32x3,
+            VertexAttributeValues::Float4(_) => VertexFormat::Float32x4,
         }
     }
 }
@@ -202,13 +202,13 @@ impl Mesh {
     }
 
     /// Returns vertex buffer descriptor
-    pub fn vertex_buffer_descriptor(&self) -> VertexBufferDescriptor {
+    pub fn vertex_buffer_descriptor(&self) -> VertexBufferLayout {
         let vertex_formats = self.attributes
             .iter()
             .map(|attribute| attribute.into())
             .collect::<Vec<VertexFormat>>();
 
-        VertexBufferDescriptor::new(vertex_formats)
+        VertexBufferLayout::new(vertex_formats)
     }
 }
 

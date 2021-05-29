@@ -1,6 +1,6 @@
 use spirv_reflect::{ShaderModule, types::ReflectDescriptorBinding, types::ReflectDescriptorSet, types::{ReflectBlockVariable, ReflectDescriptorType, ReflectInterfaceVariable, ReflectTypeDescription, ReflectTypeFlags}};
 
-use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
+use crate::{BindGroupDescriptor, BindGroupEntry, BindingType, InputStepMode, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferLayout, VertexFormat};
 
 #[derive(Debug)]
 enum NumberType {
@@ -36,28 +36,28 @@ impl From<&ReflectTypeDescription> for VertexFormat {
     fn from(description: &ReflectTypeDescription) -> Self {
         let number: NumberType = description.into();
         match number {
-            NumberType::UInt(2, 8) => VertexFormat::Uchar2,
-            NumberType::UInt(4, 8) => VertexFormat::Uchar4,
-            NumberType::Int(2, 8) => VertexFormat::Char2,
-            NumberType::Int(4, 8) => VertexFormat::Char4,
-            NumberType::Float(2, 16) => VertexFormat::Half2,
-            NumberType::Float(4, 16) => VertexFormat::Half4,
-            NumberType::UInt(2, 16) => VertexFormat::Ushort2,
-            NumberType::UInt(4, 16) => VertexFormat::Ushort4,
-            NumberType::Int(2, 16) => VertexFormat::Short2,
-            NumberType::Int(4, 16) => VertexFormat::Short4,
-            NumberType::Float(0, 32) => VertexFormat::Float,
-            NumberType::Float(2, 32) => VertexFormat::Float2,
-            NumberType::Float(3, 32) => VertexFormat::Float3,
-            NumberType::Float(4, 32) => VertexFormat::Float4,
-            NumberType::Int(0, 32) => VertexFormat::Int,
-            NumberType::Int(2, 32) => VertexFormat::Int2,
-            NumberType::Int(3, 32) => VertexFormat::Int3,
-            NumberType::Int(4, 32) => VertexFormat::Int4,
-            NumberType::UInt(0, 32) => VertexFormat::Uint,
-            NumberType::UInt(2, 32) => VertexFormat::Uint2,
-            NumberType::UInt(3, 32) => VertexFormat::Uint3,
-            NumberType::UInt(4, 32) => VertexFormat::Uint4,
+            NumberType::UInt(2, 8) => VertexFormat::Uint8x2,
+            NumberType::UInt(4, 8) => VertexFormat::Uint8x4,
+            NumberType::Int(2, 8) => VertexFormat::Sint8x2,
+            NumberType::Int(4, 8) => VertexFormat::Sint8x4,
+            NumberType::Float(2, 16) => VertexFormat::Float16x2,
+            NumberType::Float(4, 16) => VertexFormat::Float16x4,
+            NumberType::UInt(2, 16) => VertexFormat::Uint16x2,
+            NumberType::UInt(4, 16) => VertexFormat::Uint16x4,
+            NumberType::Int(2, 16) => VertexFormat::Sint16x2,
+            NumberType::Int(4, 16) => VertexFormat::Sint16x4,
+            NumberType::Float(0, 32) => VertexFormat::Float32,
+            NumberType::Float(2, 32) => VertexFormat::Float32x2,
+            NumberType::Float(3, 32) => VertexFormat::Float32x3,
+            NumberType::Float(4, 32) => VertexFormat::Float32x4,
+            NumberType::Int(0, 32) => VertexFormat::Sint32,
+            NumberType::Int(2, 32) => VertexFormat::Sint32x2,
+            NumberType::Int(3, 32) => VertexFormat::Sint32x3,
+            NumberType::Int(4, 32) => VertexFormat::Sint32x4,
+            NumberType::UInt(0, 32) => VertexFormat::Uint32,
+            NumberType::UInt(2, 32) => VertexFormat::Uint32x2,
+            NumberType::UInt(3, 32) => VertexFormat::Uint32x3,
+            NumberType::UInt(4, 32) => VertexFormat::Uint32x4,
             _ => panic!("Unexpected vertex format found: {:?}", number),
         }
     }
@@ -114,7 +114,7 @@ impl From<&ReflectTypeDescription> for TextureViewDimension {
         if description.type_flags.contains(ReflectTypeFlags::EXTERNAL_IMAGE) {
             description.traits.image.dim.into()
         } else {
-            panic!("Resource type {} is not an sampler / texture")
+            panic!("Resource type {:?} is not an sampler / texture", description.type_flags);
         }
     }
 }
@@ -127,14 +127,14 @@ pub(crate) fn reflect(spv_data: &[u8]) -> ShaderLayout {
             let shader_stage: ShaderStage = module.get_shader_stage().into();
 
             let bind_groups: Vec<BindGroupDescriptor> = reflect_bind_groups(&module, shader_stage);
-            let vertex_buffer_descriptors: Vec<VertexBufferDescriptor> = reflect_input_variables(&module);
+            let vertex_buffer_layouts: Vec<VertexBufferLayout> = reflect_input_variables(&module);
 
             reflect_push_constant_blocks(&module);
 
             ShaderLayout {
                 entry_point,
                 bind_groups,
-                vertex_buffer_descriptors,
+                vertex_buffer_layouts,
             }
         }
         Err(err) => panic!("Failed to reflect shader layout: {:?}", err),
@@ -157,6 +157,7 @@ fn reflect_bind_group(
     descriptor_set: &ReflectDescriptorSet,
     shader_stage: ShaderStage,
 ) -> BindGroupDescriptor {
+    dbg!(&descriptor_set);
     let bindings = descriptor_set.bindings
         .iter()
         .map(|descriptor_binding| reflect_binding(descriptor_binding, shader_stage))
@@ -195,16 +196,16 @@ fn reflect_binding(
     }
 }
 
-pub(crate) fn reflect_input_variables(shader_module: &ShaderModule) -> Vec<VertexBufferDescriptor> {
+pub(crate) fn reflect_input_variables(shader_module: &ShaderModule) -> Vec<VertexBufferLayout> {
     let variables = shader_module.enumerate_input_variables(None).unwrap();
     let mut vertex_attributes = variables.iter()
         .map(|variable| reflect_vertex_attribute(&variable))
         .collect::<Vec<VertexAttributeDescriptor>>();
 
-    vertex_attributes.sort_by_key(|va| va.location);
+    vertex_attributes.sort_by_key(|va| va.shader_location);
     vertex_attributes.drain(..)
         .into_iter()
-        .map(|attr| VertexBufferDescriptor::from_attribute(attr, InputStepMode::Vertex))
+        .map(|attr| VertexBufferLayout::from_attribute(attr, InputStepMode::Vertex))
         .collect()
 }
 
@@ -218,7 +219,7 @@ pub(crate) fn reflect_vertex_attribute(
 ) -> VertexAttributeDescriptor {
     VertexAttributeDescriptor {
         name: variable.name.clone(),
-        location: variable.location,
+        shader_location: variable.location,
         offset: 0,
         format: variable.type_description.as_ref().unwrap().into(),
     }
@@ -251,7 +252,7 @@ fn reflect_uniform_struct(block_variable: &ReflectBlockVariable) -> Uniform {
 
 #[cfg(test)]
 mod tests {
-    use crate::{BindGroupDescriptor, BindGroupEntry, BindingShaderStage, BindingType, InputStepMode, Renderer, Shader, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor, VertexFormat};
+    use crate::{BindGroupDescriptor, BindGroupEntry, BindingShaderStage, BindingType, InputStepMode, Renderer, Shader, ShaderLayout, ShaderStage, TextureComponentType, TextureViewDimension, Uniform, UniformProperty, VertexAttributeDescriptor, VertexBufferLayout, VertexFormat};
 
     fn shader_layout(source: &str) -> ShaderLayout {
         let renderer = futures::executor::block_on(Renderer::new());

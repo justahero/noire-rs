@@ -38,8 +38,9 @@ impl BindingType {
 impl From<&BindingType> for wgpu::BindingType {
     fn from(binding_type: &BindingType) -> Self {
         match binding_type {
-            BindingType::Uniform{ dynamic, .. } => wgpu::BindingType::UniformBuffer{
-                dynamic: *dynamic,
+            BindingType::Uniform{ dynamic, .. } => wgpu::BindingType::Buffer{
+                ty: wgpu::BufferBindingType::Uniform,
+                has_dynamic_offset: *dynamic,
                 min_binding_size: binding_type.get_size().and_then(wgpu::BufferSize::new),
             },
             _ => panic!("Binding type currently not supported"),

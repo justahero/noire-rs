@@ -1,5 +1,5 @@
 use cgmath::prelude::InnerSpace;
-use cgmath::{Deg, Matrix4, PerspectiveFov, Point3, Rad, Transform, Vector3};
+use cgmath::{Deg, Matrix4, One, PerspectiveFov, Point3, Rad, Vector3};
 
 use crate::math::Color;
 
@@ -49,7 +49,7 @@ impl Spotlight {
         self.pos       = eye;
         self.target    = target;
         self.direction = get_direction(&self.pos, &self.target);
-        self.view      = Matrix4::look_at(eye, target, up);
+        self.view      = Matrix4::look_at_lh(eye, target, up);
         self
     }
 }

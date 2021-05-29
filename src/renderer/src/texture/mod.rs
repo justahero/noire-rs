@@ -108,12 +108,14 @@ impl From<TextureFormat> for wgpu::TextureFormat {
     }
 }
 
-impl From<TextureFormat> for wgpu::ColorStateDescriptor {
+impl From<TextureFormat> for wgpu::ColorTargetState {
     fn from(format: TextureFormat) -> Self {
         Self {
             format: format.into(),
-            color_blend: wgpu::BlendDescriptor::REPLACE,
-            alpha_blend: wgpu::BlendDescriptor::REPLACE,
+            blend: Some(wgpu::BlendState {
+                color: wgpu::BlendComponent::REPLACE,
+                alpha: wgpu::BlendComponent::REPLACE,
+            }),
             write_mask: wgpu::ColorWrite::ALL,
         }
     }

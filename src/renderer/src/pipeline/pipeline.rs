@@ -1,6 +1,6 @@
 use uuid::Uuid;
 
-use crate::{ColorStateDescriptor, DepthStencilStateDescriptor, IndexFormat, PipelineLayout, PrimitiveTopology, RasterizationStateDescriptor, Shader};
+use crate::{DepthStencilState, Face, FrontFace, IndexFormat, MultisampleState, PipelineLayout, PolygonMode, PrimitiveState, PrimitiveTopology, Shader};
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 pub struct RenderPipelineId(Uuid);
@@ -21,26 +21,12 @@ pub struct PipelineDescriptor {
     pub vertex_shader: Shader,
     /// Fragment Shader
     pub fragment_shader: Shader,
-    /// List of color state descriptors
-    pub color_states: Vec<ColorStateDescriptor>,
-    /// Describes the state of the rasterizer in this pipeline
-    pub rasterization_state: Option<RasterizationStateDescriptor>,
-    /// Defines the way draw calls are rendered
-    pub primitive_topology: PrimitiveTopology,
+    /// Properties of the pipeline at the primitive state
+    pub primitive: PrimitiveState,
     /// Depth Stencil state
-    pub depth_stencil_state: Option<DepthStencilStateDescriptor>,
-    /// The format of index buffers used with this pipeline
-    pub index_format: IndexFormat,
-    /// Number of samples calculated per pixel, MSAA
-    pub sample_count: u32,
-    /// Bitmask that restricts samples of a pixel modified by this pipeline
-    pub sample_mask: u32,
-    /// When enabled, produces another sample mask per pixel based on alpha output value,
-    /// that is ANDed with the `sample_mask` and primitive coverage to restrict the set of
-    /// samples affected by a primitive.
-    /// The implicit mask produced for alpha of zero is guaranteed to be zero, and for alpha
-    /// of one is guaranteed to be all 1-s.
-    pub alpha_to_coverage_enabled: bool,
+    pub depth_stencil: Option<DepthStencilState>,
+    /// Multi sampling properties of the pipeline
+    pub multisample: MultisampleState,
 }
 
 impl PipelineDescriptor {
@@ -52,23 +38,26 @@ impl PipelineDescriptor {
             vec![&vertex_shader, &fragment_shader]
         ).unwrap();
 
-        let color_states = vec![
-            ColorStateDescriptor::default(),
-        ];
+        let primitive = PrimitiveState {
+            topology: PrimitiveTopology::TriangleList,
+            strip_index_format: Some(IndexFormat::Uint32),
+            front_face: FrontFace::Ccw,
+            cull_mode: Some(Face::Back),
+            clamp_depth: true,
+            polygon_mode: PolygonMode::default(),
+            conservative: false,
+        };
+
+        let multisample = MultisampleState::default();
 
         Self {
             label: Some(String::from("Test")),
             layout: Some(layout),
             vertex_shader,
             fragment_shader,
-            color_states,
-            rasterization_state: Some(RasterizationStateDescriptor::default()),
-            primitive_topology: PrimitiveTopology::TriangleList,
-            depth_stencil_state: Some(DepthStencilStateDescriptor::default()),
-            index_format: IndexFormat::Uint32,
-            sample_count: 1,
-            sample_mask: !0,
-            alpha_to_coverage_enabled: false,
+            primitive,
+            depth_stencil: Some(DepthStencilState::default()),
+            multisample,
         }
     }
 
